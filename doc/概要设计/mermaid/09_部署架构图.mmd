@@ -1,0 +1,14 @@
+flowchart TB
+    LB["Nginx 负载均衡"]
+
+    LB --> FE1["前端服务1<br/>React静态文件<br/>2C4G"]
+    LB --> FE2["前端服务2<br/>React静态文件<br/>2C4G"]
+    LB --> API["API服务<br/>FastAPI+uvicorn<br/>4C8G+SSD"]
+
+    API --> GPU["GPU推理服务器<br/>YOLOv8-Pose<br/>4GB+ VRAM"]
+    API --> DB[("数据库<br/>MySQL 8.0<br/>2C4G+SSD")]
+    API --> Redis[("缓存<br/>Redis<br/>1C2G")]
+
+    API --> MinIO[("对象存储<br/>MinIO<br/>视频/图片")]
+    API --> Monitor["监控日志<br/>system_logs<br/>性能指标"]
+    API --> CDN["CDN<br/>静态资源加速"]

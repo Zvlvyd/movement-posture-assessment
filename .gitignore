@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+*.egg
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Model files (large binaries)
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temp / helper scripts
+_b64dec.py
+_build.py
+_gen_asymmetry.py
+_gen_helper.py
+_gen_md.py
+_design_doc_full.txt
+_detailed_design_existing.txt
+_srs.txt
+_template.txt
+_test.txt
+tmp_write.py
+generate_doc.py
+update_yolo_engine.py
+run_backend.py
+backend.log
+
+# Environment
+.env
+.env.local
+
+# Test outputs
+test_data/
+tests/output/

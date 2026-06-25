@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor User as 用户
+    participant FE as 前端(React)
+    participant BE as 后端(FastAPI)
+    participant YOLO as YOLO模型
+    participant PA as 姿态分析器
+    participant FSM as 动作识别(FSM)
+    participant DS as 双模评分器
+    participant DB as 数据库
+
+    User->>FE: 1.选择深蹲动作
+    FE->>FE: 2.打开摄像头
+    FE->>BE: 3.WS上传视频帧
+    BE->>YOLO: 4.调用YOLO检测
+    YOLO-->>BE: 5.返回17关键点(x,y,conf)
+    BE->>PA: 6.计算深蹲角度(膝/髋/踝)
+    PA-->>BE: 7关节角度数据
+    BE->>FSM: 7.传入角度序列
+    FSM-->>BE: 8.判定动作阶段(站→蹲→起)
+    BE->>DS: 9.双模评分(基础/竞技)
+    DS-->>BE: 得分+反馈文本
+    BE->>DB: 10.写入训练记录
+    BE-->>FE: 11.返回得分+反馈
+    FE-->>User: 12.显示结果

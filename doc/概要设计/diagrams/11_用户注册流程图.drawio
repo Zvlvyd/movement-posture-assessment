@@ -1,0 +1,107 @@
+<mxfile host="Electron" agent="Codex">
+  <diagram name="用户注册流程" id="0">
+    <mxGraphModel dx="1137" dy="695" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="800" pageHeight="560" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="s" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;fontStyle=1;fontSize=11" value="开始" vertex="1">
+          <mxGeometry height="40" width="120" x="360" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11" value="系统初始化完成" vertex="1">
+          <mxGeometry height="40" width="160" x="340" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11" value="获取用户输入&lt;br&gt;手机号码 + 密码" vertex="1">
+          <mxGeometry height="45" width="200" x="320" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="r3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11" value="保存到用户参数设置" vertex="1">
+          <mxGeometry height="40" width="160" x="340" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="r4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11" value="发送注册信息到后台" vertex="1">
+          <mxGeometry height="40" width="160" x="340" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="数据库User表匹配&lt;br&gt;是否已注册？" vertex="1">
+          <mxGeometry height="60" width="220" x="310" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=10" value="返回错误消息&lt;br&gt;该手机号已注册" vertex="1">
+          <mxGeometry height="45" width="180" x="80" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="r5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11" value="添加到User表单" vertex="1">
+          <mxGeometry height="40" width="160" x="580" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="r6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11" value="返回注册成功消息" vertex="1">
+          <mxGeometry height="40" width="160" x="580" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="e" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#333333;fontStyle=1;fontSize=11" value="结束" vertex="1">
+          <mxGeometry height="40" width="120" x="600" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="50" as="sourcePoint" />
+            <mxPoint x="420" y="70" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a2" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="110" as="sourcePoint" />
+            <mxPoint x="420" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="175" as="sourcePoint" />
+            <mxPoint x="420" y="195" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a4" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="235" as="sourcePoint" />
+            <mxPoint x="420" y="255" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a5" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="295" as="sourcePoint" />
+            <mxPoint x="420" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a6" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333" value="是">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="350" as="sourcePoint" />
+            <mxPoint x="260" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a7" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="r5" value="否">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="530" y="350" as="sourcePoint" />
+            <mxPoint x="540" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="659.66" y="380" as="sourcePoint" />
+            <mxPoint x="659.66" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a10" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="170" y="385" as="sourcePoint" />
+            <mxPoint x="170" y="425" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a11" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;entryX=0.003;entryY=0.62;entryDx=0;entryDy=0;entryPerimeter=0;" target="r6" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="170" y="425" as="sourcePoint" />
+            <mxPoint x="580" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a12" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="659.5" y="440" as="sourcePoint" />
+            <mxPoint x="659.5" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

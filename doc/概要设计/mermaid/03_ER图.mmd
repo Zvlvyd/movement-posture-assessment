@@ -1,0 +1,103 @@
+erDiagram
+    ACTION_LIBRARY ||--o{ TRAINING_RECORDS : "动作记录"
+    ACTION_LIBRARY ||--o{ FMS_RECORDS : "FMS关联"
+    ACTION_LIBRARY ||--o{ TAG_ACTION_MAPPING : "标签映射"
+    ACTION_LIBRARY ||--o{ PRESCRIPTION_ITEMS : "处方动作"
+
+    USERS ||--o{ TRAINING_RECORDS : "训练记录"
+    USERS ||--o{ FMS_RECORDS : "FMS记录"
+    USERS ||--o{ PRESCRIPTIONS : "运动处方"
+    USERS ||--o{ CHECK_IN_CARDS : "打卡记录"
+    USERS ||--o{ BADGES : "徽章"
+    USERS ||--o{ USER_CYCLE_CONFIG : "周期配置"
+    USERS ||--o{ FMS_COMPARISONS : "FMS对比"
+    USERS ||--o{ CLASS_GROUPS : "班级成员"
+
+    FMS_RECORDS ||--o{ PRESCRIPTIONS : "处方来源"
+    FMS_RECORDS ||--o{ FMS_COMPARISONS : "历史对比"
+    FMS_RECORDS }o--|| PROBLEM_TAGS : "问题标签"
+
+    PROBLEM_TAGS ||--o{ TAG_ACTION_MAPPING : "标签映射"
+
+    PRESCRIPTIONS ||--o{ PRESCRIPTION_ITEMS : "处方明细"
+
+    USERS {
+        int id PK
+        string username
+        string password_hash
+        enum role
+        string gender
+        bool fms_completed
+    }
+
+    ACTION_LIBRARY {
+        int id PK
+        string name
+        string category
+        int difficulty
+        json risk_tags
+        json standard_angles
+        json detection_rules
+    }
+
+    TRAINING_RECORDS {
+        int id PK
+        int user_id FK
+        int action_id FK
+        enum mode
+        int score
+        json key_angles
+        string feedback_text
+    }
+
+    FMS_RECORDS {
+        int id PK
+        int user_id FK
+        int balance_score
+        int squat_score
+        int flex_score
+        int stab_score
+        int symmetry_score
+        json problem_tags
+        json radar_data
+    }
+
+    PRESCRIPTIONS {
+        int id PK
+        int user_id FK
+        int fms_record_id FK
+        json warmup
+        json strengthen
+        json main
+        json cooldown
+        bool is_active
+    }
+
+    PROBLEM_TAGS {
+        int id PK
+        string tag_name
+        string description
+        string fms_dimension
+    }
+
+    CHECK_IN_CARDS {
+        int id PK
+        int user_id FK
+        date check_date
+        int streak_count
+    }
+
+    BADGES {
+        int id PK
+        int user_id FK
+        string badge_type
+        datetime earned_at
+    }
+
+    USER_CYCLE_CONFIG {
+        int id PK
+        int user_id FK
+        int cycle_length
+        date last_period_date
+        bool is_enabled
+    }

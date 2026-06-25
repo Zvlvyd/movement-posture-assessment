@@ -1,0 +1,127 @@
+<mxfile host="Electron" agent="Codex">
+  <diagram name="Seq_Squat" id="0">
+    <mxGraphModel dx="1137" dy="695" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="用户" vertex="1">
+          <mxGeometry height="40" width="110" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="f" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="前端(React)" vertex="1">
+          <mxGeometry height="40" width="110" x="270" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="b" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="后端(FastAPI)" vertex="1">
+          <mxGeometry height="40" width="110" x="40" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="y" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="YOLO模型" vertex="1">
+          <mxGeometry height="40" width="110" x="170" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="p" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="姿态分析器" vertex="1">
+          <mxGeometry height="40" width="110" x="280" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="a" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="动作识别(FSM)" vertex="1">
+          <mxGeometry height="40" width="110" x="560" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="s" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="双模评分器" vertex="1">
+          <mxGeometry height="40" width="110" x="290" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="d" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="数据库" vertex="1">
+          <mxGeometry height="40" width="110" x="560" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="1.选择深蹲动作">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="60" as="sourcePoint" />
+            <mxPoint x="330" y="60" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="2.打开摄像头">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="324.5" y="60" as="sourcePoint" />
+            <mxPoint x="324.5" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="3.WS上传视频帧">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="170" as="sourcePoint" />
+            <mxPoint x="330" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="4.调用YOLO检测">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="260" as="sourcePoint" />
+            <mxPoint x="330" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="5.返回17关键点">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="350" as="sourcePoint" />
+            <mxPoint x="610" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="6.计算深蹲角度 膝角/髋角/踝角">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610" y="370" as="sourcePoint" />
+            <mxPoint x="610" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="7.传入角度序列">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610" y="440" as="sourcePoint" />
+            <mxPoint x="610" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="8.判断动作阶段 站→蹲→起">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610" y="530" as="sourcePoint" />
+            <mxPoint x="610" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="9.写入训练记录">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610" y="620" as="sourcePoint" />
+            <mxPoint x="610" y="690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="10.返回得分+反馈">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="709.5" as="sourcePoint" />
+            <mxPoint x="230" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="7关节角度">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="380" as="sourcePoint" />
+            <mxPoint x="330" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="膝/髋/踝角度">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="380" as="sourcePoint" />
+            <mxPoint x="610" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="角度数据">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610" y="480" as="sourcePoint" />
+            <mxPoint x="330" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="确认开始">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="250" as="sourcePoint" />
+            <mxPoint x="150" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2" value="11.显示结果">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="600" y="610" as="sourcePoint" />
+            <mxPoint x="420" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="77JigX7t6jEY7NDofsBz-1" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11" value="前端(React)" vertex="1">
+          <mxGeometry height="40" width="110" x="120" y="690" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

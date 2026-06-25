@@ -1,0 +1,13 @@
+flowchart TD
+    Start([FMS筛查完成]) --> ST1[获取问题标签<br/>平衡/蹲/柔韧/稳定/对称]
+    ST1 --> ST2[标签动作映射<br/>tag_action_mapping表]
+    ST2 --> ST3[生成4阶段计划<br/>热身→强化→主训→冷却]
+    ST3 --> D1{女性用户?}
+    D1 -->|是| ST4A[经期强度调整<br/>CycleAdapter]
+    D1 -->|否| ST4B[风险评估<br/>高/中/低风险]
+    ST4A --> ST4B
+    ST4B --> D2{高风险?}
+    D2 -->|是| ST5A[自动锁定<br/>需教练解锁]
+    D2 -->|否| ST5B[生成处方<br/>prescriptions表+明细]
+    ST5A --> ST5B
+    ST5B --> End([处方生成完成])
