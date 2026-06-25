@@ -41,34 +41,63 @@
 
 ### 前置条件
 
-- Python 3.10+（推荐 conda 环境）
+- Python 3.10+（推荐 conda 环境 `dl`）
 - Node.js 18+
-- MySQL 8.0（可选，支持 SQLite 降级）
+- MySQL 8.0（可选，开发环境自动降级 SQLite）
 
 ### 后端启动
 
 ```bash
+# 进入项目目录
 cd code/运动姿态评估与纠错系统/运动姿态评估与纠错系统
 
-# 安装依赖
+# 激活 conda 环境（如使用 conda）
+conda activate dl
+
+# 安装依赖（首次）
 pip install -r requirements.txt
 
-# 设置数据库（MySQL）
+# 设置数据库 MySQL（可选，跳过则自动使用 SQLite）
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS pose_correction DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-# 启动（自动创建表结构）
+# 启动后端（自动创建表结构，端口 8002）
 python run.py
 ```
+
+后端启动后访问：http://localhost:8002/docs （API 文档）
 
 ### 前端启动
 
 ```bash
-cd frontend
+# 进入前端目录
+cd code/运动姿态评估与纠错系统/运动姿态评估与纠错系统/frontend
+
+# 安装依赖（首次）
 npm install
+
+# 启动开发服务器（默认端口 5173，被占用则自动递增）
 npm run dev
 ```
 
-访问 http://localhost:5173
+前端启动后访问：http://localhost:5173 （Vite 自动热更新，修改代码即时生效）
+
+### 一键启动（同时打开前后端）
+
+打开**两个终端窗口**分别执行：
+
+**终端 1 — 后端：**
+```bash
+cd d:/workbench/program3/code/运动姿态评估与纠错系统/运动姿态评估与纠错系统
+conda activate dl
+python run.py
+```
+
+**终端 2 — 前端：**
+```bash
+cd d:/workbench/program3/code/运动姿态评估与纠错系统/运动姿态评估与纠错系统/frontend
+npm install
+npm run dev
+```
 
 ## 功能模块
 
