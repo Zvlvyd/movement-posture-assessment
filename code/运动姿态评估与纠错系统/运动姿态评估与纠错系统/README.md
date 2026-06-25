@@ -48,53 +48,55 @@
 ### 后端启动
 
 ```bash
-# 进入项目目录
-cd code/运动姿态评估与纠错系统/运动姿态评估与纠错系统
+# 切到 D 盘并进入后端目录
+d:
+cd workbench/program3/code/运动姿态评估与纠错系统/运动姿态评估与纠错系统
 
-# 激活 conda 环境（如使用 conda）
+# 激活 conda 环境
 conda activate dl
 
 # 安装依赖（首次）
 pip install -r requirements.txt
 
-# 设置数据库 MySQL（可选，跳过则自动使用 SQLite）
+# （可选）创建 MySQL 数据库，跳过则自动使用 SQLite
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS pose_correction DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-# 启动后端（自动创建表结构，端口 8002）
+# 启动（端口 8002，自动创建表结构）
 python run.py
 ```
 
-后端启动后访问：http://localhost:8002/docs （API 文档）
+> 启动后访问 http://localhost:8002/docs 查看 API 文档
 
 ### 前端启动
 
 ```bash
-# 进入前端目录
-cd code/运动姿态评估与纠错系统/运动姿态评估与纠错系统/frontend
+# 切到 D 盘并进入前端目录
+d:
+cd workbench/program3/code/运动姿态评估与纠错系统/运动姿态评估与纠错系统/frontend
 
 # 安装依赖（首次）
 npm install
 
-# 启动开发服务器（默认端口 5173，被占用则自动递增）
+# 启动开发服务器
 npm run dev
 ```
 
-前端启动后访问：http://localhost:5173 （Vite 自动热更新，修改代码即时生效）
+> Vite 默认端口 5173，被占用自动递增（5174、5175...），看终端输出确认实际地址
 
-### 一键启动（同时打开前后端）
-
-打开**两个终端窗口**分别执行：
+### 一键启动（两个终端分别执行）
 
 **终端 1 — 后端：**
 ```bash
-cd d:/workbench/program3/code/运动姿态评估与纠错系统/运动姿态评估与纠错系统
+d:
+cd workbench/program3/code/运动姿态评估与纠错系统/运动姿态评估与纠错系统
 conda activate dl
 python run.py
 ```
 
 **终端 2 — 前端：**
 ```bash
-cd d:/workbench/program3/code/运动姿态评估与纠错系统/运动姿态评估与纠错系统/frontend
+d:
+cd workbench/program3/code/运动姿态评估与纠错系统/运动姿态评估与纠错系统/frontend
 npm install
 npm run dev
 ```
