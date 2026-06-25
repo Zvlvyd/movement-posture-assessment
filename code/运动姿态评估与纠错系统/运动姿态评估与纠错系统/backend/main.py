@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.config import settings
-from backend.database.connection import init_db
+from backend.database.connection import init_db, get_db
 
 app = FastAPI(
     title="运动姿态评估与纠错系统",
@@ -17,10 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routers
 from backend.routers import auth, assessment, fms, prescription, training, learning, records, checkin, coach, admin
-# fms router
-# from backend.routers import fms
 app.include_router(auth.router)
 app.include_router(fms.router)
 app.include_router(assessment.router)
@@ -35,6 +32,12 @@ app.include_router(admin.router)
 @app.on_event("startup")
 def on_startup():
     init_db()
+    from backend.database.seed import seed_action_library
+    db = next(get_db())
+    try:
+        seed_action_library(db)
+    finally:
+        db.close()
 
 @app.get("/api/health")
 def health_check():

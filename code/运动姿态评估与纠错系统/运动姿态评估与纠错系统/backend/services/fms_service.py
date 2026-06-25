@@ -351,11 +351,11 @@ class FMSState:
         self.current_test_idx = 0
         self.best_keypoints = None
         self.tests = [
-            {"idx":0,"name":"test0","instruction":"do test 0","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
-            {"idx":1,"name":"test1","instruction":"do test 1","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
-            {"idx":2,"name":"test2","instruction":"do test 2","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
-            {"idx":3,"name":"test3","instruction":"do test 3","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
-            {"idx":4,"name":"test4","instruction":"do test 4","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
+            {"idx":0,"name":"闭眼单腿站立","instruction":"双手叉腰，闭眼，单腿站立保持平衡","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
+            {"idx":1,"name":"过头深蹲","instruction":"双手举过头顶，缓慢下蹲至最低点再站起","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
+            {"idx":2,"name":"肩活动度","instruction":"一手从肩上方向后、另一手从腰后方向前，双手背后相触","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
+            {"idx":3,"name":"平板支撑","instruction":"俯卧，用前臂和脚尖支撑身体，保持成一条直线","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
+            {"idx":4,"name":"弓步蹲","instruction":"双手叉腰，向前迈出弓步蹲，左右交替完成","status":"pending","start_time":0,"data":None,"score":0,"completed":False},
         ]
 
     def current_test(self):
@@ -372,3 +372,4 @@ class FMSState:
                 self.current_test_idx = i
                 return i
         return -1
+

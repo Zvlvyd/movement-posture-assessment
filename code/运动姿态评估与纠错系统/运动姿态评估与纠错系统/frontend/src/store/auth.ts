@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import type { User } from '../types';
 import { authApi } from '../services/api';
 
@@ -10,6 +10,7 @@ interface AuthState {
   register: (username: string, password: string, phone?: string, gender?: string) => Promise<void>;
   logout: () => void;
   fetchUser: () => Promise<void>;
+  setUser: (user: User) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -30,6 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem('user');
     set({ user: null, token: null });
   },
+  setUser: (user) => { localStorage.setItem('user', JSON.stringify(user)); set({ user }); },
   fetchUser: async () => {
     try {
       const user = await authApi.me();
@@ -37,3 +39,5 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch { set({ user: null, token: null }); }
   },
 }));
+
+

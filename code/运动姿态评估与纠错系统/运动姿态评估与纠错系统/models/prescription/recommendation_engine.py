@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+﻿from typing import List, Dict, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 import random
@@ -116,3 +116,32 @@ class PrescriptionEngine:
             return False
         thresholds = {1: 3, 2: 5, 3: 7, 4: 10}
         return training_count >= thresholds.get(current_phase, 10) and overall_score >= 60.0
+    @classmethod
+    def generate_plans(cls, problem_tags: List[Dict], difficulty: int = 1,
+                       cycle_phase: Optional[str] = None, count: int = 3) -> List[Dict]:
+        """Generate multiple plan options for user to choose from."""
+        plans = []
+        difficulties = [max(1, difficulty - 1), difficulty, difficulty + 1]
+        # Ensure each plan is different by varying difficulty and mix
+        for i in range(count):
+            d = difficulties[i] if i < len(difficulties) else difficulty
+            plan = cls.generate(problem_tags, difficulty=d, cycle_phase=cycle_phase)
+            plan['plan_id'] = i + 1
+            plan['plan_name'] = f"方案{i+1}"
+            plan['difficulty'] = d
+            if i == 0:
+                plan['plan_name'] = '标准方案'
+                plan['recommended'] = True
+            elif i == 1:
+                plan['plan_name'] = '进阶方案'
+                plan['recommended'] = False
+            else:
+                plan['plan_name'] = '保守方案'
+                plan['recommended'] = False
+            plans.append(plan)
+        return plans
+
+
+
+
+

@@ -16,8 +16,10 @@ const FMS_TESTS = [
 
 // COCO pose skeleton connections (0-indexed)
 const SKELETON: [number, number][] = [
+  [0, 1], [0, 2], [1, 3], [2, 4],
   [5, 6], [5, 7], [7, 9], [6, 8], [8, 10],
-  [5, 11], [6, 12], [11, 12], [11, 13], [13, 15], [12, 14], [14, 16]
+  [5, 11], [6, 12], [11, 12],
+  [11, 13], [13, 15], [12, 14], [14, 16],
 ];
 
 type TestPhase = 'preparing' | 'countdown' | 'running' | 'completed' | 'skipped';
@@ -73,13 +75,27 @@ export default function FMSScreeningPage() {
   const drawSkeleton = useCallback((keypointsList: any[]) => {
     const canvas = overlayCanvasRef.current;
     const video = videoRef.current;
-    if (!canvas || !video || !video.videoWidth) return;
+    if (!canvas || !video) return;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // 获取显示尺寸作为 canvas 分辨率，确保坐标对齐
+    const rect = canvas.getBoundingClientRect();
+    const displayW = rect.width || video.videoWidth || 640;
+    const displayH = rect.height || video.videoHeight || 480;
+    if (displayW === 0 || displayH === 0) return;
+
+    // 只在尺寸变化时重新设置 canvas 内部分辨率（避免闪烁）
+    if (canvas.width !== displayW || canvas.height !== displayH) {
+      canvas.width = displayW;
+      canvas.height = displayH;
+    }
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 关键点坐标基于 YOLO 输入分辨率(640xN)，需缩放到显示尺寸
+    const scaleX = displayW / (video.videoWidth || 640);
+    const scaleY = displayH / (video.videoHeight || 480);
 
     for (const person of keypointsList) {
       const kps = person.keypoints || [];
@@ -93,7 +109,8 @@ export default function FMSScreeningPage() {
           const [x1, y1] = kps[i]; const [x2, y2] = kps[j];
           if (x1 > 0 && y1 > 0 && x2 > 0 && y2 > 0) {
             ctx.beginPath();
-            ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+            ctx.moveTo(x1 * scaleX, y1 * scaleY);
+            ctx.lineTo(x2 * scaleX, y2 * scaleY);
             ctx.stroke();
           }
         }
@@ -105,7 +122,7 @@ export default function FMSScreeningPage() {
           if (x > 0 && y > 0) {
             ctx.fillStyle = '#ff4466';
             ctx.beginPath();
-            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.arc(x * scaleX, y * scaleY, 4, 0, Math.PI * 2);
             ctx.fill();
           }
         }
@@ -135,7 +152,11 @@ export default function FMSScreeningPage() {
     clearInterval(intervalRef.current);
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    if (!canvas || !video || !video.videoWidth) return false;
+    if (!canvas || !video || !video.videoWidth) {
+      // Retry after 200ms if video not ready yet
+      setTimeout(() => startFrameCapture(), 200);
+      return false;
+    }
     const ctx = canvas.getContext('2d');
     if (!ctx) return false;
     console.log('[FMS] Frame capture started');
@@ -352,9 +373,8 @@ export default function FMSScreeningPage() {
   }
 
   const currentTestData = FMS_TESTS[currentTest];
-  // 视频始终在 DOM 中保持尺寸（用 visibility 而非 display:none），确保 video.videoWidth 可用
-  const videoHidden = !(testPhase === 'running' || testPhase === 'completed');
   const showPreparing = testPhase === 'preparing' || testPhase === 'countdown';
+  const showVideo = testPhase === 'running' || testPhase === 'completed';
 
   // ─── 主界面 ────────────────────────────────────────
   return (
@@ -407,20 +427,24 @@ export default function FMSScreeningPage() {
               </div>
             )}
 
-            {/* 视频区域 — 始终在 DOM 中保持尺寸，非运行阶段用 visibility 隐藏但保留 videoWidth */}
+            {/* 视频区域 — 始终保留在 DOM 流中，visibility 隐藏时仍可解码帧 */}
             <div style={{
               position: 'relative',
-              visibility: videoHidden ? 'hidden' : 'visible',
-              height: videoHidden ? 0 : undefined,
+              width: '100%',
+              background: '#000',
+              borderRadius: 8,
               overflow: 'hidden',
             }}>
-              <video ref={videoCallbackRef} autoPlay playsInline muted style={{ width: '100%', borderRadius: 8, background: '#000' }} />
+              <video ref={videoCallbackRef} autoPlay playsInline muted style={{
+                width: '100%', borderRadius: 8, background: '#000',
+                visibility: showVideo ? 'visible' : 'hidden',
+              }} />
               <canvas ref={overlayCanvasRef} style={{
                 position: 'absolute', top: 0, left: 0,
                 width: '100%', height: '100%', borderRadius: 8,
-                pointerEvents: 'none'
+                pointerEvents: 'none', zIndex: 10,
+                display: showVideo ? 'block' : 'none',
               }} />
-              <canvas ref={canvasRef} style={{ display: 'none' }} />
 
               {/* 实时指导语浮层 */}
               {guidance && (
@@ -428,12 +452,14 @@ export default function FMSScreeningPage() {
                   position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)',
                   background: 'rgba(0,0,0,0.75)', color: '#fff', padding: '8px 20px',
                   borderRadius: 20, fontSize: 16, fontWeight: 500,
-                  whiteSpace: 'nowrap', pointerEvents: 'none'
+                  whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 20,
                 }}>
                   {guidance}
                 </div>
               )}
             </div>
+            {/* 帧捕获 canvas — 独立于视频容器，始终可用于 toDataURL 发送帧 */}
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
 
             {/* 控制卡片 */}
             <Card size="small" style={{ marginTop: 16 }}>
@@ -483,3 +509,6 @@ export default function FMSScreeningPage() {
     </div>
   );
 }
+
+
+

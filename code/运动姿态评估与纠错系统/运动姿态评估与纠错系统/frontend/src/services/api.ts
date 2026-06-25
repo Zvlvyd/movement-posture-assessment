@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+import axios from "axios";
 import type { TokenResponse, User, FMSRecord, AssessmentRecord, Prescription, TrainingRecord, TrainingStats, ActionItem } from "../types";
 
 const api = axios.create({ baseURL: "/api" });

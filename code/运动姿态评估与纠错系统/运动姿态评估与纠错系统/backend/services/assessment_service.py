@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 评估服务 - 替代 fms_service.py
 处理静态姿态评估 + 实时运动评估 + 报告存储
@@ -211,6 +211,95 @@ class AssessmentService:
         
         return response
 
+
+    def check_re_test_status(self, user_id: int) -> dict:
+        """Check if user is due for periodic re-test."""
+        from datetime import datetime, timedelta
+        latest_fms = self.db.query(models.FMSRecord).filter(
+            models.FMSRecord.user_id == user_id
+        ).order_by(models.FMSRecord.test_date.desc()).first()
+
+        latest_assessment = self.db.query(models.AssessmentRecord).filter(
+            models.AssessmentRecord.user_id == user_id
+        ).order_by(models.AssessmentRecord.test_date.desc()).first()
+
+        active_rx = self.db.query(models.Prescription).filter(
+            models.Prescription.user_id == user_id,
+            models.Prescription.status == 'active'
+        ).order_by(models.Prescription.created_at.desc()).first()
+
+        now = datetime.utcnow()
+        days_since_last_test = 999
+        last_test_date = None
+
+        if latest_assessment:
+            delta = now - latest_assessment.test_date.replace(tzinfo=None) if latest_assessment.test_date else timedelta(days=999)
+            days_since_last_test = delta.days
+            last_test_date = latest_assessment.test_date
+        elif latest_fms:
+            delta = now - latest_fms.test_date.replace(tzinfo=None) if latest_fms.test_date else timedelta(days=999)
+            days_since_last_test = delta.days
+            last_test_date = latest_fms.test_date
+
+        due_for_retest = days_since_last_test >= 14  # Every 2 weeks
+        next_phase_available = False
+        if active_rx:
+            training_count = self.db.query(models.TrainingRecord).filter(
+                models.TrainingRecord.user_id == user_id,
+                models.TrainingRecord.prescription_id == active_rx.id
+            ).count()
+            avg_score_record = self.db.query(models.TrainingRecord).filter(
+                models.TrainingRecord.user_id == user_id,
+                models.TrainingRecord.prescription_id == active_rx.id,
+                models.TrainingRecord.total_score.isnot(None)
+            ).order_by(models.TrainingRecord.end_time.desc()).first()
+            avg_score = avg_score_record.total_score if avg_score_record else 0
+            next_phase_available = PrescriptionEngine.should_unlock_next(
+                active_rx.phase, training_count, avg_score or 0
+            )
+
+        return {
+            "due_for_retest": due_for_retest,
+            "days_since_last_test": days_since_last_test,
+            "last_test_date": str(last_test_date) if last_test_date else None,
+            "next_phase_available": next_phase_available,
+            "current_phase": active_rx.phase if active_rx else 0,
+            "current_difficulty": active_rx.difficulty if active_rx else 0,
+        }
+
+    def trigger_phase_upgrade(self, user_id: int, prescription_id: int) -> dict:
+        """Upgrade to next phase and prepare for re-test."""
+        rx = self.db.query(models.Prescription).filter(
+            models.Prescription.id == prescription_id,
+            models.Prescription.user_id == user_id
+        ).first()
+        if not rx:
+            raise HTTPException(status_code=404, detail='Prescription not found')
+
+        new_phase = rx.phase + 1
+        new_difficulty = rx.difficulty + 1
+
+        # Mark old prescription as completed
+        rx.status = 'completed'
+
+        # Create new phase prescription
+        new_rx = models.Prescription(
+            user_id=user_id,
+            fms_record_id=rx.fms_record_id,
+            phase=new_phase,
+            status='active',
+            difficulty=new_difficulty,
+            unlocked_at=datetime.utcnow(),
+        )
+        self.db.add(new_rx)
+        self.db.commit()
+        return {
+            "message": "Phase upgraded successfully",
+            "old_phase": rx.phase,
+            "new_phase": new_phase,
+            "new_prescription_id": new_rx.id,
+            "new_difficulty": new_difficulty,
+        }
 
 class RealtimeAssessmentService:
     """实时评估 WebSocket 服务"""
@@ -500,3 +589,4 @@ class RealtimeAssessmentService:
             
         except Exception as e:
             await ws.send_json({"type": "error", "message": str(e)})
+

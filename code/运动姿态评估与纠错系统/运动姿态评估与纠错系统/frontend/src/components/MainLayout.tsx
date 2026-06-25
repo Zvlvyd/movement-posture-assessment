@@ -1,4 +1,4 @@
-﻿import { Layout, Menu } from 'antd';
+import { Layout, Menu } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   HomeOutlined, ExperimentOutlined, PlayCircleOutlined,

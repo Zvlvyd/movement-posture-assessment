@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Row, Col, Statistic, Button, Typography, List, Tag } from "antd";
 import { ExperimentOutlined, PlayCircleOutlined, CheckCircleOutlined, TrophyOutlined, ScanOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";

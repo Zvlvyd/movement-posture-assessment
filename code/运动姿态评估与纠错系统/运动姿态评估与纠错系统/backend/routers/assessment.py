@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 评估路由 - 替代 routers/fms.py
 POST /api/assessment/submit   - 提交关键点数据，返回评估结果
@@ -113,3 +113,30 @@ async def assessment_websocket(
             await ws.send_json({"type": "error", "message": f"会话异常: {str(e)}"})
         except:
             pass
+
+
+# ─── Periodic Re-test & Prescription Upgrade ────────────────────────────────
+from datetime import timedelta
+from backend.database import models as db_models
+from models.prescription.recommendation_engine import PrescriptionEngine
+
+@router.get("/re-test-status")
+def get_re_test_status(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Check if the user is due for a periodic re-test."""
+    svc = AssessmentService(db)
+    return svc.check_re_test_status(user.id)
+
+@router.post("/trigger-re-test")
+def trigger_re_test(
+    prescription_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """User requests a periodic re-test: marks current phase complete and unlocks next."""
+    svc = AssessmentService(db)
+    return svc.trigger_phase_upgrade(user.id, prescription_id)
+
+

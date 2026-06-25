@@ -1,4 +1,4 @@
-﻿export interface User {
+export interface User {
   id: number; username: string; role: string;
   phone?: string; avatar?: string; gender?: string;
   is_active: boolean; created_at?: string;

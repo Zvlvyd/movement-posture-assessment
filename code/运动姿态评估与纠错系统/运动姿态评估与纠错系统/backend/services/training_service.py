@@ -1,10 +1,10 @@
-﻿from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session
 from fastapi import HTTPException, WebSocket
 from backend.database import models
 from backend.schemas.business import TrainingRecordResponse, TrainingSessionResponse
 from models.scoring import DualModeScorer
 from models.angle_calculator import AngleCalculator
-from models.action_recognizer.squat_fsm import get_fsm_for_action
+from models.action_recognizer.squat_fsm import get_fsm_for_action, get_initial_state, get_fsm_context
 import json
 import numpy as np
 import base64
@@ -44,28 +44,40 @@ class TrainingService:
         self.db.refresh(record)
         return TrainingRecordResponse.model_validate(record)
 
-    def process_frame(self, keypoints_data: list, action_name: str, mode: str) -> dict:
+    def process_frame(self, keypoints_data: list, action_name: str, mode: str, fsm=None) -> dict:
         if not keypoints_data:
             return {'error': 'no keypoints'}
         keypoints = np.array(keypoints_data, dtype=np.float32)
         angles = self.angle_calc.compute_all_angles(keypoints)
-        knee_angle = angles.get('left_knee') or angles.get('right_knee') or 180.0
+
         if mode == 'basic':
             result = DualModeScorer.score_basic(angles, action_name)
         else:
             result = DualModeScorer.score_advanced(angles, action_name)
-        fsm = get_fsm_for_action(action_name)
-        fsm.start('standing', {'knee_angle': knee_angle})
-        fsm.update({'knee_angle': knee_angle})
-        result['fsm_state'] = fsm.get_state()
-        result['fsm_progress'] = fsm.get_progress()
+
+        fsm_ctx = get_fsm_context(action_name, angles)
+        if fsm is not None:
+            try:
+                fsm.update(fsm_ctx)
+                result['fsm_state'] = fsm.get_state()
+                result['fsm_progress'] = fsm.get_progress()
+            except Exception:
+                result['fsm_state'] = 'unknown'
+                result['fsm_progress'] = 0.0
+        else:
+            result['fsm_state'] = 'initializing'
+            result['fsm_progress'] = 0.0
+
         result['angles'] = {k: v for k, v in angles.items() if v is not None}
         return result
+
 
 class TrainingWebSocketHandler:
     def __init__(self, training_service: TrainingService):
         self.service = training_service
         self.yolo = None
+        # Persist FSM instances keyed by (session_id, action_name)
+        self._fsm_store: dict = {}
 
     def _get_yolo(self):
         if self.yolo is None:
@@ -75,7 +87,6 @@ class TrainingWebSocketHandler:
         return self.yolo
 
     def _decode_base64_frame(self, b64_str: str):
-        """Decode base64 image string to numpy array"""
         try:
             img_data = base64.b64decode(b64_str.split(",")[-1] if "," in b64_str else b64_str)
             np_arr = np.frombuffer(img_data, np.uint8)
@@ -84,51 +95,102 @@ class TrainingWebSocketHandler:
         except:
             return None
 
+    def _get_or_create_fsm(self, session_id: int, action_name: str, initial_ctx: dict):
+        key = (session_id, action_name)
+        if key not in self._fsm_store:
+            fsm = get_fsm_for_action(action_name)
+            init_state = get_initial_state(action_name)
+            fsm.start(init_state, initial_ctx)
+            self._fsm_store[key] = fsm
+        return self._fsm_store[key]
+
+    def _guidance_for_state(self, action_name: str, fsm_state: str) -> str:
+        action = action_name.lower()
+        guidance_map = {
+            'squat': {
+                'standing': '准备好了吗？开始下蹲！',
+                'descending': '很好，继续蹲下去...',
+                'bottom': '到达底部！保持住，然后慢慢站起',
+                'ascending': '正在站起，控制动作',
+                'complete': '完成一次深蹲！继续下一次',
+            },
+            'lunge': {
+                'standing': '准备好，向前迈出弓步！',
+                'lunging': '继续下蹲，前膝不要超过脚尖',
+                'bottom': '到达弓步最低点，保持稳定',
+                'recovering': '回收前腿，控制节奏',
+                'complete': '完成一次弓步！换腿继续',
+            },
+            'pushup': {
+                'top': '手臂伸直，保持身体一条直线',
+                'descending': '缓慢下降，肘部贴近身体',
+                'bottom': '到达底部，胸接近地面',
+                'ascending': '推起身体，保持核心收紧',
+                'complete': '完成一次俯卧撑！',
+            },
+            'plank': {
+                'ready': '准备进入平板支撑姿势',
+                'holding': '保持！身体成一条直线',
+                'drooping': '臀部下降太多，收紧核心抬起',
+                'recovering': '调整姿势中...',
+                'complete': '平板支撑完成！',
+            },
+            'shoulder_press': {
+                'rest': '准备开始肩推，哑铃在肩部高度',
+                'pressing': '向上推起，手臂伸直',
+                'top': '到达顶部，不要锁死肘关节',
+                'lowering': '缓慢下放，控制动作',
+                'complete': '完成一次肩推！',
+            },
+        }
+        action_guide = guidance_map.get(action, {})
+        return action_guide.get(fsm_state, '请保持标准姿势')
+
     async def handle(self, ws: WebSocket, user_id: int):
         await ws.accept()
         session_id = None
         action_name = 'squat'
         mode = 'basic'
+        self._fsm_store.clear()
         try:
             while True:
                 data = await ws.receive_text()
                 msg = json.loads(data)
                 msg_type = msg.get('type')
-                
+
                 if msg_type == 'start':
                     rx_id = msg.get('prescription_id')
                     mode = msg.get('mode', 'basic')
                     action_name = msg.get('action_name', 'squat')
                     record = self.service.start_session(user_id, rx_id, mode)
                     session_id = record.id
+                    # Clear any stale FSM for this session
+                    stale_keys = [k for k in self._fsm_store if k[0] == session_id]
+                    for k in stale_keys:
+                        del self._fsm_store[k]
                     await ws.send_json({
                         'type': 'started', 'session_id': session_id,
                         'guidance': '准备开始训练，请站在画面中央'
                     })
-                    
+
                 elif msg_type == 'frame':
                     if session_id is None:
                         await ws.send_json({'type': 'error', 'message': 'session not started'})
                         continue
-                    
+
                     try:
-                        action_name = msg.get('action_name', 'squat')
+                        action_name = msg.get('action_name', action_name)
                         b64 = msg.get('image', '')
-                    
-                        # Try base64 image first, fallback to keypoints
                         keypoints_data = msg.get('keypoints', [])
-                    
+
                         if b64 and not keypoints_data:
-                            # Run YOLO on base64 frame
                             frame = self._decode_base64_frame(b64)
                             if frame is not None:
                                 yolo = self._get_yolo()
                                 persons, _ = yolo.process_frame(frame)
                                 if persons:
                                     kps = persons[0].get("keypoints", [])
-                                    confs = persons[0].get("confidences", [1.0]*len(kps))
                                     keypoints_data = kps
-                                    # Include keypoints for frontend overlay
                                 else:
                                     await ws.send_json({
                                         'type': 'result', 'fms_status': 'no_person',
@@ -136,25 +198,16 @@ class TrainingWebSocketHandler:
                                         'keypoints': []
                                     })
                                     continue
-                        
+
                         if keypoints_data:
-                            result = self.service.process_frame(keypoints_data, action_name, mode)
+                            # Get or create persistent FSM for (session, action)
+                            fsm = self._get_or_create_fsm(session_id, action_name, {})
+                            result = self.service.process_frame(keypoints_data, action_name, mode, fsm)
                             result['type'] = 'result'
                             result['keypoints'] = keypoints_data[:17] if len(keypoints_data) > 17 else keypoints_data
-                        
-                            # Add guidance based on FSM state
+
                             fsm_state = result.get('fsm_state', '')
-                            if fsm_state == 'standing':
-                                result['guidance'] = '准备好了吗？开始下蹲！'
-                            elif fsm_state == 'squatting':
-                                result['guidance'] = '很好，继续蹲下去...'
-                            elif fsm_state == 'bottom':
-                                result['guidance'] = '到达底部！保持住，然后慢慢站起'
-                            elif fsm_state == 'rising':
-                                result['guidance'] = '正在站起，控制动作'
-                            else:
-                                result['guidance'] = '请保持标准姿势'
-                        
+                            result['guidance'] = self._guidance_for_state(action_name, fsm_state)
                             await ws.send_json(result)
                         else:
                             await ws.send_json({
@@ -162,25 +215,26 @@ class TrainingWebSocketHandler:
                                 'guidance': '未检测到人体，请调整站位',
                                 'keypoints': []
                             })
-                        
+
                     except Exception as e:
                         import traceback
                         print(f'Training frame error: {e}')
                         traceback.print_exc()
                         try:
-                            await ws.send_json({'type':'error','message':f'处理帧失败: {str(e)}'})
+                            await ws.send_json({'type': 'error', 'message': f'处理帧失败: {str(e)}'})
                         except:
                             pass
+
                 elif msg_type == 'end':
                     if session_id is not None:
                         score = msg.get('score')
                         self.service.end_session(session_id, user_id, score)
                     await ws.send_json({'type': 'ended', 'session_id': session_id, 'guidance': '训练结束！'})
                     break
-                    
+
                 elif msg_type == 'ping':
                     await ws.send_json({'type': 'pong'})
-                    
+
         except Exception as e:
             if session_id is not None:
                 try:
@@ -191,3 +245,9 @@ class TrainingWebSocketHandler:
                 await ws.send_json({'type': 'error', 'message': str(e)})
             except:
                 pass
+        finally:
+            # Clean up FSM store for this session
+            stale_keys = [k for k in self._fsm_store if k[0] == session_id]
+            for k in stale_keys:
+                del self._fsm_store[k]
+
