@@ -385,15 +385,23 @@ class RealtimeAssessmentService:
                         kps = results[0].keypoints.data.cpu().numpy()
                         if kps.shape[0] > 0 and kps.shape[1] >= 17:
                             kp_array = kps[0, :, :2]
+                            kp_confs = kps[0, :, 2].tolist() if kps.shape[1] >= 3 else [1.0] * 17
                             self._frames_buffer.append(kp_array)
-                            
+
                             # 保存最佳帧（检测到最多关键点的帧）
                             if self._best_keypoints is None or kps[0, :, 2].mean() > 0.5:
                                 self._best_keypoints = kp_array.copy()
-                            
+
                             # ROM 追踪
                             angles = self.tracker.feed_keypoints(kp_array)
-                            
+
+                            # 关键点列表（前端骨架绘制需要）
+                            keypoints_list = [{
+                                "keypoints": kp_array.tolist(),
+                                "confidences": kp_confs,
+                                "bbox": None,
+                            }]
+
                             # 获取当前动作的目标角度
                             movement = get_movement(current_movement_idx)
                             if movement:
@@ -406,10 +414,11 @@ class RealtimeAssessmentService:
                             else:
                                 current_angles = {}
                                 plateau = False
-                            
+
                             await ws.send_json({
                                 "type": "angles_update",
                                 "angles": current_angles,
+                                "keypoints": keypoints_list,
                                 "frame_count": self.tracker._frame_count,
                                 "plateau_detected": plateau,
                             })

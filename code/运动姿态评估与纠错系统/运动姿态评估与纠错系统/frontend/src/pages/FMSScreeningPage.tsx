@@ -75,32 +75,28 @@ export default function FMSScreeningPage() {
   const drawSkeleton = useCallback((keypointsList: any[]) => {
     const canvas = overlayCanvasRef.current;
     const video = videoRef.current;
-    if (!canvas || !video) return;
+    if (!canvas || !video) { console.log('[drawSkeleton] no canvas or video'); return; }
 
-    // 获取显示尺寸作为 canvas 分辨率，确保坐标对齐
     const rect = canvas.getBoundingClientRect();
     const displayW = rect.width || video.videoWidth || 640;
     const displayH = rect.height || video.videoHeight || 480;
-    if (displayW === 0 || displayH === 0) return;
+    if (displayW === 0 || displayH === 0) { console.log('[drawSkeleton] zero size', {rectW: rect.width, rectH: rect.height, vw: video.videoWidth, vh: video.videoHeight}); return; }
 
-    // 只在尺寸变化时重新设置 canvas 内部分辨率（避免闪烁）
-    if (canvas.width !== displayW || canvas.height !== displayH) {
-      canvas.width = displayW;
-      canvas.height = displayH;
-    }
+    canvas.width = displayW;
+    canvas.height = displayH;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 关键点坐标基于 YOLO 输入分辨率(640xN)，需缩放到显示尺寸
     const scaleX = displayW / (video.videoWidth || 640);
     const scaleY = displayH / (video.videoHeight || 480);
 
+    let personsDrawn = 0;
     for (const person of keypointsList) {
       const kps = person.keypoints || [];
       const confs = person.confidences || Array(kps.length).fill(1);
-      if (kps.length < 17) continue;
+      if (kps.length < 17) { console.log('[drawSkeleton] skip: kps.length=', kps.length); continue; }
 
       ctx.strokeStyle = '#00ff88';
       ctx.lineWidth = 2;
@@ -127,6 +123,10 @@ export default function FMSScreeningPage() {
           }
         }
       }
+      personsDrawn++;
+    }
+    if (personsDrawn > 0 && personsDrawn % 30 === 1) {
+      console.log('[drawSkeleton] drew', personsDrawn, 'persons, canvas:', canvas.width, 'x', canvas.height, 'scale:', scaleX.toFixed(2), scaleY.toFixed(2));
     }
   }, []);
 
@@ -226,14 +226,32 @@ export default function FMSScreeningPage() {
     console.log("[FMS] WS message:", data.type, data.fms_status || data);
 
     if (data.type === 'test_ready') {
-      // 后端通知新测试就绪 → 进入准备阶段（帧捕获保持运行）
+      // 后端通知新测试就绪
       setCurrentTest(data.test);
       setTestMessage(data.instruction || '');
       setGuidance(data.instruction || '准备开始');
       setTestScore(null);
       setNoPersonWarning(false);
       setProgress((data.test / 5) * 100);
-      setTestPhase('preparing');
+      // 第1项：手动准备；后续项：自动倒计时
+      if (data.test === 0) {
+        setTestPhase('preparing');
+      } else {
+        setTestPhase('countdown');
+        setCountdown(2);
+        let tick = 2;
+        const timer = setInterval(() => {
+          tick--;
+          if (tick <= 0) {
+            clearInterval(timer);
+            playStartBeep();
+            setCountdown(0);
+            setTestPhase('running');
+          } else {
+            setCountdown(tick);
+          }
+        }, 1000);
+      }
 
     } else if (data.type === 'frame_result') {
       // ── 无人检测：任何阶段都显示警告 ──
@@ -250,11 +268,15 @@ export default function FMSScreeningPage() {
 
       // ── 骨架绘制（仅运行/完成阶段） ──
       if (testPhaseRef.current === 'running' || testPhaseRef.current === 'completed') {
-        if (data.keypoints?.length) drawSkeleton(data.keypoints);
+        if (data.keypoints?.length) {
+          drawSkeleton(data.keypoints);
+        } else {
+          console.log('[FMS] no keypoints in frame_result, keys:', Object.keys(data).filter(k => k !== 'keypoints'));
+        }
         if (data.guidance) setGuidance(data.guidance);
       }
 
-      // ── started / running ──
+      // ── started / running ── 仅在倒计时或已运行时才推进
       if (data.fms_status === 'started' || data.fms_status === 'running') {
         if (testPhaseRef.current === 'countdown' || testPhaseRef.current === 'running') {
           if (testPhaseRef.current !== 'running') setTestPhase('running');
@@ -427,23 +449,25 @@ export default function FMSScreeningPage() {
               </div>
             )}
 
-            {/* 视频区域 — 始终保留在 DOM 流中，visibility 隐藏时仍可解码帧 */}
+            {/* 视频区域 — isolation:isolate 创建独立层叠上下文 */}
             <div style={{
               position: 'relative',
               width: '100%',
               background: '#000',
               borderRadius: 8,
               overflow: 'hidden',
+              isolation: 'isolate',
             }}>
               <video ref={videoCallbackRef} autoPlay playsInline muted style={{
                 width: '100%', borderRadius: 8, background: '#000',
                 visibility: showVideo ? 'visible' : 'hidden',
+                position: 'relative', zIndex: 1,
               }} />
               <canvas ref={overlayCanvasRef} style={{
                 position: 'absolute', top: 0, left: 0,
                 width: '100%', height: '100%', borderRadius: 8,
                 pointerEvents: 'none', zIndex: 10,
-                display: showVideo ? 'block' : 'none',
+                visibility: showVideo ? 'visible' : 'hidden',
               }} />
 
               {/* 实时指导语浮层 */}

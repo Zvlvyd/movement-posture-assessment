@@ -63,11 +63,23 @@ export default function AssessmentPage() {
     if (!canvas || !keypointsList?.length) return;
     const video = videoRef.current;
     if (!video?.videoWidth) return;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+
+    const rect = canvas.getBoundingClientRect();
+    const displayW = rect.width || video.videoWidth || 640;
+    const displayH = rect.height || video.videoHeight || 480;
+    if (displayW === 0 || displayH === 0) return;
+
+    if (canvas.width !== displayW || canvas.height !== displayH) {
+      canvas.width = displayW;
+      canvas.height = displayH;
+    }
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const scaleX = displayW / (video.videoWidth || 640);
+    const scaleY = displayH / (video.videoHeight || 480);
+
     for (const person of keypointsList) {
       const kps = person.keypoints || [];
       const confs = person.confidences || Array(kps.length).fill(1);
@@ -77,7 +89,10 @@ export default function AssessmentPage() {
         if (i < kps.length && j < kps.length && confs[i] > 0.3 && confs[j] > 0.3) {
           const [x1, y1] = kps[i]; const [x2, y2] = kps[j];
           if (x1 > 0 && y1 > 0 && x2 > 0 && y2 > 0) {
-            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x1 * scaleX, y1 * scaleY);
+            ctx.lineTo(x2 * scaleX, y2 * scaleY);
+            ctx.stroke();
           }
         }
       }
@@ -86,7 +101,9 @@ export default function AssessmentPage() {
           const [x, y] = kps[i];
           if (x > 0 && y > 0) {
             ctx.fillStyle = "#ff4466";
-            ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x * scaleX, y * scaleY, 4, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
       }
@@ -245,7 +262,10 @@ export default function AssessmentPage() {
           setAssessmentItem(item || null);
           setPhase("preparing");
         } else if (msg.type === "angles_update") {
-          if (phaseRef.current !== "running") return;
+          if (phaseRef.current !== "running" && phaseRef.current !== "between_steps") {
+            console.log("[Assessment] angles_update dropped, phase:", phaseRef.current);
+            return;
+          }
           // 过滤：仅展示当前步骤关注的关节角度
           const item = getAssessmentItem(currentIdxRef.current);
           const step = item?.steps[currentStepRef.current];
@@ -364,16 +384,25 @@ export default function AssessmentPage() {
           </div>
         )}
 
-        {/* ── 视频（非 idle/done 阶段始终在 DOM 中，用 visibility 而非 display:none 保留 videoWidth） ── */}
+        {/* ── 视频区域 — 始终保留在 DOM 中，isolation:isolate 确保 canvas 在 video 上方 ── */}
         {showVideo && (
           <div style={{
             position: "relative",
-            visibility: videoVisible ? "visible" : "hidden",
-            height: videoVisible ? undefined : 0,
+            width: "100%",
+            background: "#000",
+            borderRadius: 8,
             overflow: "hidden",
+            isolation: "isolate",
           }}>
-            <video ref={videoCallbackRef} autoPlay playsInline muted style={{ width: "100%", borderRadius: 8, background: "#000" }} />
-            <canvas ref={overlayCanvasRef} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", borderRadius: 8, pointerEvents: "none" }} />
+            <video ref={videoCallbackRef} autoPlay playsInline muted style={{
+              width: "100%", borderRadius: 8, background: "#000",
+              position: "relative", zIndex: 1,
+            }} />
+            <canvas ref={overlayCanvasRef} style={{
+              position: "absolute", top: 0, left: 0,
+              width: "100%", height: "100%", borderRadius: 8,
+              pointerEvents: "none", zIndex: 10,
+            }} />
             <canvas ref={canvasRef} style={{ display: "none" }} />
           </div>
         )}
