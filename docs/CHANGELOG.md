@@ -1,5 +1,44 @@
 # 修改日志
 
+## 2026-06-26 — 模块优化集成：FMS 增强 + 实时训练重写 + 处方训练
+
+详见 [docs/upgrades/2026-06-26-v2-module-optimization.md](upgrades/2026-06-26-v2-module-optimization.md)
+
+### 新增功能
+- 🆕 处方训练模块（多动作顺序执行 + 独立报告）
+- 🆕 训练报告页（统计卡片、成绩进度条、错误历史）
+- 🆕 FMS 报告增强（颜色编码进度条、风险预警 Alert、编号建议列表）
+- 🆕 实时训练重写（7 动作自选、完成计数、错误追踪、模式区分反馈面板）
+- 🆕 跳跃式开合跳 + 硬拉 2 个新动作（含 FSM 状态机）
+
+### 算法优化
+- 🔧 FMS 肩部评估：双手检测 + 加权距离（垂直 70%/水平 30%）
+- 🔧 FMS 评分引擎：摇摆惩罚、臀降惩罚、自动建议生成
+- 🔧 FMS 视频合并报告：生成 radar_data/suggestions/problem_tags
+
+### 架构调整
+- 📐 `TrainingRecord.prescription_id` 改为 nullable（支持自由训练）
+- 📐 `TrainingWebSocketHandler` 开始支持 prescription_id=null
+- 📐 MySQL training_record 表 ALTER COLUMN
+
+### 修改文件（12 个）
+| 文件 | 类型 |
+|------|------|
+| `models/fms/scoring.py` | 增强 |
+| `backend/services/fms_service.py` | 增强 |
+| `backend/services/training_service.py` | 增强 |
+| `backend/database/models.py` | Schema |
+| `backend/schemas/business.py` | Schema |
+| `models/action_recognizer/squat_fsm.py` | 增强 |
+| `frontend/src/pages/TrainingPage.tsx` | 重写 |
+| `frontend/src/pages/FMSScreeningPage.tsx` | 增强 |
+| `frontend/src/pages/FMSReportPage.tsx` | 增强 |
+| `frontend/src/pages/TrainingReportPage.tsx` | 新建 |
+| `frontend/src/pages/PrescriptionTrainingPage.tsx` | 新建 |
+| `frontend/src/pages/PrescriptionTrainingReportPage.tsx` | 新建 |
+| `frontend/src/App.tsx` | 路由 |
+| `frontend/src/components/MainLayout.tsx` | 导航 |
+
 ## 2026-06-25 — WebSocket 连接修复 + FMS 模块恢复 + 数据库迁移
 
 ### 问题
