@@ -13,6 +13,9 @@ import numpy as np
 import cv2
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
+from backend.logger import get_logger
+
+logger = get_logger(__name__)
 from sqlalchemy.orm import Session
 
 from backend.database.connection import get_db
@@ -62,7 +65,7 @@ def _decode_b64_to_keypoints(b64_str: str):
 
         return None
     except Exception as e:
-        print(f"[MultiView] Keypoint extraction error: {e}")
+        logger.warning("[MultiView] Keypoint extraction error: %s", e)
         return None
 
 

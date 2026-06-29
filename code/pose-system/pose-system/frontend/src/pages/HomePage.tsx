@@ -1,60 +1,125 @@
-import { useEffect, useState } from "react";
-import { Card, Row, Col, Statistic, Button, Typography, List, Tag } from "antd";
-import { ExperimentOutlined, PlayCircleOutlined, CheckCircleOutlined, TrophyOutlined, ScanOutlined } from "@ant-design/icons";
+import { Typography } from "antd";
+import { ThunderboltOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/auth";
-import { recordsApi, prescriptionApi, checkinApi } from "../services/api";
-import type { TrainingStats, Prescription } from "../types";
+
+const { Text, Title } = Typography;
 
 export default function HomePage() {
   const navigate = useNavigate();
   const user = useAuthStore(s => s.user);
-  const [stats, setStats] = useState<TrainingStats | null>(null);
-  const [rx, setRx] = useState<Prescription | null>(null);
-  const [badgeCount, setBadgeCount] = useState(0);
-
-  useEffect(() => {
-    recordsApi.stats().then(setStats).catch(() => {});
-    prescriptionApi.list().then(rxs => { if (rxs.length > 0) setRx(rxs[0]); }).catch(() => {});
-    checkinApi.badges().then(b => setBadgeCount(b.length)).catch(() => {});
-  }, []);
 
   return (
-    <div>
-      <Typography.Title level={4}>欢迎回来，{user?.username}</Typography.Title>
-      <Row gutter={16} style={{ marginTop: 16 }}>
-        <Col span={6}><Card className="stat-card"><Statistic title="连续打卡" value={stats?.current_streak || 0} suffix="天" prefix={<CheckCircleOutlined />} /></Card></Col>
-        <Col span={6}><Card className="stat-card"><Statistic title="近7天训练" value={stats?.total_sessions_7d || 0} suffix="次" prefix={<PlayCircleOutlined />} /></Card></Col>
-        <Col span={6}><Card className="stat-card"><Statistic title="平均评分" value={stats?.average_score || 0} suffix="分" precision={1} /></Card></Col>
-        <Col span={6}><Card className="stat-card"><Statistic title="徽章" value={badgeCount} suffix="枚" prefix={<TrophyOutlined />} /></Card></Col>
-      </Row>
-      <Row gutter={16} style={{ marginTop: 24 }}>
-        <Col span={12}>
-          <Card title="快捷入口">
-            <Button block type="primary" icon={<ScanOutlined />} style={{ marginBottom: 12 }} onClick={() => navigate("/assessment")}>体态评估（新）</Button>
-            <Button block icon={<ExperimentOutlined />} style={{ marginBottom: 12 }} onClick={() => navigate("/fms")}>FMS 筛查（旧）</Button>
-            <Button block icon={<PlayCircleOutlined />} onClick={() => navigate("/training")}>开始今日训练</Button>
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="当前处方">
-            {rx ? (
-              <div>
-                <Tag color="blue">第{rx.phase}阶段</Tag>
-                <Tag color={rx.status === "active" ? "green" : "default"}>{rx.status}</Tag>
-                <List size="small" dataSource={rx.items.slice(0, 5)} renderItem={item => (
-                  <List.Item>{item.action_name} - {item.sets}组 x {item.reps}次</List.Item>
-                )} />
-                <Button type="link" onClick={() => navigate("/training")}>查看全部</Button>
-              </div>
-            ) : (
-              <div style={{ textAlign: "center", padding: 24 }}>
-                <Typography.Text type="secondary">暂无活跃处方，请先完成评估</Typography.Text>
-              </div>
-            )}
-          </Card>
-        </Col>
-      </Row>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "calc(100vh - 120px)",
+        padding: 24,
+      }}
+    >
+      {/* Greeting */}
+      <Title
+        level={2}
+        style={{
+          fontFamily: "var(--font-display)",
+          fontWeight: 400,
+          fontSize: "clamp(1.1rem, 2.5vw, 1.5rem)",
+          color: "var(--color-text-secondary)",
+          marginBottom: 40,
+          textAlign: "center",
+          letterSpacing: "-0.01em",
+        }}
+      >
+        欢迎回来，{user?.username}
+      </Title>
+
+      {/* Hero Button — Swiss: bold, clean, asymmetric accent */}
+      <button
+        onClick={() => navigate("/training")}
+        style={{
+          height: 64,
+          minWidth: 240,
+          padding: "0 48px",
+          border: "2px solid var(--color-primary)",
+          borderRadius: "var(--radius-sm)",
+          background: "var(--color-primary)",
+          color: "#FFFFFF",
+          fontFamily: "var(--font-display)",
+          fontWeight: 600,
+          fontSize: 20,
+          letterSpacing: "0.03em",
+          cursor: "pointer",
+          boxShadow: "4px 4px 0 rgba(0,0,0,0.06)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 12,
+          transition: "all 200ms var(--ease-swiss)",
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = "var(--color-pure-white)";
+          e.currentTarget.style.color = "var(--color-primary)";
+          e.currentTarget.style.boxShadow = "2px 2px 0 rgba(0,0,0,0.04)";
+          e.currentTarget.style.transform = "translate(1px, 1px)";
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = "var(--color-primary)";
+          e.currentTarget.style.color = "#FFFFFF";
+          e.currentTarget.style.boxShadow = "4px 4px 0 rgba(0,0,0,0.06)";
+          e.currentTarget.style.transform = "";
+        }}
+      >
+        <ThunderboltOutlined style={{ fontSize: 22 }} />
+        开始训练
+      </button>
+
+      {/* Hint Link */}
+      <div style={{ marginTop: 32 }}>
+        <Text
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: 14,
+            color: "var(--color-text-muted)",
+          }}
+        >
+          还没有处方？请先进行
+        </Text>
+        <span
+          onClick={() => navigate("/assessment")}
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: 14,
+            color: "var(--color-accent)",
+            cursor: "pointer",
+            fontWeight: 500,
+            marginLeft: 4,
+            borderBottom: "1px solid var(--color-accent)",
+            paddingBottom: 1,
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.color = "var(--color-primary)";
+            e.currentTarget.style.borderBottomColor = "var(--color-primary)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.color = "var(--color-accent)";
+            e.currentTarget.style.borderBottomColor = "var(--color-accent)";
+          }}
+        >
+          评估
+        </span>
+        <Text
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: 14,
+            color: "var(--color-text-muted)",
+          }}
+        >
+          哦
+        </Text>
+      </div>
     </div>
   );
 }

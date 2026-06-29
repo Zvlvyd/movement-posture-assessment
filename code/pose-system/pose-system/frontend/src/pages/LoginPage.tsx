@@ -3,27 +3,38 @@ import { Form, Input, Button, Card, message, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import MathCaptcha, { useCaptchaRule } from '../components/MathCaptcha';
+import useRoleNavigate from '../hooks/useRoleNavigate';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const roleGo = useRoleNavigate();
   const login = useAuthStore(s => s.login);
+
+  // 验证码逻辑（组件与校验拆分为独立模块）
+  const { a, b, validator, refresh: refreshCaptcha } = useCaptchaRule();
 
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
     try {
       await login(values.username, values.password);
       message.success('登录成功');
-      navigate('/home');
+      roleGo(); // 角色感知跳转
     } catch (e: any) {
       message.error(e.response?.data?.detail || '登录失败');
-    } finally { setLoading(false); }
+      refreshCaptcha();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f0f2f5' }}>
       <Card style={{ width: 400, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <Typography.Title level={3} style={{ textAlign: 'center', marginBottom: 24 }}>运动姿态评估与纠错系统</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: 'center', marginBottom: 24 }}>
+          运动姿态评估与纠错系统
+        </Typography.Title>
         <Form onFinish={onFinish} size="large">
           <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
             <Input prefix={<UserOutlined />} placeholder="用户名" />
@@ -31,11 +42,25 @@ export default function LoginPage() {
           <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
             <Input.Password prefix={<LockOutlined />} placeholder="密码" />
           </Form.Item>
+          <Form.Item
+            name="captcha"
+            rules={[{ required: true, message: '请输入验证码' }, { validator }]}
+          >
+            <MathCaptcha a={a} b={b} onRefresh={refreshCaptcha} />
+          </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>登录</Button>
+            <Button type="primary" htmlType="submit" loading={loading} block>
+              登录
+            </Button>
           </Form.Item>
           <div style={{ textAlign: 'center' }}>
             还没有账号？<Link to="/register">立即注册</Link>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 12 }}>
+            <Typography.Text type="secondary">首次使用？</Typography.Text>
+            <Button type="link" size="small" onClick={() => navigate('/register')}>
+              开始运动能力评估
+            </Button>
           </div>
         </Form>
       </Card>

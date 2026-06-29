@@ -18,6 +18,9 @@ from backend.services.auth_service import get_current_user
 from backend.database.models import User, AssessmentRecord
 from jose import jwt as jose_jwt
 from config.settings import settings
+from backend.logger import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/assessment", tags=["Assessment"])
 
@@ -76,6 +79,68 @@ def get_record_detail(
     return svc.build_detail_response(record)
 
 
+@router.post("/records/{record_id}/generate-report")
+async def generate_ai_report(
+    record_id: int,
+    regenerate: bool = False,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """调用 DeepSeek AI 生成体态评估报告。设 regenerate=true 强制重新生成。"""
+    import json as _json
+
+    svc = AssessmentService(db)
+    record = svc.get_record_detail(record_id, user.id)
+
+    # 解析已有 report_data
+    report_data = record.report_data
+    if isinstance(report_data, str):
+        try:
+            report_data = _json.loads(report_data)
+        except (_json.JSONDecodeError, TypeError):
+            report_data = {}
+    if not report_data:
+        report_data = {}
+
+    # 有缓存且不强制重新生成 → 直接返回
+    if not regenerate and report_data.get("ai_report"):
+        return {"report": report_data["ai_report"], "cached": True}
+
+    # 调用 DeepSeek 生成
+    from backend.services.deepseek_service import generate_assessment_report
+
+    assessment_dict = {
+        "balance_score": record.balance_score,
+        "flexibility_score": record.flexibility_score,
+        "upper_limb_score": record.upper_limb_score,
+        "core_score": record.core_score,
+        "symmetry_score": record.symmetry_score,
+        "overall_score": record.overall_score,
+        "risk_level": record.risk_level.value if record.risk_level else None,
+        "posture_data": record.posture_data,
+        "muscle_findings": record.muscle_findings,
+        "rom_data": record.rom_data,
+        "movement_data": record.movement_data,
+    }
+
+    try:
+        report_text = await generate_assessment_report(assessment_dict)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    except Exception as e:
+        logger.exception("AI 报告生成异常")
+        raise HTTPException(status_code=500, detail=f"AI 报告生成异常: {str(e)}")
+
+    # 缓存到 report_data
+    report_data["ai_report"] = report_text
+    record.report_data = _json.dumps(report_data, ensure_ascii=False)
+    db.commit()
+
+    return {"report": report_text, "cached": False}
+
+
 @router.websocket("/ws")
 async def assessment_websocket(
     ws: WebSocket,
@@ -124,9 +189,6 @@ async def assessment_websocket(
 
 
 # ─── Periodic Re-test & Prescription Upgrade ────────────────────────────────
-from datetime import timedelta
-from backend.database import models as db_models
-from models.prescription.recommendation_engine import PrescriptionEngine
 
 @router.get("/re-test-status")
 def get_re_test_status(

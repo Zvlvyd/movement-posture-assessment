@@ -10,6 +10,7 @@ import { useAuthStore } from "../store/auth";
 import MovementDemo from "../components/MovementDemo";
 import { playStartBeep, playEndBeep, playCountdownBeep, playFinalBeep } from "../utils/audio";
 import { getAssessmentItem, type AssessmentItem, type MovementStep } from "../config/assessmentSteps";
+import AssessmentDashboard from "./assessment/AssessmentDashboard";
 
 interface Movement {
   index: number;
@@ -425,7 +426,7 @@ export default function AssessmentPage() {
           <div>
             <MovementDemo movementName={currentItem.name} stepName={currentStepData.name} instruction={currentStepData.instruction}
               stepIndex={currentStep + 1} totalSteps={currentItem.steps.length} durationHint={currentItem.durationHint}
-              countdown={phase === "countdown" ? countdown : 0} onCountdownEnd={() => {}}
+              countdown={phase === "countdown" ? countdown : 0}
               imageUrl={currentStepData.imageUrl} videoUrl={currentStepData.videoUrl} />
             {phase === "preparing" && (
               <div style={{ textAlign: "center", marginTop: 4 }}>
@@ -494,6 +495,7 @@ export default function AssessmentPage() {
         {error && <Result status="error" title="连接失败" subTitle={error}
           extra={<Button onClick={() => { setError(""); setPhase("idle"); cleanup(); }}>重试</Button>} />}
       </Card>
+      <AssessmentDashboard />
     </div>
   );
 }

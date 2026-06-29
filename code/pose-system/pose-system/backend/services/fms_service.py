@@ -6,6 +6,9 @@ from models.fms.scoring import FMSScoringEngine
 from models.fms.radar_report import RadarReport
 from models.fms.problem_tagger import ProblemTagger
 from backend.schemas.business import FMSSubmitRequest, FMSResultResponse
+from backend.logger import get_logger
+
+logger = get_logger(__name__)
 
 class FMSService:
     def __init__(self, db: Session):
@@ -50,25 +53,17 @@ from datetime import datetime
 import numpy as np
 
 from models.angle_calculator import AngleCalculator
+from backend.services.base import BaseWebSocketHandler
 
 # 全局存储：跨请求共享单动作视频处理结果
 # key: "{user_id}_{test_index}", value: dict with score, data, completed, best_keypoints
 _single_test_results_global: Dict[str, dict] = {}
 
 
-class RealtimeFMSService:
+class RealtimeFMSService(BaseWebSocketHandler):
     def __init__(self, db: Session):
-        self.db = db
-        self.angle_calc = AngleCalculator()
+        super().__init__(db)
         self.engine = FMSScoringEngine()
-        self.yolo = None
-
-    def _get_yolo(self):
-        if self.yolo is None:
-            from models.yolo_pose_engine import YOLOPoseEngine
-            from config.settings import settings
-            self.yolo = YOLOPoseEngine(model_path=settings.MODEL_PATH, device=settings.DEVICE)
-        return self.yolo
 
     async def handle_session(self, ws: WebSocket, user_id: int):
 # ws.accept() already called in router
@@ -81,7 +76,7 @@ class RealtimeFMSService:
                 if mt == "start":
                     state.reset()
                     t = state.tests[0]
-                    t["status"] = "ready"
+                    t["status"] = "awaiting_user"
                     await ws.send_json({"type":"test_ready","test":0,"name":t["name"],"instruction":t["instruction"],"total_tests":5})
                 elif mt == "skip_test":
                     test = state.current_test()
@@ -90,84 +85,129 @@ class RealtimeFMSService:
                         test["completed"] = True
                         test["score"] = 0
                         test["data"] = {"skipped": True}
-                    idx = state.advance_to_next()
-                    if idx >= 0:
-                        t = state.current_test()
-                        t["status"] = "ready"
-                        await ws.send_json({"type":"test_ready","test":idx,"name":t["name"],"instruction":t["instruction"],"total_tests":5})
-                    else:
-                        await self._send_final_result(ws, state, user_id)
+                    await ws.send_json({"type": "test_skipped", "test": state.current_test_idx})
+                elif mt == "start_test":
+                    test = state.current_test()
+                    if test and test["status"] == "awaiting_user":
+                        test["status"] = "ready"
                 elif mt == "frame":
                     test = state.current_test()
-                    if not test or test["status"] == "done" or test["status"] == "skipped":
+                    if not test or test["status"] == "awaiting_user":  # 仅 awaiting_user 跳过，done/skipped 继续返回关键点
                         continue
                     b64 = msg.get("image","")
                     if not b64:
                         continue
                     try:
-                        yolo = self._get_yolo()
-                        persons, _ = yolo.process_base64_frame(b64)
+                        frame = self.decode_frame(b64)
+                        if frame is None:
+                            continue
+                        persons = self.extract_multi_keypoints(frame)
                         keypoints_list = []
                         for p in persons:
                             kps = p.get("keypoints", [])
                             confs = p.get("confidences", [1.0]*len(kps))
-                            keypoints_list.append({"keypoints": kps, "confidences": confs, "bbox": p.get("bbox")})
-                        
+                            keypoints_list.append({"keypoints": kps, "confidences": confs})
+
                         eval_res = {"type":"frame_result","test_idx":state.current_test_idx,"keypoints": keypoints_list}
-                        
+
                         if not persons:
                             eval_res["fms_status"] = "no_person"
                             await ws.send_json(eval_res)
                             continue
-                        
+
                         person = persons[0]
                         kps = np.array(person["keypoints"])
                         # Store best keypoints for posture analysis (tallest person)
-                        bbox = person.get("bbox")
-                        if bbox and (state.best_keypoints is None or (bbox[3] - bbox[1]) > 100):
+                        if state.best_keypoints is None:
                             state.best_keypoints = person["keypoints"]
-                        angles = self.angle_calc.compute_all_angles(kps)
+                        angles = self.compute_angles(kps)
                         test_idx = state.current_test_idx
                         
-                        evaluation = {}
-                        if test_idx == 0:
-                            evaluation = self._eval_balance(state, angles, kps)
-                        elif test_idx == 1:
-                            evaluation = self._eval_squat(state, angles, kps)
-                        elif test_idx == 2:
-                            evaluation = self._eval_shoulder(state, angles, kps)
-                        elif test_idx == 3:
-                            evaluation = self._eval_plank(state, angles, kps)
-                        elif test_idx == 4:
-                            evaluation = self._eval_symmetry(state, angles, kps)
-                        
-                        eval_res.update(evaluation)
-                        if eval_res.get("fms_status") == "completed":
-                            eval_res["wait_advance"] = True
-                        
+                        # 仅在 ready/running 状态运行评估；done/skipped 仍返回关键点用于骨架显示
+                        if test["status"] in ("ready", "running"):
+                            evaluation = {}
+                            if test_idx == 0:
+                                evaluation = self._eval_balance(state, angles, kps)
+                            elif test_idx == 1:
+                                evaluation = self._eval_squat(state, angles, kps)
+                            elif test_idx == 2:
+                                evaluation = self._eval_shoulder(state, angles, kps)
+                            elif test_idx == 3:
+                                evaluation = self._eval_plank(state, angles, kps)
+                            elif test_idx == 4:
+                                evaluation = self._eval_symmetry(state, angles, kps)
+                            eval_res.update(evaluation)
+                        else:
+                            eval_res["fms_status"] = "observing"
+
                         await ws.send_json(eval_res)
                     except Exception as e:
                         import traceback
-                        print(f"FMS frame error: {e}")
-                        traceback.print_exc()
+                        logger.warning("FMS frame error: %s", e)
                         try:
                             await ws.send_json({"type":"frame_result","error":str(e)})
                         except:
                             pass
                 elif mt == "next_test":
-                    print(f"[FMS] next_test received, idx={state.current_test_idx}")
+                    logger.info("[FMS] next_test received, idx=%s", state.current_test_idx)
+                    # 如果当前测试仍在运行，手动结束并计算分数
+                    cur_test = state.current_test()
+                    if cur_test and cur_test.get("status") == "running" and not cur_test.get("completed"):
+                        cur_test["status"] = "done"
+                        cur_test["completed"] = True
+                        tidx = state.current_test_idx
+                        if tidx == 0:  # 平衡：用时
+                            dur_val = time.time() - cur_test.get("start_time", 0)
+                            if dur_val > 0:
+                                cur_test["data"] = {"duration": round(dur_val, 1)}
+                                cur_test["score"] = round(self.engine.score_balance(dur_val).score, 1)
+                        elif tidx == 1:  # 深蹲
+                            vals = cur_test.get("knee_vals", [])
+                            if vals:
+                                avg_k = sum(vals) / len(vals)
+                                cur_test["data"] = {"depth_angle": round(avg_k, 1)}
+                                cur_test["score"] = round(self.engine.score_flexibility(avg_k, 0, 1.0).score, 1)
+                            else:
+                                cur_test["score"] = 0
+                        elif tidx == 2:  # 肩
+                            dists = cur_test.get("dists", [])
+                            if dists:
+                                avg_d = sum(dists) / len(dists)
+                                cur_test["data"] = {"hand_distance": round(avg_d, 1)}
+                                cur_test["score"] = round(self.engine.score_upper_limb(avg_d).score, 1)
+                            else:
+                                cur_test["score"] = 0
+                        elif tidx == 3:  # 平板
+                            dur_val = time.time() - cur_test.get("start_time", 0)
+                            if dur_val > 0:
+                                cur_test["data"] = {"duration": round(dur_val, 1)}
+                                cur_test["score"] = round(self.engine.score_core(dur_val).score, 1)
+                        elif tidx == 4:  # 对称
+                            ls = cur_test.get("left_score")
+                            rs = cur_test.get("right_score")
+                            if ls is not None and rs is not None:
+                                cur_test["data"] = {"left_score": round(ls, 1), "right_score": round(rs, 1)}
+                                cur_test["score"] = round(self.engine.score_symmetry(ls, rs).score, 1)
+                            else:
+                                vals_l = cur_test.get("cl", []); vals_r = cur_test.get("cr", [])
+                                ls = max(0, 100 - abs(90 - sum(vals_l)/len(vals_l))) if vals_l else 0
+                                rs = max(0, 100 - abs(90 - sum(vals_r)/len(vals_r))) if vals_r else 0
+                                cur_test["left_score"] = ls; cur_test["right_score"] = rs
+                                cur_test["data"] = {"left_score": round(ls, 1), "right_score": round(rs, 1)}
+                                cur_test["score"] = round(self.engine.score_symmetry(ls, rs).score, 1)
+                        logger.info("[FMS] Test %s manually completed, score=%s", tidx, cur_test.get('score'))
                     idx = state.advance_to_next()
                     if idx >= 0:
                         t = state.current_test()
-                        t["status"] = "ready"
+                        t["status"] = "awaiting_user"
                         await ws.send_json({"type":"test_ready","test":idx,"name":t["name"],"instruction":t["instruction"],"total_tests":5})
                     else:
                         await self._send_final_result(ws, state, user_id)
                 elif mt == "finish":
-                    print(f"[FMS] finish received")
+                    logger.info("[FMS] finish received")
                     await self._send_final_result(ws, state, user_id)
         except Exception as e:
-            print(f"FMS WS error: {e}")
+            logger.exception("FMS WS error: %s", e)
             try: await ws.close()
             except: pass
 
@@ -183,7 +223,6 @@ class RealtimeFMSService:
                 idx = t.get("idx", 0)
                 sc = t.get("score", 0)
                 dim_map = {0: "balance", 1: "flexibility", 2: "upper_limb", 3: "core", 4: "symmetry"}
-                label_map = {0: "balance", 1: "flexibility", 2: "upper_limb", 3: "core", 4: "symmetry"}
                 dim = dim_map.get(idx, "unknown")
                 score_map[dim] = sc
                 score_list.append({"dimension": dim, "label": dim, "score": sc})
@@ -213,11 +252,10 @@ class RealtimeFMSService:
                 self.db.commit()
                 self.db.refresh(record)
                 record_id = record.id
-                print(f"[FMS] Saved record id={record_id} user={user_id} score={overall}")
+                logger.info("[FMS] Saved record id=%s user=%s score=%s", record_id, user_id, overall)
             except Exception as e:
                 import traceback
-                print(f"[FMS] DB save failed: {e}")
-                traceback.print_exc()
+                logger.exception("[FMS] DB save failed: %s", e)
                 try: self.db.rollback()
                 except: pass
             
@@ -229,9 +267,9 @@ class RealtimeFMSService:
                     analyzer = PostureAnalyzer()
                     measurements = analyzer.analyze_from_keypoints(state.best_keypoints)
                     posture_report = analyzer.generate_report(measurements, score_list)
-                    print(f"[FMS] Posture: {len(posture_report.get('problems',[]))} problems")
+                    logger.info("[FMS] Posture: %s problems", len(posture_report.get('problems', [])))
                 except Exception as e:
-                    print(f"[FMS] Posture analysis error: {e}")
+                    logger.warning("[FMS] Posture analysis error: %s", e)
 
             result = {
                 "type": "fms_result",
@@ -247,8 +285,7 @@ class RealtimeFMSService:
             await ws.send_json(result)
         except Exception as e:
             import traceback
-            print(f"[FMS] final result error: {e}")
-            traceback.print_exc()
+            logger.exception("[FMS] final result error: %s", e)
             try:
                 await ws.send_json({"type":"fms_result","overall_score":0,"risk_level":"unknown","scores":[],"error":str(e)})
             except:
@@ -261,11 +298,7 @@ class RealtimeFMSService:
             t["start_time"] = time.time()
             return {"fms_status":"started"}
         dur = time.time() - t["start_time"]
-        if dur > 1:
-            t["status"] = "done"; t["completed"] = True
-            t["data"] = {"duration": round(dur,1)}
-            t["score"] = round(self.engine.score_balance(dur).score,1)
-            return {"fms_status":"completed","duration":round(dur,1),"score":t["score"]}
+        # 持续运行，由用户手动点击"下一步"结束并计分
         return {"fms_status":"running","duration":round(dur,1)}
 
     def _eval_squat(self, state, angles, kps):
@@ -338,11 +371,7 @@ class RealtimeFMSService:
                 return {"fms_status":"started"}
             return {"fms_status":"ready"}
         dur = time.time() - t["start_time"]
-        if not horiz and dur > 1:
-            t["status"] = "done"; t["completed"] = True
-            t["data"] = {"duration": round(dur,1)}
-            t["score"] = round(self.engine.score_core(dur).score,1)
-            return {"fms_status":"completed","duration":round(dur,1),"score":t["score"]}
+        # 持续运行，由用户手动点击"下一步"结束并计分
         return {"fms_status":"running","duration":round(dur,1)}
 
     def _eval_symmetry(self, state, angles, kps):
@@ -429,7 +458,7 @@ class VideoFMSService:
             cap.release()
             raise Exception("视频文件为空")
 
-        print(f"[VideoFMS] Processing video: {total_frames} frames, {fps:.1f} FPS")
+        logger.info("[VideoFMS] Processing video: %s frames, %.1f FPS", total_frames, fps)
 
         state = FMSState()
         yolo = self._get_yolo()
@@ -472,17 +501,17 @@ class VideoFMSService:
                 self._eval_symmetry_video(state, angles, kps)
 
             if test.get("completed"):
-                print(f"[VideoFMS] Test {test_idx} completed, score={test.get('score')}")
+                logger.info("[VideoFMS] Test %s completed, score=%s", test_idx, test.get('score'))
                 next_idx = state.advance_to_next()
                 if next_idx < 0:
                     break
 
             frame_count += 1
             if frame_count % 30 == 0:
-                print(f"[VideoFMS] Progress: {frame_count}/{total_frames} frames")
+                logger.debug("[VideoFMS] Progress: %s/%s frames", frame_count, total_frames)
 
         cap.release()
-        print(f"[VideoFMS] Video processing done, processed {frame_count} frames")
+        logger.info("[VideoFMS] Video processing done, processed %s frames", frame_count)
 
         return self._build_result(state, user_id, best_keypoints_all)
 
@@ -656,11 +685,10 @@ class VideoFMSService:
             self.db.commit()
             self.db.refresh(record)
             record_id = record.id
-            print(f"[VideoFMS] Saved record id={record_id} user={user_id} score={overall}")
+            logger.info("[VideoFMS] Saved record id=%s user=%s score=%s", record_id, user_id, overall)
         except Exception as e:
             import traceback
-            print(f"[VideoFMS] DB save failed: {e}")
-            traceback.print_exc()
+            logger.exception("[VideoFMS] DB save failed: %s", e)
             try:
                 self.db.rollback()
             except:
@@ -675,7 +703,7 @@ class VideoFMSService:
                 measurements = analyzer.analyze_from_keypoints(best_kps)
                 posture_report = analyzer.generate_report(measurements, score_list)
             except Exception as e:
-                print(f"[VideoFMS] Posture analysis error: {e}")
+                logger.warning("[VideoFMS] Posture analysis error: %s", e)
 
         return {
             "type": "fms_result",
@@ -704,7 +732,7 @@ class VideoFMSService:
             cap.release()
             raise Exception("视频文件为空")
 
-        print(f"[VideoFMS] Processing single test {test_index}: {total_frames} frames, {fps:.1f} FPS")
+        logger.info("[VideoFMS] Processing single test %s: %s frames, %.1f FPS", test_index, total_frames, fps)
 
         yolo = self._get_yolo()
         frame_count = 0
@@ -748,12 +776,12 @@ class VideoFMSService:
                 self._eval_symmetry_single(test, angles, kps)
 
             if test.get("completed"):
-                print(f"[VideoFMS] Single test {test_index} completed, score={test.get('score')}")
+                logger.info("[VideoFMS] Single test %s completed, score=%s", test_index, test.get('score'))
                 break
 
             frame_count += 1
             if frame_count % 30 == 0:
-                print(f"[VideoFMS] Progress: {frame_count}/{total_frames} frames")
+                logger.debug("[VideoFMS] Progress: %s/%s frames", frame_count, total_frames)
 
         cap.release()
 
@@ -981,11 +1009,10 @@ class VideoFMSService:
             self.db.commit()
             self.db.refresh(record)
             record_id = record.id
-            print(f"[VideoFMS] Combined result saved record id={record_id} user={user_id} score={overall}")
+            logger.info("[VideoFMS] Combined result saved record id=%s user=%s score=%s", record_id, user_id, overall)
         except Exception as e:
             import traceback
-            print(f"[VideoFMS] DB save failed: {e}")
-            traceback.print_exc()
+            logger.exception("[VideoFMS] DB save failed: %s", e)
             try:
                 self.db.rollback()
             except:

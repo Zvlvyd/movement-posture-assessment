@@ -27,10 +27,6 @@ class RiskLevel(str, enum.Enum):
     MEDIUM = 'medium'
     HIGH = 'high'
 
-class TrainingMode(str, enum.Enum):
-    BASIC = 'basic'
-    ADVANCED = 'advanced'
-
 # 班级-学员关联表
 class_group_student = Table(
     'class_group_student', Base.metadata,
@@ -52,7 +48,6 @@ class User(Base):
 
     fms_records = relationship('FMSRecord', back_populates='user')
     prescriptions = relationship('Prescription', back_populates='user')
-    training_records = relationship('TrainingRecord', back_populates='user')
     check_in_cards = relationship('CheckInCard', back_populates='user')
     badges = relationship('Badge', back_populates='user')
     cycle_config = relationship('UserCycleConfig', back_populates='user', uselist=False)
@@ -123,7 +118,6 @@ class Prescription(Base):
     assessment_record_id = Column(Integer, ForeignKey('assessment_record.id'), nullable=True)
     assessment_record = relationship('AssessmentRecord', back_populates='prescriptions_new')
     items = relationship('PrescriptionItem', back_populates='prescription', cascade='all, delete-orphan')
-    training_records = relationship('TrainingRecord', back_populates='prescription')
 
 class PrescriptionItem(Base):
     __tablename__ = 'prescription_item'
@@ -168,20 +162,6 @@ class TagActionMapping(Base):
 
     tag = relationship('ProblemTag')
     action = relationship('ActionLibrary')
-
-class TrainingRecord(Base):
-    __tablename__ = 'training_record'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    prescription_id = Column(Integer, ForeignKey('prescription.id'), nullable=True)
-    start_time = Column(DateTime, default=datetime.utcnow)
-    end_time = Column(DateTime)
-    total_score = Column(Float)
-    mode = Column(Enum(TrainingMode), default=TrainingMode.BASIC)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    user = relationship('User', back_populates='training_records')
-    prescription = relationship('Prescription', back_populates='training_records')
 
 class CheckInCard(Base):
     __tablename__ = 'check_in_card'

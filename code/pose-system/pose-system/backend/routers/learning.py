@@ -14,7 +14,7 @@ from backend.database.connection import get_db
 from backend.database import models
 from backend.schemas.business import ActionLibraryResponse
 from backend.services.auth_service import get_current_user
-from backend.services.learning_service import LearningService, RealtimeLearningService, StandardActionLoader
+from backend.services.learning_service import LearningService, RealtimeLearningService, UnifiedActionLoader
 from backend.database.models import User
 from jose import jwt as jose_jwt
 from config.settings import settings
@@ -74,7 +74,7 @@ def get_learnable_action(name: str):
 @router.get('/views/{name}')
 def get_action_views(name: str):
     """获取动作支持的观察视角列表"""
-    loader = StandardActionLoader()
+    loader = UnifiedActionLoader()
     action = loader.get_action(name)
     if not action:
         raise HTTPException(status_code=404, detail=f'未找到动作: {name}')

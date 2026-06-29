@@ -25,6 +25,8 @@ def create_squat_fsm() -> StateMachine:
     fsm.add_transition('descending', 'bottom', cond_bottom)
     fsm.add_transition('bottom', 'ascending', cond_ascending)
     fsm.add_transition('ascending', 'complete', cond_complete)
+    # 回路：完成一次后需再次弯曲膝盖才开启下一次计数（防止站立不动时误触发）
+    fsm.add_transition('complete', 'standing', lambda ctx: ctx.get('knee_angle', 180.0) < 140.0)
     return fsm
 
 def create_lunge_fsm() -> StateMachine:
@@ -38,6 +40,7 @@ def create_lunge_fsm() -> StateMachine:
     fsm.add_transition('lunging', 'bottom', lambda ctx: ctx.get('front_knee_angle', 120.0) < 90.0)
     fsm.add_transition('bottom', 'recovering', lambda ctx: ctx.get('front_knee_angle', 90.0) > 100.0)
     fsm.add_transition('recovering', 'complete', lambda ctx: ctx.get('front_knee_angle', 100.0) > 155.0)
+    fsm.add_transition('complete', 'standing', lambda ctx: ctx.get('front_knee_angle', 180.0) < 140.0)
     return fsm
 
 def create_pushup_fsm() -> StateMachine:
@@ -51,6 +54,7 @@ def create_pushup_fsm() -> StateMachine:
     fsm.add_transition('descending', 'bottom', lambda ctx: ctx.get('elbow_angle', 100.0) < 90.0)
     fsm.add_transition('bottom', 'ascending', lambda ctx: ctx.get('elbow_angle', 80.0) > 100.0)
     fsm.add_transition('ascending', 'complete', lambda ctx: ctx.get('elbow_angle', 100.0) > 160.0)
+    fsm.add_transition('complete', 'top', lambda ctx: ctx.get('elbow_angle', 180.0) < 140.0)
     return fsm
 
 def create_plank_fsm() -> StateMachine:
@@ -64,6 +68,7 @@ def create_plank_fsm() -> StateMachine:
     fsm.add_transition('holding', 'drooping', lambda ctx: ctx.get('hip_angle', 180.0) < 160.0)
     fsm.add_transition('drooping', 'recovering', lambda ctx: ctx.get('hip_angle', 0.0) >= 160.0)
     fsm.add_transition('recovering', 'complete', lambda ctx: True)
+    fsm.add_transition('complete', 'ready', lambda ctx: ctx.get('hip_angle', 180.0) < 150.0)
     return fsm
 
 def create_shoulder_press_fsm() -> StateMachine:
@@ -77,6 +82,7 @@ def create_shoulder_press_fsm() -> StateMachine:
     fsm.add_transition('pressing', 'top', lambda ctx: ctx.get('elbow_angle', 90.0) > 160.0)
     fsm.add_transition('top', 'lowering', lambda ctx: ctx.get('elbow_angle', 170.0) < 150.0)
     fsm.add_transition('lowering', 'complete', lambda ctx: ctx.get('elbow_angle', 0.0) < 100.0)
+    fsm.add_transition('complete', 'rest', lambda ctx: ctx.get('elbow_angle', 180.0) < 130.0)
     return fsm
 
 def create_jumping_jack_fsm() -> StateMachine:
@@ -90,6 +96,7 @@ def create_jumping_jack_fsm() -> StateMachine:
     fsm.add_transition('jumping_up', 'open', lambda ctx: ctx.get('hip_angle', 150.0) < 150.0)
     fsm.add_transition('open', 'closing', lambda ctx: ctx.get('hip_angle', 130.0) > 150.0)
     fsm.add_transition('closing', 'complete', lambda ctx: ctx.get('hip_angle', 160.0) > 170.0)
+    fsm.add_transition('complete', 'standing', lambda ctx: ctx.get('hip_angle', 180.0) < 165.0)
     return fsm
 
 
@@ -104,6 +111,7 @@ def create_deadlift_fsm() -> StateMachine:
     fsm.add_transition('lowering', 'bottom', lambda ctx: ctx.get('hip_angle', 100.0) < 100.0)
     fsm.add_transition('bottom', 'lifting', lambda ctx: ctx.get('hip_angle', 50.0) > 100.0)
     fsm.add_transition('lifting', 'complete', lambda ctx: ctx.get('hip_angle', 120.0) > 160.0)
+    fsm.add_transition('complete', 'standing', lambda ctx: ctx.get('hip_angle', 180.0) < 150.0)
     return fsm
 
 

@@ -9,33 +9,16 @@ class ReportService:
         self.db = db
 
     def get_training_history(self, user_id: int, days: int = 30):
-        start_date = datetime.utcnow() - timedelta(days=days)
-        return self.db.query(models.TrainingRecord).filter(
-            models.TrainingRecord.user_id == user_id,
-            models.TrainingRecord.start_time >= start_date
-        ).order_by(models.TrainingRecord.start_time.desc()).all()
+        # Training module removed — return empty list
+        return []
 
     def get_training_stats(self, user_id: int) -> Dict:
-        now = datetime.utcnow()
-        last_7 = now - timedelta(days=7)
-        last_30 = now - timedelta(days=30)
-        total_count_7 = self.db.query(func.count(models.TrainingRecord.id)).filter(
-            models.TrainingRecord.user_id == user_id,
-            models.TrainingRecord.start_time >= last_7
-        ).scalar() or 0
-        total_count_30 = self.db.query(func.count(models.TrainingRecord.id)).filter(
-            models.TrainingRecord.user_id == user_id,
-            models.TrainingRecord.start_time >= last_30
-        ).scalar() or 0
-        avg_score = self.db.query(func.avg(models.TrainingRecord.total_score)).filter(
-            models.TrainingRecord.user_id == user_id,
-            models.TrainingRecord.total_score.isnot(None)
-        ).scalar() or 0
+        # Training module removed — return zero stats
         streak = self._compute_streak(user_id)
         return {
-            'total_sessions_7d': total_count_7,
-            'total_sessions_30d': total_count_30,
-            'average_score': round(float(avg_score), 1),
+            'total_sessions_7d': 0,
+            'total_sessions_30d': 0,
+            'average_score': 0.0,
             'current_streak': streak,
         }
 

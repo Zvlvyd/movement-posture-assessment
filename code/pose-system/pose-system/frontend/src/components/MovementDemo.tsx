@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
 import { PictureOutlined, VideoCameraOutlined } from '@ant-design/icons';
 
 /** 动作示范 + 图片/视频占位 + 倒计时叠加层 */
@@ -15,10 +14,8 @@ interface Props {
   totalSteps?: number;
   /** 预计耗时 */
   durationHint?: string;
-  /** 倒计时秒数，0 表示不显示 */
+  /** 倒计时秒数，0 表示不显示。由父组件控制，此处仅做展示。 */
   countdown: number;
-  /** 倒计时结束回调 */
-  onCountdownEnd?: () => void;
   /** 示范图片 URL（留空使用占位） */
   imageUrl?: string;
   /** 示范视频 URL（留空使用占位） */
@@ -51,33 +48,14 @@ function pickPose(name: string) {
 
 export default function MovementDemo({
   movementName, stepName, instruction, stepIndex, totalSteps,
-  durationHint, countdown, onCountdownEnd,
-  imageUrl, videoUrl, transitionHint,
+  durationHint, countdown, imageUrl, videoUrl, transitionHint,
 }: Props) {
-  const [cd, setCd] = useState(countdown);
-  const timerRef = useRef<number>(0);
   const pose = pickPose(movementName);
   const svgSize = 220;
 
-  useEffect(() => {
-    setCd(countdown);
-    if (countdown <= 0) return;
-    timerRef.current = window.setInterval(() => {
-      setCd(prev => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          onCountdownEnd?.();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timerRef.current);
-  }, [countdown, onCountdownEnd]);
-
   return (
     <div className="demo-enter" style={{ textAlign: 'center', padding: '12px 0' }}>
-      {/* ── 标题行 ──────────────────────────── */}
+      {/* ── 标题行 ── */}
       <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 2, color: '#1a1a2e' }}>
         {movementName}
       </div>
@@ -89,12 +67,11 @@ export default function MovementDemo({
       )}
       <div style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>{pose.label}</div>
 
-      {/* ── 示范区域（简笔画 + 图片/视频占位） ── */}
+      {/* ── 示范区域 ── */}
       <div style={{
         display: 'flex', gap: 12, justifyContent: 'center', alignItems: 'stretch',
         marginBottom: 12, flexWrap: 'wrap',
       }}>
-        {/* 图片占位 */}
         <div style={{
           width: svgSize, minHeight: svgSize,
           background: '#f5f5f5', borderRadius: 16,
@@ -114,7 +91,6 @@ export default function MovementDemo({
           )}
         </div>
 
-        {/* 视频占位 */}
         <div style={{
           width: svgSize, minHeight: svgSize,
           background: '#f5f5f5', borderRadius: 16,
@@ -135,18 +111,18 @@ export default function MovementDemo({
         </div>
       </div>
 
-      {/* ── 倒计时叠加在示范区域上方（独立展示）── */}
-      {cd > 0 && (
+      {/* ── 倒计时叠加 ── */}
+      {countdown > 0 && (
         <div style={{
           width: '100%', maxWidth: svgSize * 2 + 12, margin: '-80px auto 16px',
           height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'rgba(0,0,0,0.45)', borderRadius: 16, position: 'relative', zIndex: 2,
         }}>
-          <span className="countdown-number" style={{
+          <span style={{
             fontSize: 64, fontWeight: 900, color: '#fff',
             textShadow: '0 4px 12px rgba(0,0,0,0.3)',
           }}>
-            {cd}
+            {countdown}
           </span>
         </div>
       )}
@@ -160,13 +136,12 @@ export default function MovementDemo({
         💡 {instruction}
       </div>
 
-      {/* ── 过渡提示（步骤完成后显示） ── */}
+      {/* ── 过渡提示 ── */}
       {transitionHint && (
         <div style={{
           background: '#fff7e6', border: '1px solid #ffd591',
           borderRadius: 8, padding: '8px 16px', marginBottom: 8,
           fontSize: 14, color: '#ad6800', fontWeight: 500,
-          animation: 'fadeInUp 0.4s ease-out',
         }}>
           ⏭ {transitionHint}
         </div>

@@ -6,6 +6,9 @@
 """
 import json
 from pathlib import Path
+from backend.logger import get_logger
+
+logger = get_logger(__name__)
 from sqlalchemy.orm import Session
 from backend.database import models
 
@@ -84,4 +87,36 @@ def seed_action_library(db: Session):
                     description=prob_info.get("name", prob_id),
                     severity=2,
                 ))
+    db.commit()
+
+
+def seed_users(db: Session):
+    """创建默认管理员和教练账号（如不存在则创建）。
+
+    账号凭据从 config.settings 读取，支持环境变量覆盖。
+    已在数据库中存在同名用户时跳过，保证幂等。
+    """
+    from shared.security import hash_password
+    from config.settings import settings
+
+    defaults = [
+        (settings.DEFAULT_ADMIN_USERNAME, settings.DEFAULT_ADMIN_PASSWORD, models.UserRole.ADMIN),
+        (settings.DEFAULT_COACH_USERNAME, settings.DEFAULT_COACH_PASSWORD, models.UserRole.COACH),
+    ]
+
+    for username, password, role in defaults:
+        existing = db.query(models.User).filter(
+            models.User.username == username
+        ).first()
+        if existing:
+            continue
+        user = models.User(
+            username=username,
+            password_hash=hash_password(password),
+            role=role,
+            is_active=True,
+        )
+        db.add(user)
+        logger.info("[seed] Created %s account: username=%s", role.value, username)
+
     db.commit()

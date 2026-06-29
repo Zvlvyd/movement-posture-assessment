@@ -1,14 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Card, Table, Tabs, Descriptions, Switch, Select, Tag, message, Button, Space } from 'antd';
-import { useAuthStore } from '../store/auth';
-import axios from 'axios';
-
-const api = axios.create({ baseURL: '/api' });
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config;
-});
+import { Card, Table, Tabs, Descriptions, Switch, Select, message } from 'antd';
+import { adminApi } from '../services/api';
 
 export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -16,19 +8,29 @@ export default function AdminPage() {
   const [logs, setLogs] = useState<any[]>([]);
 
   useEffect(() => {
-    api.get('/admin/users').then(r => setUsers(r.data)).catch(() => {});
-    api.get('/admin/config').then(r => setConfig(r.data)).catch(() => {});
-    api.get('/admin/logs').then(r => setLogs(r.data)).catch(() => {});
+    adminApi.users().then(setUsers).catch(() => {});
+    adminApi.config().then(setConfig).catch(() => {});
+    adminApi.logs().then(setLogs).catch(() => {});
   }, []);
 
   const toggleStatus = async (userId: number, active: boolean) => {
-    await api.put(`/admin/users/${userId}/status`, null, { params: { is_active: active } });
-    message.success('状态已更新');
+    try {
+      await adminApi.toggleStatus(userId, active);
+      message.success('状态已更新');
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, is_active: active } : u));
+    } catch {
+      message.error('状态更新失败');
+    }
   };
 
   const changeRole = async (userId: number, role: string) => {
-    await api.put(`/admin/users/${userId}/role`, null, { params: { role } });
-    message.success('角色已更新');
+    try {
+      await adminApi.changeRole(userId, role);
+      message.success('角色已更新');
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role } : u));
+    } catch {
+      message.error('角色更新失败');
+    }
   };
 
   const userColumns = [

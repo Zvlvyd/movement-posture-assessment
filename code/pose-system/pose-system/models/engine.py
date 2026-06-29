@@ -4,7 +4,7 @@ Consolidated YOLO Model Manager — thread-safe lazy-loading singleton.
 All services use this single entry point instead of each having its own _get_yolo().
 """
 import threading
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 from config.settings import settings
 
@@ -42,7 +42,9 @@ class ModelManager:
     def get_keypoints(self, frame):
         """
         Run YOLO-Pose on a BGR frame → (keypoints_xy, confidences) or (None, None).
+        Returns the first detected person only.
         keypoints_xy: (17, 2) numpy array
+        confidences: list of 17 floats
         """
         self._ensure_loaded()
         results = self._model(frame, verbose=False)
@@ -53,6 +55,25 @@ class ModelManager:
                 kp_conf = kps[0, :, 2].tolist() if kps.shape[1] >= 3 else [1.0] * 17
                 return kp_xy, kp_conf
         return None, None
+
+    def get_multi_keypoints(self, frame) -> List[dict]:
+        """
+        Run YOLO-Pose on a BGR frame → list of person dicts.
+        Each dict: {"keypoints": [[x,y], ...], "confidences": [float, ...]}
+        Returns empty list if no persons detected.
+        """
+        self._ensure_loaded()
+        results = self._model(frame, verbose=False)
+        persons = []
+        if results and results[0].keypoints is not None:
+            kp_data = results[0].keypoints.data.cpu().numpy()
+            for i in range(kp_data.shape[0]):
+                kps = kp_data[i]
+                persons.append({
+                    "keypoints": kps[:, :2].tolist(),
+                    "confidences": kps[:, 2].tolist() if kps.shape[1] >= 3 else [1.0] * kps.shape[0],
+                })
+        return persons
 
     def get_keypoints_from_b64(self, b64_str: str):
         """

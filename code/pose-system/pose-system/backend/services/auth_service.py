@@ -4,26 +4,13 @@ from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-import hashlib
-import secrets
 from config.settings import settings
 from backend.database.connection import get_db
 from backend.database.models import User, UserRole
 from backend.schemas.user import UserRegister, UserLogin, UserResponse, TokenResponse
+from shared.security import hash_password, verify_password, needs_password_upgrade
 
 security = HTTPBearer()
-
-def hash_password(password: str) -> str:
-    salt = secrets.token_hex(16)
-    h = hashlib.sha256((salt + password).encode()).hexdigest()
-    return salt + '$' + h
-
-def verify_password(plain: str, hashed: str) -> bool:
-    parts = hashed.split('$')
-    if len(parts) != 2:
-        return False
-    salt, h = parts
-    return hashlib.sha256((salt + plain).encode()).hexdigest() == h
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
@@ -53,6 +40,10 @@ def login_user(db: Session, data: UserLogin) -> TokenResponse:
         raise HTTPException(status_code=401, detail='Invalid username or password')
     if not user.is_active:
         raise HTTPException(status_code=403, detail='Account is disabled')
+    # Auto-upgrade legacy SHA-256 hashes to bcrypt
+    if needs_password_upgrade(user.password_hash):
+        user.password_hash = hash_password(data.password)
+        db.commit()
     access_token = create_access_token(data={'sub': str(user.id), 'role': user.role.value})
     return TokenResponse(access_token=access_token, user=UserResponse.model_validate(user))
 

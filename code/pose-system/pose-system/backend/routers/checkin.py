@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from datetime import datetime, date
 from backend.database.connection import get_db
 from backend.database import models
-from backend.schemas.business import TrainingRecordResponse
 from backend.services.report_service import ReportService, BadgeService
 from backend.services.auth_service import get_current_user
 from backend.database.models import User
@@ -13,10 +12,25 @@ router = APIRouter(prefix='/api/checkin', tags=['Check-in & Badges'])
 @router.post('')
 def check_in(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     today = datetime.utcnow()
+    today_date = today.date()
+
+    # 检查今天是否已签到
+    existing_today = db.query(models.CheckInCard).filter(
+        models.CheckInCard.user_id == user.id,
+        models.CheckInCard.date >= today_date
+    ).first()
+    if existing_today:
+        return {
+            'message': 'already checked in today',
+            'streak_days': existing_today.streak_days,
+            'new_badges': [],
+        }
+
     yesterday_card = db.query(models.CheckInCard).filter(
         models.CheckInCard.user_id == user.id
     ).order_by(models.CheckInCard.date.desc()).first()
-    streak = (yesterday_card.streak_days + 1) if yesterday_card and (today - yesterday_card.date).days <= 1 else 1
+    diff_days = (today - yesterday_card.date).days if yesterday_card else None
+    streak = (yesterday_card.streak_days + 1) if yesterday_card and diff_days == 1 else 1
     card = models.CheckInCard(user_id=user.id, date=today, streak_days=streak)
     db.add(card)
     db.commit()

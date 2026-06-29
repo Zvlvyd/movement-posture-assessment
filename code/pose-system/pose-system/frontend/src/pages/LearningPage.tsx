@@ -1,551 +1,456 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
-  Card, Select, List, Typography, Tag, Spin, Button, Space, Progress,
-  Row, Col, Badge, Divider, Empty, message, Descriptions, Segmented,
-} from 'antd';
+  Card, Select, Input, List, Typography, Tag, Spin,
+  Space, Button, message, Empty, Modal, Descriptions, Tooltip, Collapse,
+} from "antd";
 import {
-  PlayCircleOutlined, StopOutlined,
-  TrophyOutlined, BulbOutlined, EyeOutlined, ArrowLeftOutlined,
-  CheckCircleOutlined, CloseCircleOutlined, WarningOutlined,
-} from '@ant-design/icons';
-import { learningApi, createLearningWS } from '../services/api';
+  PlayCircleOutlined, InfoCircleOutlined, SearchOutlined,
+  ThunderboltOutlined, BookOutlined, CaretRightOutlined,
+  CheckCircleOutlined, AimOutlined,
+} from "@ant-design/icons";
+import { learningApi } from "../services/api";
+import { useTrainingSession } from "../hooks/useTrainingSession";
+import TrainingSessionPanel from "../components/TrainingSessionPanel";
+import TrainingResultPanel from "./training/TrainingResultPanel";
 import type {
-  ActionItem, LearnableAction, LearnableActionDetail, StandardAngles,
-  AngleDiff, LearningFeedback, LearningComplete,
-} from '../types';
+  ActionItem, LearnableAction, LearnableActionDetail, LearningComplete,
+} from "../types";
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
-type PageMode = 'list' | 'detail' | 'learning' | 'result';
+const DIFFICULTY_LABELS: Record<number, string> = { 1: "初级", 2: "中级", 3: "高级" };
+const DIFFICULTY_COLORS: Record<number, string> = { 1: "green", 2: "blue", 3: "red" };
+const INTENSITY_LABELS: Record<string, string> = { LOW: "低强度", MEDIUM: "中强度", HIGH: "高强度" };
+const INTENSITY_COLORS: Record<string, string> = { LOW: "green", MEDIUM: "orange", HIGH: "red" };
+const PHASE_LABELS: Record<string, string> = { warmup: "热身", main: "主体", cooldown: "冷却" };
 
-const STATUS_COLORS: Record<string, string> = {
-  good: '#52c41a',
-  close: '#faad14',
-  warning: '#fa8c16',
-  bad: '#f5222d',
-  unknown: '#d9d9d9',
-};
+function diffLabel(d: number) { return DIFFICULTY_LABELS[d] || "Lv." + d; }
+function diffColor(d: number) { return DIFFICULTY_COLORS[d] || "default"; }
 
-const STATUS_LABELS: Record<string, string> = {
-  good: '达标',
-  close: '接近',
-  warning: '偏差',
-  bad: '严重偏差',
-  unknown: '—',
-};
-
-const STATUS_ICONS: Record<string, React.ReactNode> = {
-  good: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-  close: <WarningOutlined style={{ color: '#faad14' }} />,
-  warning: <WarningOutlined style={{ color: '#fa8c16' }} />,
-  bad: <CloseCircleOutlined style={{ color: '#f5222d' }} />,
-};
+type PageMode = "list" | "learning" | "result";
 
 export default function LearningPage() {
-  // --- List mode ---
-  const [mode, setMode] = useState<PageMode>('list');
+  const [mode, setMode] = useState<PageMode>("list");
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [learnable, setLearnable] = useState<LearnableAction[]>([]);
   const [category, setCategory] = useState<string | undefined>();
+  const [family, setFamily] = useState<string | undefined>();
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // --- Detail mode ---
-  const [selectedAction, setSelectedAction] = useState<LearnableActionDetail | null>(null);
+  const [detailAction, setDetailAction] = useState<LearnableActionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
 
-  // --- Learning mode ---
-  const [ws, setWs] = useState<WebSocket | null>(null);
-  const [currentView, setCurrentView] = useState<string>('正面');
-  const [standardAngles, setStandardAngles] = useState<StandardAngles>({});
-  const [keyChecks, setKeyChecks] = useState<any[]>([]);
-  const [instruction, setInstruction] = useState('');
-  const [diffs, setDiffs] = useState<AngleDiff[]>([]);
-  const [feedbacks, setFeedbacks] = useState<LearningFeedback[]>([]);
-  const [overallScore, setOverallScore] = useState<number | null>(null);
-  const [bestScore, setBestScore] = useState(0);
-  const [frameCount, setFrameCount] = useState(0);
-  const [isSessionActive, setIsSessionActive] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
-  const intervalRef = useRef<number | null>(null);
-
-  // --- Result mode ---
+  const [selectedAction, setSelectedAction] = useState("");
   const [result, setResult] = useState<LearningComplete | null>(null);
 
-  // Cleanup on unmount
+  const [sessionState, sessionActions] = useTrainingSession({
+    actionName: selectedAction,
+    onComplete: (data) => {
+      setResult(data);
+      setMode("result");
+    },
+    onError: (msg) => message.error(msg),
+  });
+
   useEffect(() => {
-    return () => {
-      stopCamera();
-      closeWS();
-    };
+    setLoading(true);
+    Promise.all([
+      learningApi.getActions(),
+      learningApi.getLearnable(),
+    ]).then(([a, l]) => {
+      setActions(a);
+      setLearnable(l);
+    }).catch(() => message.error("加载动作库失败"))
+      .finally(() => setLoading(false));
   }, []);
 
-  // --- Data loading ---
-  useEffect(() => {
-    if (mode === 'list') {
-      setLoading(true);
-      Promise.all([
-        learningApi.getActions(category),
-        learningApi.getLearnable().catch(() => [] as LearnableAction[]),
-      ]).then(([acts, learn]) => {
-        setActions(acts);
-        setLearnable(learn);
-      }).finally(() => setLoading(false));
-    }
-  }, [category, mode]);
+  // Dynamic categories from actual data (both DB + learnable)
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    actions.forEach(a => { if (a.category) set.add(a.category); });
+    learnable.forEach(l => { if (l.category) set.add(l.category); });
+    return Array.from(set).sort();
+  }, [actions, learnable]);
 
-  // --- Camera ---
-  const startCamera = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480, facingMode: 'user' },
+  // Dynamic families from learnable data
+  const families = useMemo(() => {
+    const set = new Set<string>();
+    learnable.forEach(l => { if (l.family) set.add(l.family); });
+    return Array.from(set).sort();
+  }, [learnable]);
+
+  const learnableNames = useMemo(
+    () => new Set(learnable.map(l => l.name)),
+    [learnable],
+  );
+
+  // Get learnable metadata by name
+  const learnableMap = useMemo(() => {
+    const map = new Map<string, LearnableAction>();
+    learnable.forEach(l => map.set(l.name, l));
+    return map;
+  }, [learnable]);
+
+  // Filter DB actions
+  const filtered = useMemo(() => {
+    let list = actions;
+    if (category) list = list.filter(a => a.category === category);
+    if (family) {
+      // Filter DB actions by matching against learnable family
+      list = list.filter(a => {
+        const l = learnableMap.get(a.name);
+        return l && l.family === family;
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      streamRef.current = stream;
-    } catch (e) {
-      message.error('无法访问摄像头，请检查权限设置');
     }
-  }, []);
-
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
+    if (search.trim()) {
+      const kw = search.trim().toLowerCase();
+      list = list.filter(a => {
+        const l = learnableMap.get(a.name);
+        return a.name.toLowerCase().includes(kw)
+          || (a.description || "").toLowerCase().includes(kw)
+          || (a.target_body_parts || "").toLowerCase().includes(kw)
+          || (l?.family_name || "").toLowerCase().includes(kw);
+      });
     }
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }, []);
+    return [...list].sort((a, b) => {
+      const aL = learnableNames.has(a.name) ? 0 : 1;
+      const bL = learnableNames.has(b.name) ? 0 : 1;
+      if (aL !== bL) return aL - bL;
+      return (a.difficulty ?? 99) - (b.difficulty ?? 99);
+    });
+  }, [actions, category, family, search, learnableNames, learnableMap]);
 
-  const closeWS = useCallback(() => {
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-    setWs(null);
-  }, []);
-
-  // --- Frame capture and send ---
-  const captureAndSend = useCallback(() => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-    wsRef.current.send(JSON.stringify({
-      type: 'frame',
-      data: dataUrl,
-    }));
-  }, []);
-
-  // --- Enter learning mode ---
   const enterLearning = useCallback(async (actionName: string) => {
+    setSelectedAction(actionName);
+    const ok = await sessionActions.startSession();
+    if (ok) setMode("learning");
+  }, [sessionActions]);
+
+  const showDetail = useCallback(async (name: string) => {
     setDetailLoading(true);
+    setDetailOpen(true);
     try {
-      const detail = await learningApi.getLearnableDetail(actionName);
-      setSelectedAction(detail);
-
-      // Switch to learning
-      setMode('learning');
-      await startCamera();
-
-      const token = localStorage.getItem('token') || '';
-      const socket = createLearningWS(token);
-      wsRef.current = socket;
-      setWs(socket);
-
-      socket.onopen = () => {
-        socket.send(JSON.stringify({
-          type: 'start',
-          action: actionName,
-          view: detail.views?.[0] || '正面',
-        }));
-        setCurrentView(detail.views?.[0] || '正面');
-        setIsSessionActive(true);
-
-        // Start frame capture interval
-        intervalRef.current = window.setInterval(() => {
-          captureAndSend();
-        }, 150); // ~6-7 fps, balanced
-      };
-
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleWSMessage(data);
-      };
-
-      socket.onerror = () => {
-        message.error('WebSocket 连接失败');
-        setIsSessionActive(false);
-      };
-
-      socket.onclose = () => {
-        setIsSessionActive(false);
-      };
-    } catch (e) {
-      message.error('加载动作数据失败');
-      setMode('list');
+      const d = await learningApi.getLearnableDetail(name);
+      setDetailAction(d);
+    } catch {
+      message.error("加载动作详情失败");
+      setDetailOpen(false);
     } finally {
       setDetailLoading(false);
     }
-  }, [startCamera, captureAndSend]);
-
-  const handleWSMessage = useCallback((data: any) => {
-    switch (data.type) {
-      case 'session_ready':
-        setStandardAngles(data.standard_angles || {});
-        setKeyChecks(data.key_checks || []);
-        setInstruction(data.instruction || '');
-        setDiffs([]);
-        setFeedbacks([]);
-        setOverallScore(null);
-        setBestScore(0);
-        setFrameCount(0);
-        break;
-
-      case 'comparison':
-        setDiffs(data.diffs || []);
-        setFeedbacks(data.feedbacks || []);
-        setOverallScore(data.overall_score);
-        setBestScore(data.best_score || 0);
-        setFrameCount(data.frame || 0);
-        break;
-
-      case 'view_switched':
-        setCurrentView(data.view);
-        setStandardAngles(data.standard_angles || {});
-        setKeyChecks(data.key_checks || []);
-        break;
-
-      case 'learning_complete':
-        setResult(data);
-        setMode('result');
-        stopCamera();
-        closeWS();
-        setIsSessionActive(false);
-        break;
-
-      case 'error':
-        message.error(data.message);
-        break;
-    }
-  }, [stopCamera, closeWS]);
-
-  // --- End session ---
-  const endSession = useCallback(() => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'finish' }));
-    }
   }, []);
 
-  const switchView = useCallback((view: string) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'switch_view', view }));
-    }
-  }, []);
-
-  // --- Render: List mode ---
-  if (mode === 'list') {
-    const learnableNames = new Set(learnable.map(l => l.name));
+  // ============================================================
+  if (mode === "learning") {
     return (
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
-        <Title>标准动作学习</Title>
-
-        {/* Learnable actions with standard learning mode */}
-        {learnable.length > 0 && (
-          <Card title="标准学习模式" style={{ marginBottom: 24 }}
-            extra={<Tag color="blue">{learnable.length} 个可学习动作</Tag>}>
-            <Text type="secondary" style={{ marginBottom: 16, display: 'block' }}>
-              以下动作支持实时对比学习：系统将逐帧对比您的动作与标准角度，给出精细化反馈。
-            </Text>
-            <List
-              dataSource={learnable}
-              renderItem={(item: LearnableAction) => (
-                <List.Item
-                  actions={[
-                    <Button type="primary" icon={<PlayCircleOutlined />}
-                      onClick={() => enterLearning(item.name)}>
-                      进入标准学习
-                    </Button>,
-                  ]}>
-                  <List.Item.Meta
-                    title={<Space>{item.name}<Tag>{item.category}</Tag></Space>}
-                    description={item.description}
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        )}
-
-        {/* Full action library */}
-        <Card title="全部动作库">
-          <Select placeholder="筛选分类" allowClear style={{ width: 200, marginBottom: 16 }}
-            onChange={setCategory}
-            options={[
-              { value: '下肢', label: '下肢' },
-              { value: '上肢', label: '上肢' },
-              { value: '核心', label: '核心' },
-            ]} />
-          {loading ? <Spin /> : (
-            <List
-              dataSource={actions}
-              renderItem={(item: ActionItem) => (
-                <List.Item actions={
-                  learnableNames.has(item.name)
-                    ? [<Button size="small" icon={<PlayCircleOutlined />}
-                        onClick={() => enterLearning(item.name)}>标准学习</Button>]
-                    : undefined
-                }>
-                  <List.Item.Meta
-                    title={<Space>{item.name}<Tag>{item.category}</Tag></Space>}
-                    description={
-                      <Space>
-                        <Tag color="blue">难度 {item.difficulty}</Tag>
-                        {item.description && <Text type="secondary">{item.description}</Text>}
-                      </Space>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-          )}
-        </Card>
-      </div>
+      <TrainingSessionPanel
+        state={sessionState}
+        actions={sessionActions}
+        exerciseInfo={{ name: selectedAction }}
+        onExit={() => { sessionActions.endSession(); setMode("list"); }}
+      />
     );
   }
 
-  // --- Render: Learning mode ---
-  if (mode === 'learning') {
+  if (mode === "result" && result) {
     return (
-      <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
-        {/* Top bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <Space>
-            <Button icon={<ArrowLeftOutlined />} onClick={() => {
-              stopCamera();
-              closeWS();
-              setMode('list');
-            }}>返回</Button>
-            <Title>{selectedAction?.name || ''} — 标准学习</Title>
-            {bestScore > 0 && (
-              <Tag color="gold" icon={<TrophyOutlined />}>最佳 {bestScore} 分</Tag>
+      <TrainingResultPanel
+        result={result}
+        plan={{ id: 0, user_id: 0, plan_name: selectedAction, status: "", generation_method: "", items: [] }}
+        completedCount={1} totalCount={1}
+        onBackToPlan={() => setMode("list")}
+        onNextExercise={() => setMode("list")}
+        onAllPlans={() => setMode("list")}
+      />
+    );
+  }
+
+  // ============================================================
+  return (
+    <div style={{ maxWidth: 1024, margin: "0 auto" }}>
+      <div style={{ marginBottom: 24 }}>
+        <Title level={2} style={{ color: "var(--color-text-primary)", marginBottom: 8 }}>
+          <BookOutlined style={{ marginRight: 10, color: "var(--color-accent)" }} />
+          标准动作学习
+        </Title>
+        <Text type="secondary">
+          全部 {actions.length} 个动作 · {learnable.length} 个支持标准学习模式
+          {" · "}{families.length} 个动作家族
+          {" · "}{learnable.filter(l => l.has_standard_angles).length} 个已配置实时对比
+        </Text>
+      </div>
+
+      {/* Toolbar */}
+      <Card size="small" style={{ marginBottom: 20 }}>
+        <Space wrap>
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="搜索动作名称、描述、家族..."
+            allowClear
+            style={{ width: 240 }}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <Select
+            placeholder="全部分类"
+            allowClear
+            style={{ width: 160 }}
+            value={category}
+            onChange={v => { setCategory(v); setFamily(undefined); }}
+            options={categories.map(c => ({ value: c, label: c }))}
+          />
+          <Select
+            placeholder="全部家族"
+            allowClear
+            style={{ width: 180 }}
+            value={family}
+            onChange={v => { setFamily(v); setCategory(undefined); }}
+            options={families.map(f => {
+              const first = learnable.find(l => l.family === f);
+              return { value: f, label: first?.family_name || f };
+            })}
+          />
+          <Tooltip title="已配置标准角度数据，可进行逐帧实时对比">
+            <Tag color="var(--color-accent)" style={{ marginLeft: 8 }}>
+              <ThunderboltOutlined /> 实时对比就绪
+            </Tag>
+          </Tooltip>
+        </Space>
+      </Card>
+
+      {/* Action card grid */}
+      {loading ? (
+        <div style={{ textAlign: "center", padding: 64 }}><Spin size="large" /></div>
+      ) : filtered.length === 0 ? (
+        <Empty description={search || category || family ? "无匹配动作" : "动作库为空"} />
+      ) : (
+        <List
+          grid={{ gutter: 16, xs: 1, sm: 2, md: 2, lg: 3, xl: 3, xxl: 4 }}
+          dataSource={filtered}
+          renderItem={(item: ActionItem) => {
+            const l = learnableMap.get(item.name);
+            const isLearnable = !!l;
+            const hasAngles = l?.has_standard_angles ?? false;
+            return (
+              <List.Item>
+                <Card
+                  hoverable
+                  size="small"
+                  style={{
+                    borderLeft: hasAngles ? "3px solid var(--color-accent)" : isLearnable ? "3px solid var(--color-muted)" : undefined,
+                    height: "100%",
+                  }}
+                  bodyStyle={{ display: "flex", flexDirection: "column", height: "100%" }}
+                >
+                  {/* Title */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                    <Text strong style={{ fontSize: 14, flex: 1 }}>{item.name}</Text>
+                    {hasAngles && (
+                      <Tag color="var(--color-accent)" style={{ margin: 0, fontSize: 11 }}>
+                        <ThunderboltOutlined /> 实时对比
+                      </Tag>
+                    )}
+                    {isLearnable && !hasAngles && (
+                      <Tag color="var(--color-muted)" style={{ margin: 0, fontSize: 11 }}>
+                        可学习
+                      </Tag>
+                    )}
+                  </div>
+
+                  {/* Tags */}
+                  <Space size={4} wrap style={{ marginBottom: 6 }}>
+                    {l && <Tag color="geekblue">{l.family_name}</Tag>}
+                    <Tag>{item.category}</Tag>
+                    <Tag color={diffColor(item.difficulty)}>{diffLabel(item.difficulty)}</Tag>
+                    {l?.intensity && (
+                      <Tag color={INTENSITY_COLORS[l.intensity] || "default"}>
+                        {INTENSITY_LABELS[l.intensity] || l.intensity}
+                      </Tag>
+                    )}
+                  </Space>
+
+                  {/* Description */}
+                  {item.description && (
+                    <Text type="secondary"
+                      style={{ fontSize: 12, lineHeight: 1.5, flex: 1, marginBottom: 10 }}
+                      ellipsis={{ tooltip: true }}>
+                      {item.description}
+                    </Text>
+                  )}
+
+                  {/* Actions */}
+                  <Space style={{ marginTop: "auto" }}>
+                    {isLearnable && (
+                      <Button
+                        type={hasAngles ? "primary" : "default"}
+                        icon={<PlayCircleOutlined />}
+                        size="small"
+                        onClick={() => enterLearning(item.name)}
+                      >
+                        开始标准学习
+                      </Button>
+                    )}
+                    {isLearnable && (
+                      <Button
+                        icon={<InfoCircleOutlined />}
+                        size="small"
+                        onClick={() => showDetail(item.name)}
+                      >
+                        查看详情
+                      </Button>
+                    )}
+                    {!isLearnable && (
+                      <Button
+                        icon={<InfoCircleOutlined />}
+                        size="small"
+                        onClick={() => showDetail(item.name)}
+                      >
+                        查看详情
+                      </Button>
+                    )}
+                  </Space>
+                </Card>
+              </List.Item>
+            );
+          }}
+        />
+      )}
+
+      {/* Detail Modal */}
+      <Modal
+        title={detailAction ? detailAction.name + " - 动作详情" : "动作详情"}
+        open={detailOpen}
+        onCancel={() => { setDetailOpen(false); setDetailAction(null); }}
+        footer={detailAction ? [
+          <Button key="cancel" onClick={() => { setDetailOpen(false); setDetailAction(null); }}>关闭</Button>,
+          <Button key="start" type="primary" icon={<PlayCircleOutlined />}
+            onClick={() => { setDetailOpen(false); enterLearning(detailAction.name); }}>
+            开始标准学习
+          </Button>,
+        ] : null}
+        width={680}
+      >
+        {detailLoading ? (
+          <div style={{ textAlign: "center", padding: 48 }}><Spin /></div>
+        ) : detailAction ? (
+          <>
+            <Descriptions column={2} size="small" style={{ marginBottom: 16 }}>
+              <Descriptions.Item label="家族">{detailAction.family_name}</Descriptions.Item>
+              <Descriptions.Item label="分类">{detailAction.subcategory || detailAction.category}</Descriptions.Item>
+              <Descriptions.Item label="难度">
+                <Tag color={diffColor(detailAction.difficulty)}>{diffLabel(detailAction.difficulty)}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="强度">
+                <Tag color={INTENSITY_COLORS[detailAction.intensity] || "default"}>
+                  {INTENSITY_LABELS[detailAction.intensity] || detailAction.intensity}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="支持视角">
+                {detailAction.views?.join(" / ") || "正面"}
+              </Descriptions.Item>
+              <Descriptions.Item label="实时对比">
+                {detailAction.has_standard_angles
+                  ? <Tag color="var(--color-accent)"><CheckCircleOutlined /> 标准角度已配置</Tag>
+                  : <Tag color="var(--color-muted)">待配置标准角度</Tag>}
+              </Descriptions.Item>
+              <Descriptions.Item label="描述" span={2}>
+                {detailAction.description || "-"}
+              </Descriptions.Item>
+            </Descriptions>
+
+            {/* Steps */}
+            {detailAction.steps && detailAction.steps.length > 0 && (
+              <Card title="动作步骤" size="small" style={{ marginBottom: 12 }}>
+                {detailAction.steps.map((s: string, i: number) => (
+                  <div key={i} style={{ marginBottom: 4, display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <Tag color="blue" style={{ flexShrink: 0 }}>{i + 1}</Tag>
+                    <Text>{s}</Text>
+                  </div>
+                ))}
+              </Card>
             )}
-          </Space>
-          <Space>
-            <Text type="secondary">视角:</Text>
-            <Segmented
-              value={currentView}
-              onChange={(val) => switchView(val as string)}
-              options={(selectedAction?.views || ['正面']).map(v => ({ label: v, value: v }))}
-            />
-          </Space>
-        </div>
 
-        <Row gutter={16} style={{ flex: 1, overflow: 'hidden' }}>
-          {/* Left: Video + skeleton */}
-          <Col span={16} style={{ height: '100%' }}>
-            <div style={{
-              position: 'relative', background: '#000', borderRadius: 8,
-              width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <video ref={videoRef} autoPlay playsInline muted
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              {/* Hidden canvas for frame capture */}
-              <canvas ref={canvasRef} style={{ display: 'none' }} />
+            {/* Cues */}
+            {detailAction.cues && detailAction.cues.length > 0 && (
+              <Card title="动作要领" size="small" style={{ marginBottom: 12 }}>
+                <Space wrap>
+                  {detailAction.cues.map((cue: string, i: number) => (
+                    <Tag key={i} icon={<AimOutlined />} color="processing">{cue}</Tag>
+                  ))}
+                </Space>
+              </Card>
+            )}
 
-              {/* Status indicator */}
-              {isSessionActive && (
-                <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 8 }}>
-                  <Badge status="processing" text="实时分析中" />
-                  <Tag>{frameCount} 帧</Tag>
-                </div>
-              )}
+            {/* Phases */}
+            {detailAction.phases && detailAction.phases.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  适用训练阶段：{detailAction.phases.map(p => PHASE_LABELS[p] || p).join(" / ")}
+                </Text>
+              </div>
+            )}
 
-              {/* Score overlay */}
-              {overallScore !== null && (
-                <div style={{
-                  position: 'absolute', top: 12, right: 12,
-                  background: 'rgba(0,0,0,0.7)', borderRadius: 12,
-                  padding: '8px 16px', color: '#fff', textAlign: 'center',
-                }}>
-                  <div style={{ fontSize: 28, fontWeight: 'bold', color: overallScore >= 70 ? '#52c41a' : overallScore >= 40 ? '#faad14' : '#f5222d' }}>
-                    {overallScore}
+            {/* Target body parts */}
+            {detailAction.target_body_parts && detailAction.target_body_parts.length > 0 && (
+              <Card title="目标部位" size="small" style={{ marginBottom: 12 }}>
+                <Space wrap>
+                  {detailAction.target_body_parts.map((bp: string, i: number) => (
+                    <Tag key={i} color="purple">{bp}</Tag>
+                  ))}
+                </Space>
+              </Card>
+            )}
+
+            {/* Common errors */}
+            {detailAction.common_errors && detailAction.common_errors.length > 0 && (
+              <Card title="常见错误" size="small" style={{ marginBottom: 12 }}>
+                {detailAction.common_errors.map((err: any, i: number) => (
+                  <div key={i} style={{ marginBottom: 8 }}>
+                    <Text strong style={{ color: "var(--color-error)" }}>{err.name}</Text>
+                    <br />
+                    <Text type="secondary">{err.feedback}</Text>
                   </div>
-                  <div style={{ fontSize: 12 }}>当前得分</div>
-                </div>
-              )}
+                ))}
+              </Card>
+            )}
 
-              {/* Instruction overlay */}
-              {isSessionActive && instruction && (
-                <div style={{
-                  position: 'absolute', bottom: 12, left: 12, right: 12,
-                  background: 'rgba(0,0,0,0.6)', borderRadius: 8,
-                  padding: '8px 16px', color: '#fff', fontSize: 13,
-                }}>
-                  <BulbOutlined style={{ marginRight: 8 }} />{instruction}
-                </div>
-              )}
-            </div>
-          </Col>
-
-          {/* Right: Analysis panel */}
-          <Col span={8} style={{ height: '100%', overflow: 'auto' }}>
-            {/* Action checks */}
-            <Card size="small" title="动作要领检查" style={{ marginBottom: 12 }}>
-              {keyChecks.map((check, i) => (
-                <div key={i} style={{ marginBottom: 8, fontSize: 13 }}>
-                  <EyeOutlined style={{ marginRight: 6, color: '#1890ff' }} />
-                  {check.rule}
-                  <Tag style={{ marginLeft: 8 }}>{check.threshold}{check.unit}</Tag>
-                </div>
-              ))}
-              {keyChecks.length === 0 && <Text type="secondary">等待数据...</Text>}
-            </Card>
-
-            {/* Angle diffs chart */}
-            <Card size="small" title="关节角度差异" style={{ marginBottom: 12 }}>
-              {diffs.length > 0 ? (
-                diffs.map((d: AngleDiff) => (
-                  <div key={d.joint} style={{ marginBottom: 10 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 2 }}>
-                      <Space size={4}>
-                        {STATUS_ICONS[d.status]}
-                        <span>{d.joint}</span>
-                      </Space>
-                      <span>
-                        {d.user !== null ? `${d.user}°` : '—'} /
-                        <Text type="secondary"> 标准 {d.standard_optimal}° ({d.standard_range})</Text>
-                      </span>
-                    </div>
-                    <Progress
-                      percent={d.user !== null ? Math.min(100, (d.user / d.standard_optimal) * 100) : 0}
-                      strokeColor={STATUS_COLORS[d.status] || '#d9d9d9'}
-                      size="small"
-                      format={() => STATUS_LABELS[d.status]}
-                    />
+            {/* Standard keypoints */}
+            {detailAction.standard_keypoints && Object.keys(detailAction.standard_keypoints).length > 0 && (
+              <Card title="标准关键点" size="small">
+                {Object.entries(detailAction.standard_keypoints).map(([view, vdata]: [string, any]) => (
+                  <div key={view} style={{ marginBottom: 12 }}>
+                    <Text strong>{view}</Text>
+                    {vdata.description && <Text type="secondary"> - {vdata.description}</Text>}
+                    {vdata.target_angles && (
+                      <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {Object.entries(vdata.target_angles as Record<string, any>).map(([joint, range]: [string, any]) => (
+                          <Tag key={joint} color="blue" style={{ fontSize: 12 }}>
+                            {joint}: {range.min}&deg;&ndash;{range.max}&deg; (最优 {range.optimal}&deg;)
+                          </Tag>
+                        ))}
+                      </div>
+                    )}
+                    {vdata.key_checks && (
+                      <div style={{ marginTop: 6 }}>
+                        {vdata.key_checks.map((kc: any, ci: number) => (
+                          <Text key={ci} type="secondary" style={{ fontSize: 12, display: "block" }}>
+                            <CheckCircleOutlined style={{ marginRight: 4 }} />
+                            {kc.joint}: {kc.rule} ({kc.direction} {kc.threshold}{kc.unit})
+                          </Text>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                ))
-              ) : (
-                <Empty description="等待动作数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-              )}
-            </Card>
-
-            {/* Real-time feedback */}
-            <Card size="small" title={
-              <Space>
-                <span>实时反馈</span>
-                {feedbacks.length > 0 && <Tag color="error">{feedbacks.length}</Tag>}
-              </Space>
-            }>
-              {feedbacks.length > 0 ? (
-                feedbacks.map((fb: LearningFeedback, i) => (
-                  <div key={i} style={{
-                    padding: '8px 12px', marginBottom: 6, borderRadius: 6,
-                    background: fb.severity === 'bad' ? '#fff2f0' : fb.severity === 'warning' ? '#fff7e6' : '#f6ffed',
-                    border: `1px solid ${fb.severity === 'bad' ? '#ffccc7' : fb.severity === 'warning' ? '#ffd591' : '#b7eb8f'}`,
-                    fontSize: 13,
-                  }}>
-                    <WarningOutlined style={{
-                      color: fb.severity === 'bad' ? '#f5222d' : fb.severity === 'warning' ? '#fa8c16' : '#52c41a',
-                      marginRight: 6,
-                    }} />
-                    {fb.message}
-                  </div>
-                ))
-              ) : (
-                <div style={{ padding: 12, textAlign: 'center', color: '#52c41a' }}>
-                  <CheckCircleOutlined style={{ fontSize: 24, marginBottom: 8 }} />
-                  <div>动作标准，继续保持！</div>
-                </div>
-              )}
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Bottom controls */}
-        <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
-          <Space size="large">
-            <Button type="primary" danger size="large" icon={<StopOutlined />}
-              onClick={endSession} loading={!isSessionActive && mode === 'learning'}>
-              结束学习
-            </Button>
-          </Space>
-        </div>
-      </div>
-    );
-  }
-
-  // --- Render: Result mode ---
-  if (mode === 'result' && result) {
-    return (
-      <div style={{ maxWidth: 700, margin: '0 auto' }}>
-        <Card>
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <TrophyOutlined style={{ fontSize: 48, color: '#faad14' }} />
-            <Title>学习完成！</Title>
-            <div style={{ fontSize: 48, fontWeight: 'bold', color: result.total_score >= 70 ? '#52c41a' : result.total_score >= 40 ? '#faad14' : '#f5222d' }}>
-              {result.total_score} <span style={{ fontSize: 18 }}>分</span>
-            </div>
-            <Text type="secondary">动作标准度评分</Text>
-          </div>
-
-          <Descriptions bordered column={2} size="small" style={{ marginBottom: 16 }}>
-            <Descriptions.Item label="最佳得分">{result.best_score} 分</Descriptions.Item>
-            <Descriptions.Item label="学习时长">{result.duration} 秒</Descriptions.Item>
-            <Descriptions.Item label="分析帧数">{result.frame_count} 帧</Descriptions.Item>
-            <Descriptions.Item label="动作名称">{selectedAction?.name}</Descriptions.Item>
-          </Descriptions>
-
-          <Divider>分析总结</Divider>
-          {result.summary.map((line, i) => (
-            <div key={i} style={{ marginBottom: 8, fontSize: 14, lineHeight: 1.6 }}>
-              <BulbOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-              {line}
-            </div>
-          ))}
-
-          {Object.keys(result.feedback_counts).length > 0 && (
-            <>
-              <Divider>错误统计</Divider>
-              {Object.entries(result.feedback_counts).map(([name, count]) => (
-                <div key={name} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
-                  <span>{name}</span>
-                  <Tag>{count} 次</Tag>
-                </div>
-              ))}
-            </>
-          )}
-
-          <div style={{ textAlign: 'center', marginTop: 24 }}>
-            <Space>
-              <Button type="primary" size="large" onClick={() => {
-                setMode('list');
-                setResult(null);
-              }}>返回动作库</Button>
-              <Button size="large" onClick={() => {
-                if (selectedAction) enterLearning(selectedAction.name);
-              }}>再练一次</Button>
-            </Space>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  // Fallback / loading
-  return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
+                ))}
+              </Card>
+            )}
+          </>
+        ) : (
+          <Text type="secondary">无法加载动作详情</Text>
+        )}
+      </Modal>
+    </div>
+  );
 }

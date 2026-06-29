@@ -47,13 +47,16 @@ export interface TrainingStats {
 export interface ActionItem {
   id: number; name: string; category: string;
   difficulty: number; description?: string;
-  video_url?: string;
+  video_url?: string; target_body_parts?: string; thumbnail_url?: string;
 }
 
 // Standard Learning types
 export interface LearnableAction {
-  name: string; category: string; description: string;
-  video_url: string; views: string[]; common_errors: string[];
+  name: string; action_id: string; family: string; family_name: string;
+  category: string; subcategory: string; difficulty: number;
+  intensity: string; phases: string[]; target_body_parts: string[];
+  description: string; steps: string[]; cues: string[];
+  views: string[]; has_standard_angles: boolean; common_errors: string[];
 }
 
 export interface StandardAngles {
@@ -61,8 +64,11 @@ export interface StandardAngles {
 }
 
 export interface LearnableActionDetail {
-  name: string; category: string; description: string;
-  video_url: string; views: string[];
+  name: string; action_id: string; family: string; family_name: string;
+  category: string; subcategory: string; difficulty: number;
+  intensity: string; phases: string[]; target_body_parts: string[];
+  description: string; steps: string[]; cues: string[];
+  views: string[]; has_standard_angles: boolean;
   common_errors: Array<{
     name: string; feedback: string; joint: string; threshold: number;
   }>;
@@ -76,6 +82,7 @@ export interface LearnableActionDetail {
       }>;
     };
   };
+  contraindications?: Record<string, number>;
 }
 
 export interface AngleDiff {
@@ -108,6 +115,42 @@ export interface LearningComplete {
   summary: string[];
   feedback_counts: { [key: string]: number };
   angle_history: any[];
+}
+
+// ── Prescription V2 ────────────────────────
+export interface PlanItemV2 {
+  id: number; plan_id: number;
+  action_id: string; action_name: string;
+  family_name?: string; category?: string;
+  phase: string; sets: number; reps: number; duration_seconds: number;
+  order_index: number; difficulty: number; intensity: string;
+  notes?: string; is_substitution: boolean;
+  steps?: string[]; cues?: string[]; display_type?: string; display_url?: string;
+}
+export interface PlanV2 {
+  id: number; user_id: number;
+  assessment_record_id?: number; fms_record_id?: number;
+  plan_name: string; overall_strategy?: string;
+  status: string; generation_method: string;
+  template_version?: string; plan_meta?: any;
+  created_at?: string; activated_at?: string; completed_at?: string;
+  items: PlanItemV2[];
+}
+export interface GenerateV2Request {
+  assessment_record_id: number; fms_record_id: number;
+  user_level?: number; force_local?: boolean;
+}
+export interface ActionLibItem {
+  id: string; family: string; family_name: string; name: string;
+  category: string; subcategory: string;
+  difficulty: number; intensity: string;
+  target_body_parts: string[]; phases: string[];
+  default_sets: number; default_reps: number; default_duration_seconds: number;
+  description: string; steps: string[]; cues: string[];
+  display_type: string; display_url: string;
+}
+export interface ActionLibResponse {
+  actions: ActionLibItem[]; total: number; families: Array<{family:string; family_name:string; family_name_en:string; category:string; variant_count:number; difficulty_range:string}>;
 }
 
 export type LearningWSMessage =

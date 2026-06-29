@@ -149,29 +149,6 @@ class PrescriptionResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# Training
-class TrainingStartRequest(BaseModel):
-    prescription_id: Optional[int] = None
-    mode: str = 'basic'
-
-class TrainingRecordResponse(BaseModel):
-    id: int
-    user_id: int
-    prescription_id: Optional[int] = None
-    start_time: datetime
-    end_time: Optional[datetime] = None
-    total_score: Optional[float] = None
-    mode: str
-
-    class Config:
-        from_attributes = True
-
-class TrainingSessionResponse(BaseModel):
-    session_id: int
-    score: Optional[float] = None
-    quality: Optional[str] = None
-    feedback: List[dict] = []
-
 # Learning
 class ActionLibraryResponse(BaseModel):
     id: int

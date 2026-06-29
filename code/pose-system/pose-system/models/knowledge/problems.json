@@ -41,5 +41,12 @@
     "cause": "臀中肌两侧力量不均衡，习惯性单腿承重",
     "tight_muscles": ["腰方肌"],
     "weak_muscles": ["臀中肌"]
+  },
+  "pelvic_posterior_tilt": {
+    "name": "骨盆后倾",
+    "metric": "pelvic_forward_offset_px",
+    "cause": "久坐导致腘绳肌和臀大肌缩短，髋屈肌和竖脊肌激活不足",
+    "tight_muscles": ["腘绳肌", "臀大肌"],
+    "weak_muscles": ["髂腰肌", "股直肌", "竖脊肌"]
   }
 }

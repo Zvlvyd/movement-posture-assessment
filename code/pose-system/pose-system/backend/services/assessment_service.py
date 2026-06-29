@@ -8,6 +8,9 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 from fastapi import WebSocket, HTTPException
 from sqlalchemy.orm import Session
+from backend.logger import get_logger
+
+logger = get_logger(__name__)
 import numpy as np
 
 from backend.database import models
@@ -18,6 +21,7 @@ from models.assessment import (
 from models.assessment.rom_tracker import MovementROMResult
 from models.posture_analyzer import PostureAnalyzer
 from models.angle_calculator import AngleCalculator
+from backend.services.base import BaseWebSocketHandler
 
 
 class AssessmentService:
@@ -244,19 +248,10 @@ class AssessmentService:
         due_for_retest = days_since_last_test >= 14  # Every 2 weeks
         next_phase_available = False
         if active_rx:
-            training_count = self.db.query(models.TrainingRecord).filter(
-                models.TrainingRecord.user_id == user_id,
-                models.TrainingRecord.prescription_id == active_rx.id
-            ).count()
-            avg_score_record = self.db.query(models.TrainingRecord).filter(
-                models.TrainingRecord.user_id == user_id,
-                models.TrainingRecord.prescription_id == active_rx.id,
-                models.TrainingRecord.total_score.isnot(None)
-            ).order_by(models.TrainingRecord.end_time.desc()).first()
-            avg_score = avg_score_record.total_score if avg_score_record else 0
-            next_phase_available = PrescriptionEngine.should_unlock_next(
-                active_rx.phase, training_count, avg_score or 0
-            )
+            # Training module removed — phase unlock now based on time only
+            training_count = 0
+            avg_score = 0
+            next_phase_available = days_since_last_test >= 14  # unlock every 2 weeks
 
         return {
             "due_for_retest": due_for_retest,
@@ -301,7 +296,7 @@ class AssessmentService:
             "new_difficulty": new_difficulty,
         }
 
-class RealtimeAssessmentService:
+class RealtimeAssessmentService(BaseWebSocketHandler):
     """
     实时评估 WebSocket 服务
 
@@ -332,12 +327,10 @@ class RealtimeAssessmentService:
     }
 
     def __init__(self, db: Session):
-        self.db = db
-        self.angle_calc = AngleCalculator()
+        super().__init__(db)
         self.tracker = ROMTracker()
         self.scoring_engine = UnifiedScoringEngine()
         self.posture_analyzer = PostureAnalyzer()
-        self.yolo = None
         self._frames_buffer: List[np.ndarray] = []
         self._best_keypoints: Optional[np.ndarray] = None
         # 三视角捕获状态
@@ -345,13 +338,6 @@ class RealtimeAssessmentService:
         self._capture_idx: int = 0
         self._capture_phase: bool = False
         self._verification_plan = None
-    
-    def _get_yolo(self):
-        if self.yolo is None:
-            from ultralytics import YOLO
-            from config.settings import settings
-            self.yolo = YOLO(settings.MODEL_PATH)
-        return self.yolo
     
     async def handle(self, ws: WebSocket, user_id: int):
         """Handle alias — delegates to handle_session for unified router interface."""
@@ -403,26 +389,14 @@ class RealtimeAssessmentService:
                         continue
 
                     # 解码并提取关键点
-                    import base64 as b64_mod
-                    import cv2
                     kp_array = None
                     if frame_b64:
                         try:
-                            img_data = b64_mod.b64decode(frame_b64.split(",")[-1])
-                            nparr = np.frombuffer(img_data, np.uint8)
-                            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                            if frame is not None:
-                                h, w = frame.shape[:2]
-                                if w > 640:
-                                    frame = cv2.resize(frame, (640, int(h * 640 / w)))
-                                yolo = self._get_yolo()
-                                results = yolo(frame, verbose=False)
-                                if results and results[0].keypoints is not None:
-                                    kps = results[0].keypoints.data.cpu().numpy()
-                                    if kps.shape[0] > 0 and kps.shape[1] >= 17:
-                                        kp_array = kps[0, :, :2].tolist()
+                            kp_xy, _, _ = self.extract_keypoints_from_b64(frame_b64)
+                            if kp_xy is not None:
+                                kp_array = kp_xy.tolist()
                         except Exception as e:
-                            print(f"[Capture] {view} decode error: {e}")
+                            logger.warning("[Capture] %s decode error: %s", view, e)
 
                     if kp_array is None:
                         await ws.send_json({
@@ -484,70 +458,51 @@ class RealtimeAssessmentService:
                     if self._capture_phase:
                         continue
                     # 收到视频帧（base64 编码的图像）
-                    import base64
-                    import cv2
-                    
                     frame_b64 = msg.get("data", "")
                     if not frame_b64:
                         continue
-                    
-                    # 解码图像
-                    img_data = base64.b64decode(frame_b64.split(",")[-1])
-                    nparr = np.frombuffer(img_data, np.uint8)
-                    frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                    
-                    if frame is None:
+
+                    kp_xy, kp_confs, frame = self.extract_keypoints_from_b64(frame_b64)
+                    if kp_xy is None:
                         continue
-                    
-                    # YOLO 姿态检测
-                    h, w = frame.shape[:2]
-                    if w > 640:
-                        frame = cv2.resize(frame, (640, int(h * 640 / w)))
-                    
-                    yolo = self._get_yolo()
-                    results = yolo(frame, verbose=False)
-                    
-                    if results and results[0].keypoints is not None:
-                        kps = results[0].keypoints.data.cpu().numpy()
-                        if kps.shape[0] > 0 and kps.shape[1] >= 17:
-                            kp_array = kps[0, :, :2]
-                            kp_confs = kps[0, :, 2].tolist() if kps.shape[1] >= 3 else [1.0] * 17
-                            self._frames_buffer.append(kp_array)
 
-                            # 保存最佳帧（检测到最多关键点的帧）
-                            if self._best_keypoints is None or kps[0, :, 2].mean() > 0.5:
-                                self._best_keypoints = kp_array.copy()
+                    kp_array = kp_xy
+                    self._frames_buffer.append(kp_array)
 
-                            # ROM 追踪
-                            angles = self.tracker.feed_keypoints(kp_array)
+                    # 保存最佳帧（平均置信度最高的帧）
+                    if self._best_keypoints is None or kp_array[0, :, 2].mean() > 0.5:
+                        self._best_keypoints = kp_array.copy()
 
-                            # 关键点列表（前端骨架绘制需要）
-                            keypoints_list = [{
-                                "keypoints": kp_array.tolist(),
-                                "confidences": kp_confs,
-                                "bbox": None,
-                            }]
+                    # ROM 追踪
+                    angles = self.tracker.feed_keypoints(kp_array)
 
-                            # 获取当前动作的目标角度
-                            movement = get_movement(current_movement_idx)
-                            if movement:
-                                target_keys = [t.angle_key for t in movement.targets]
-                                current_angles = {
-                                    k: round(v, 1) for k, v in angles.items()
-                                    if v is not None and k in target_keys
-                                }
-                                plateau = self.tracker.is_all_plateau(target_keys)
-                            else:
-                                current_angles = {}
-                                plateau = False
+                    # 关键点列表（前端骨架绘制需要）
+                    keypoints_list = [{
+                        "keypoints": kp_array.tolist(),
+                        "confidences": kp_confs,
+                        "bbox": None,
+                    }]
 
-                            await ws.send_json({
-                                "type": "angles_update",
-                                "angles": current_angles,
-                                "keypoints": keypoints_list,
-                                "frame_count": self.tracker._frame_count,
-                                "plateau_detected": plateau,
-                            })
+                    # 获取当前动作的目标角度
+                    movement = get_movement(current_movement_idx)
+                    if movement:
+                        target_keys = [t.angle_key for t in movement.targets]
+                        current_angles = {
+                            k: round(v, 1) for k, v in angles.items()
+                            if v is not None and k in target_keys
+                        }
+                        plateau = self.tracker.is_all_plateau(target_keys)
+                    else:
+                        current_angles = {}
+                        plateau = False
+
+                    await ws.send_json({
+                        "type": "angles_update",
+                        "angles": current_angles,
+                        "keypoints": keypoints_list,
+                        "frame_count": self.tracker._frame_count,
+                        "plateau_detected": plateau,
+                    })
                 
                 elif msg_type == "movement_done":
                     # 当前动作完成
@@ -803,7 +758,7 @@ class RealtimeAssessmentService:
         })
 
 
-class VerificationWebSocketHandler:
+class VerificationWebSocketHandler(BaseWebSocketHandler):
     """
     WebSocket handler for targeted ROM verification based on static findings.
     Replaces the standard 5-movement flow when verification_mode=true.
@@ -822,24 +777,15 @@ class VerificationWebSocketHandler:
     """
 
     def __init__(self, db: Session):
-        self.db = db
-        self.angle_calc = AngleCalculator()
+        super().__init__(db)
         self.tracker = ROMTracker()
         self.velocity_analyzer = None  # Lazy init
-        self.yolo = None
 
     def _get_velocity_analyzer(self):
         if self.velocity_analyzer is None:
             from models.assessment.velocity_analyzer import VelocityAnalyzer
             self.velocity_analyzer = VelocityAnalyzer()
         return self.velocity_analyzer
-
-    def _get_yolo(self):
-        if self.yolo is None:
-            from ultralytics import YOLO
-            from config.settings import settings
-            self.yolo = YOLO(settings.MODEL_PATH)
-        return self.yolo
 
     async def handle(self, ws: WebSocket, user_id: int):
         """
@@ -918,78 +864,60 @@ class VerificationWebSocketHandler:
                         await ws.send_json({"type": "error", "message": "请先 start_movement"})
                         continue
 
-                    import base64 as b64_mod
-                    import cv2
-
                     frame_b64 = msg.get("data", "")
                     keypoints_list = []
 
                     if frame_b64:
-                        img_data = b64_mod.b64decode(frame_b64.split(",")[-1])
-                        nparr = np.frombuffer(img_data, np.uint8)
-                        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                        kp_xy, kp_confs, frame = self.extract_keypoints_from_b64(frame_b64)
+                        if kp_xy is not None:
+                            kp_array = kp_xy
+                            angles = self.tracker.feed_keypoints(kp_array)
 
-                        if frame is not None:
-                            h, w = frame.shape[:2]
-                            if w > 640:
-                                frame = cv2.resize(frame, (640, int(h * 640 / w)))
+                            keypoints_list = [{
+                                "keypoints": kp_array.tolist(),
+                                "confidences": kp_confs,
+                            }]
 
-                            yolo = self._get_yolo()
-                            results = yolo(frame, verbose=False)
+                            # Get current angles for target keys
+                            vm = next(
+                                (v for v in verification_plan if v.movement_def.index == current_movement_idx),
+                                None
+                            ) if verification_plan else None
 
-                            if results and results[0].keypoints is not None:
-                                kps = results[0].keypoints.data.cpu().numpy()
-                                if kps.shape[0] > 0 and kps.shape[1] >= 17:
-                                    kp_array = kps[0, :, :2]
-                                    kp_confs = kps[0, :, 2].tolist() if kps.shape[1] >= 3 else [1.0] * 17
-                                    angles = self.tracker.feed_keypoints(kp_array)
+                            current_angles = {}
+                            velocity_alert = None
 
-                                    keypoints_list = [{
-                                        "keypoints": kp_array.tolist(),
-                                        "confidences": kp_confs,
-                                        "bbox": None,
-                                    }]
+                            if vm and vm.key_rom_track:
+                                current_angles = {
+                                    k: round(v, 1) for k, v in angles.items()
+                                    if v is not None and k in vm.key_rom_track
+                                }
 
-                                    # Get current angles for target keys
-                                    vm = next(
-                                        (v for v in verification_plan if v.movement_def.index == current_movement_idx),
-                                        None
-                                    ) if verification_plan else None
+                                # Real-time velocity check
+                                if vm.velocity_pairs:
+                                    v_analyzer = self._get_velocity_analyzer()
+                                    for left_key, right_key in vm.velocity_pairs:
+                                        left_hist = self.tracker.get_velocity_history(left_key)
+                                        right_hist = self.tracker.get_velocity_history(right_key)
+                                        if left_hist and right_hist:
+                                            alert = v_analyzer.compare_velocity_realtime(
+                                                left_hist, right_hist
+                                            )
+                                            if alert:
+                                                velocity_alert = {
+                                                    "joint": left_key.replace("left_", ""),
+                                                    "severity": alert["severity"],
+                                                    "max_diff_pct": alert["max_diff_pct"],
+                                                    "duration_frames": alert["duration_frames"],
+                                                }
 
-                                    current_angles = {}
-                                    velocity_alert = None
-
-                                    if vm and vm.key_rom_track:
-                                        current_angles = {
-                                            k: round(v, 1) for k, v in angles.items()
-                                            if v is not None and k in vm.key_rom_track
-                                        }
-
-                                        # Real-time velocity check
-                                        if vm.velocity_pairs:
-                                            v_analyzer = self._get_velocity_analyzer()
-                                            for left_key, right_key in vm.velocity_pairs:
-                                                left_hist = self.tracker.get_velocity_history(left_key)
-                                                right_hist = self.tracker.get_velocity_history(right_key)
-                                                if left_hist and right_hist:
-                                                    alert = v_analyzer.compare_velocity_realtime(
-                                                        left_hist, right_hist
-                                                    )
-                                                    if alert:
-                                                        velocity_alert = {
-                                                            "joint": left_key.replace("left_", ""),
-                                                            "severity": alert["severity"],
-                                                            "max_diff_pct": alert["max_diff_pct"],
-                                                            "duration_frames": alert["duration_frames"],
-                                                        }
-
-                                    await ws.send_json({
-                                        "type": "angles_update",
-                                        "angles": current_angles,
-                                        "keypoints": keypoints_list,
-                                        "frame_count": self.tracker._frame_count,
-                                        "velocity_alert": velocity_alert,
-                                    })
+                            await ws.send_json({
+                                "type": "angles_update",
+                                "angles": current_angles,
+                                "keypoints": keypoints_list,
+                                "frame_count": self.tracker._frame_count,
+                                "velocity_alert": velocity_alert,
+                            })
 
                 elif msg_type == "movement_done":
                     vm = next(

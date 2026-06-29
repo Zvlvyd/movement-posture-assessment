@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { TokenResponse, User, FMSRecord, AssessmentRecord, Prescription, TrainingRecord, TrainingStats, ActionItem } from "../types";
+import type { TokenResponse, User, FMSRecord, AssessmentRecord, ActionItem } from "../types";
 
 const api = axios.create({ baseURL: "/api" });
 
@@ -17,6 +17,46 @@ api.interceptors.response.use(r => r, (error) => {
   }
   return Promise.reject(error);
 });
+
+// ── Coach ──────────────────────────────────────────────────
+export const coachApi = {
+  summary: () => api.get("/coach/summary").then(r => r.data),
+  classes: () => api.get("/coach/classes").then(r => r.data),
+  createClass: (name: string, description: string = "") =>
+    api.post("/coach/classes", null, { params: { name, description } }).then(r => r.data),
+  classStats: (id: number) => api.get(`/coach/classes/${id}/stats`).then(r => r.data),
+  classTrend: (id: number, days: number = 14) =>
+    api.get(`/coach/classes/${id}/trend`, { params: { days } }).then(r => r.data),
+  addStudent: (classId: number, studentId: number) =>
+    api.post(`/coach/classes/${classId}/students`, null, { params: { student_id: studentId } }).then(r => r.data),
+  students: (classId?: number) =>
+    api.get("/coach/students", { params: classId ? { class_id: classId } : {} }).then(r => r.data),
+  availableTrainees: (keyword: string) =>
+    api.get("/coach/available-trainees", { params: { keyword } }).then(r => r.data),
+  studentProfile: (id: number) => api.get(`/coach/students/${id}/profile`).then(r => r.data),
+};
+
+// ── Admin ──────────────────────────────────────────────────
+export const adminApi = {
+  users: () => api.get("/admin/users").then(r => r.data),
+  changeRole: (userId: number, role: string) =>
+    api.put(`/admin/users/${userId}/role`, null, { params: { role } }).then(r => r.data),
+  toggleStatus: (userId: number, isActive: boolean) =>
+    api.put(`/admin/users/${userId}/status`, null, { params: { is_active: isActive } }).then(r => r.data),
+  config: () => api.get("/admin/config").then(r => r.data),
+  logs: (limit: number = 50) => api.get("/admin/logs", { params: { limit } }).then(r => r.data),
+};
+
+// ── User (profile, password, cycle config) ─────────────────
+export const userApi = {
+  updateProfile: (data: { username?: string; phone?: string; gender?: string }) =>
+    api.put<User>("/auth/me", data).then(r => r.data),
+  changePassword: (data: { old_password: string; new_password: string }) =>
+    api.put("/auth/change-password", data).then(r => r.data),
+  getCycleConfig: () => api.get("/auth/cycle-config").then(r => r.data),
+  updateCycleConfig: (data: { cycle_length?: number; period_length?: number; last_period_date?: string }) =>
+    api.put("/auth/cycle-config", data).then(r => r.data),
+};
 
 // Auth
 export const authApi = {
@@ -70,26 +110,49 @@ export const assessmentApi = {
     api.post<AssessmentRecord>("/assessment/submit", data).then(r => r.data),
   getRecords: () => api.get<AssessmentRecord[]>("/assessment/records").then(r => r.data),
   getRecord: (id: number) => api.get<AssessmentRecord>("/assessment/records/" + id).then(r => r.data),
+  generateReport: (id: number, regenerate: boolean = false) =>
+    api.post<{ report: string; cached: boolean }>(
+      `/assessment/records/${id}/generate-report`, null, { params: { regenerate } }
+    ).then(r => r.data),
 };
 
-// Prescription
-export const prescriptionApi = {
-  generate: (fmsRecordId: number) => api.post<Prescription>("/prescription/generate/" + fmsRecordId).then(r => r.data),
-  list: () => api.get<Prescription[]>("/prescription").then(r => r.data),
-  get: (id: number) => api.get<Prescription>("/prescription/" + id).then(r => r.data),
+// Prescription V2 (new)
+export const prescriptionV2Api = {
+  generate: (data: import("../types").GenerateV2Request) =>
+    api.post<{success:boolean; plan?:import("../types").PlanV2; generation_method:string; error_message:string; fallback_used:boolean}>(
+      "/prescription-v2/generate", data
+    ).then(r => r.data),
+  list: () =>
+    api.get<{plans:import("../types").PlanV2[]; total:number}>("/prescription-v2/plans").then(r => r.data),
+  get: (id: number) =>
+    api.get<import("../types").PlanV2>("/prescription-v2/plans/" + id).then(r => r.data),
+  delete: (id: number) =>
+    api.delete<{success: boolean; message: string}>("/prescription-v2/plans/" + id).then(r => r.data),
+  activate: (id: number) =>
+    api.post<{success:boolean; message:string; bridge_prescription_id?:number}>(
+      "/prescription-v2/plans/" + id + "/activate"
+    ).then(r => r.data),
+  getActions: () =>
+    api.get<import("../types").ActionLibResponse>("/prescription-v2/actions").then(r => r.data),
+  // Test helpers (mock record creation)
+  mockAssessment: (data: { problems: string[]; severities: Record<string, string> }) =>
+    api.post<{success: boolean; record_id: number; overall_score: number; risk_level: string}>(
+      "/prescription-v2/test/mock-assessment", data
+    ).then(r => r.data),
+  mockFMS: (data: Record<string, number>) =>
+    api.post<{success: boolean; record_id: number; overall_score: number; risk_level: string}>(
+      "/prescription-v2/test/mock-fms", data
+    ).then(r => r.data),
+  mockBoth: (data: { assessment: { problems: string[]; severities: Record<string, string> }; fms: Record<string, number> }) =>
+    api.post<{success: boolean; assessment_record_id: number; fms_record_id: number}>(
+      "/prescription-v2/test/mock-both", data
+    ).then(r => r.data),
 };
 
-// Training
-export const trainingApi = {
-  start: (data: { prescription_id: number; mode: string }) => api.post<TrainingRecord>("/training/start", data).then(r => r.data),
-  end: (id: number, score?: number) => api.post<TrainingRecord>("/training/" + id + "/end", null, { params: { score } }).then(r => r.data),
-  getRecords: () => api.get<TrainingRecord[]>("/training/records").then(r => r.data),
-};
-
-// Records & stats
+// Records & stats (training module removed — stub)
 export const recordsApi = {
-  stats: () => api.get<TrainingStats>("/records/stats").then(r => r.data),
-  history: (days = 30) => api.get<TrainingRecord[]>("/records/history", { params: { days } }).then(r => r.data),
+  stats: async () => ({ total_sessions_7d: 0, total_sessions_30d: 0, average_score: 0, current_streak: 0 }),
+  history: async (_days = 30) => [],
 };
 
 // Check-in

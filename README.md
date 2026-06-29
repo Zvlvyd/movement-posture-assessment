@@ -239,6 +239,28 @@ cd workbench\program3\code\pose-system\pose-system\frontend
 npm run dev
 ```
 
+### 局域网内其他人访问
+
+你的电脑同时运行后端 + 前端后，局域网内其他人可直接通过浏览器访问：
+
+```
+http://<你的局域网IP>:5173
+```
+
+> 启动后端时，控制台会打印你的局域网 IP 和 CORS 白名单，方便确认。
+
+**前提条件：**
+1. 后端 `.env` 中已设置 `CORS_ALLOW_LAN=true`（默认已启用）
+2. 所有电脑在同一个局域网内
+3. 你的防火墙允许 5173 和 8002 端口入站连接
+
+**Windows 防火墙放行：**
+```powershell
+# 以管理员身份运行
+New-NetFirewallRule -DisplayName "Pose System Frontend" -Direction Inbound -Protocol TCP -LocalPort 5173 -Action Allow
+New-NetFirewallRule -DisplayName "Pose System Backend" -Direction Inbound -Protocol TCP -LocalPort 8002 -Action Allow
+```
+
 ---
 
 ## 文档
@@ -247,6 +269,7 @@ npm run dev
 |------|------|
 | API 接口 | [docs/API.md](docs/API.md) |
 | 更新日志 | [docs/CHANGELOG.md](docs/CHANGELOG.md) |
+| 第一次检查技术文档 | [docs/第一次检查-技术文档.md](docs/第一次检查-技术文档.md) |
 | v2 优化详情 | [docs/upgrades/2026-06-26-v2-module-optimization.md](docs/upgrades/2026-06-26-v2-module-optimization.md) |
 | 概要设计 | [doc/概要设计/](doc/概要设计/) |
 | 详细设计 | [doc/详细设计/](doc/详细设计/) |

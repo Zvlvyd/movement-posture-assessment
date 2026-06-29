@@ -8,6 +8,9 @@ from backend.database.connection import get_db
 from backend.schemas.business import FMSSubmitRequest, FMSResultResponse
 from backend.services.fms_service import FMSService, RealtimeFMSService, VideoFMSService
 from backend.services.auth_service import get_current_user
+from backend.logger import get_logger
+
+logger = get_logger(__name__)
 from jose import jwt as jose_jwt
 from config.settings import settings
 from backend.database.models import User, FMSRecord
@@ -46,8 +49,7 @@ async def upload_fms_video(
         result = await svc.process_single_test_video(filepath, test_index, user.id)
         return result
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        logger.exception("视频处理失败")
         raise HTTPException(status_code=500, detail=f"视频处理失败: {str(e)}")
     finally:
         try:

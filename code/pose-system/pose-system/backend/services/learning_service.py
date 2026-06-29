@@ -8,6 +8,9 @@ import math
 import time
 import os
 from pathlib import Path
+from backend.logger import get_logger
+
+logger = get_logger(__name__)
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 from fastapi import WebSocket
@@ -15,16 +18,22 @@ from sqlalchemy.orm import Session
 
 from models.angle_calculator import AngleCalculator
 from backend.database import models
+from backend.services.base import BaseWebSocketHandler
 
 
 KNOWLEDGE_DIR = Path(__file__).parent.parent.parent / "models" / "knowledge"
+PRESCRIPTION_V2_DIR = Path(__file__).parent.parent.parent / "models" / "prescription_v2"
 
 
-class StandardActionLoader:
-    """加载标准动作参考数据"""
+class UnifiedActionLoader:
+    """统一动作加载器 — 合并 action_library.json (58动作) 和 standard_actions.json (含标准角度)"""
 
     _instance = None
-    _data = None
+    _actions_list = None        # list from action_library.json
+    _actions_by_name = None     # dict by name
+    _actions_by_id = None       # dict by action id
+    _standard_data = None       # dict from standard_actions.json
+    _families = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -32,90 +41,144 @@ class StandardActionLoader:
         return cls._instance
 
     def __init__(self):
-        if self._data is not None:
+        if self._actions_list is not None:
             return
-        path = KNOWLEDGE_DIR / "standard_actions.json"
-        with open(path, "r", encoding="utf-8") as f:
+
+        # Load action_library.json (58 actions, 10 families)
+        lib_path = PRESCRIPTION_V2_DIR / "action_library.json"
+        with open(lib_path, "r", encoding="utf-8") as f:
+            lib_data = json.load(f)
+        self._actions_list = lib_data.get("actions", [])
+        self._actions_by_name = {}
+        self._actions_by_id = {}
+        self._families = set()
+        for a in self._actions_list:
+            self._actions_by_name[a["name"]] = a
+            self._actions_by_id[a["id"]] = a
+            self._families.add(a.get("family", ""))
+
+        # Load standard_actions.json (standard angles for some actions)
+        std_path = KNOWLEDGE_DIR / "standard_actions.json"
+        with open(std_path, "r", encoding="utf-8") as f:
             raw = json.load(f)
-        self._data = raw.get("actions", {})
-        self._action_names = list(self._data.keys())
+        self._standard_data = raw.get("actions", {})
+
+    # ---- accessors ----
 
     @property
-    def data(self):
-        return self._data
+    def actions(self) -> List[Dict]:
+        return self._actions_list
 
-    def get_action(self, name: str) -> Optional[Dict]:
-        return self._data.get(name)
+    def get_by_name(self, name: str) -> Optional[Dict]:
+        return self._actions_by_name.get(name)
 
-    def get_action_names(self) -> List[str]:
-        return list(self._data.keys())
+    def get_by_id(self, action_id: str) -> Optional[Dict]:
+        return self._actions_by_id.get(action_id)
 
-    def get_views(self, action_name: str) -> List[str]:
-        action = self.get_action(action_name)
-        if not action:
-            return []
-        return action.get("views", ["正面"])
+    def get_standard_data(self, name: str) -> Optional[Dict]:
+        """获取该动作在 standard_actions.json 中的标准角度数据（如有）"""
+        return self._standard_data.get(name)
+
+    def has_standard_angles(self, name: str) -> bool:
+        """该动作是否有标准角度数据可用"""
+        sd = self._standard_data.get(name)
+        if not sd:
+            return False
+        return bool(sd.get("standard_keypoints"))
+
+    def get_views(self, name: str) -> List[str]:
+        """获取支持视角：优先标准数据，否则默认正面"""
+        sd = self._standard_data.get(name)
+        if sd and sd.get("views"):
+            return sd["views"]
+        return ["正面"]
+
+    def get_families(self) -> List[str]:
+        return sorted(self._families)
+
+    def get_actions_by_family(self, family: str) -> List[Dict]:
+        return [a for a in self._actions_list if a.get("family") == family]
 
 
 class LearningService:
-    """标准学习 REST 服务 — 提供动作数据查询"""
+    """标准学习 REST 服务 — 提供统一动作数据查询"""
 
     def __init__(self):
-        self.loader = StandardActionLoader()
+        self.loader = UnifiedActionLoader()
 
     def list_learnable_actions(self) -> List[Dict]:
-        """列出可学习的动作"""
+        """列出全部可学习的动作（58个）"""
         result = []
-        for name, data in self.loader.data.items():
+        for a in self.loader.actions:
+            name = a["name"]
+            sd = self.loader.get_standard_data(name)
+            has_angles = self.loader.has_standard_angles(name)
             result.append({
                 "name": name,
-                "category": data.get("category", ""),
-                "description": data.get("description", ""),
-                "video_url": data.get("video_url", ""),
-                "views": data.get("views", ["正面"]),
-                "common_errors": [e.get("name") for e in data.get("common_errors", [])],
+                "action_id": a.get("id", ""),
+                "family": a.get("family", ""),
+                "family_name": a.get("family_name", ""),
+                "category": a.get("category", ""),
+                "subcategory": a.get("subcategory", ""),
+                "difficulty": a.get("difficulty", 1),
+                "intensity": a.get("intensity", "MEDIUM"),
+                "phases": a.get("phases", []),
+                "target_body_parts": a.get("target_body_parts", []),
+                "description": a.get("description", ""),
+                "steps": a.get("steps", []),
+                "cues": a.get("cues", []),
+                "views": self.loader.get_views(name),
+                "has_standard_angles": has_angles,
+                "common_errors": (
+                    [e.get("name") for e in sd.get("common_errors", [])]
+                    if sd else []
+                ),
             })
         return result
 
     def get_action_detail(self, name: str) -> Optional[Dict]:
         """获取动作详情（含标准角度、检查项）"""
-        action = self.loader.get_action(name)
+        action = self.loader.get_by_name(name)
         if not action:
             return None
+        sd = self.loader.get_standard_data(name)
+        has_angles = self.loader.has_standard_angles(name)
         return {
             "name": name,
+            "action_id": action.get("id", ""),
+            "family": action.get("family", ""),
+            "family_name": action.get("family_name", ""),
             "category": action.get("category", ""),
+            "subcategory": action.get("subcategory", ""),
+            "difficulty": action.get("difficulty", 1),
+            "intensity": action.get("intensity", "MEDIUM"),
+            "phases": action.get("phases", []),
+            "target_body_parts": action.get("target_body_parts", []),
             "description": action.get("description", ""),
-            "video_url": action.get("video_url", ""),
-            "views": action.get("views", ["正面"]),
-            "standard_keypoints": action.get("standard_keypoints", {}),
-            "common_errors": action.get("common_errors", []),
+            "steps": action.get("steps", []),
+            "cues": action.get("cues", []),
+            "views": self.loader.get_views(name),
+            "has_standard_angles": has_angles,
+            "standard_keypoints": sd.get("standard_keypoints", {}) if sd else {},
+            "common_errors": sd.get("common_errors", []) if sd else [],
+            "contraindications": action.get("contraindications", {}),
         }
 
     def get_standard_angles(self, action_name: str, view: str) -> Dict[str, Any]:
         """获取指定动作在指定视角下的标准角度"""
-        action = self.loader.get_action(action_name)
-        if not action:
+        sd = self.loader.get_standard_data(action_name)
+        if not sd:
             return {}
-        view_data = action.get("standard_keypoints", {}).get(view, {})
+        view_data = sd.get("standard_keypoints", {}).get(view, {})
         return view_data.get("target_angles", {})
 
 
-class RealtimeLearningService:
+class RealtimeLearningService(BaseWebSocketHandler):
     """实时学习 WebSocket 服务 — 处理逐帧对比"""
 
     def __init__(self, db: Session):
-        self.db = db
-        self.angle_calc = AngleCalculator()
-        self.loader = StandardActionLoader()
-        self.yolo = None
-
-    def _get_yolo(self):
-        if self.yolo is None:
-            from ultralytics import YOLO
-            from config.settings import settings
-            self.yolo = YOLO(settings.MODEL_PATH)
-        return self.yolo
+        super().__init__(db)
+        self.loader = UnifiedActionLoader()
 
     async def handle_session(self, ws: WebSocket, user_id: int):
         """
@@ -193,73 +256,8 @@ class RealtimeLearningService:
                         await ws.send_json({"type": "error", "message": "请先发送 start 消息"})
                         continue
 
-                    import base64
-                    import cv2
-
-                    frame_b64 = msg.get("data", "")
-                    if not frame_b64:
-                        continue
-
-                    img_data = base64.b64decode(frame_b64.split(",")[-1])
-                    nparr = np.frombuffer(img_data, np.uint8)
-                    frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-                    if frame is None:
-                        continue
-
-                    h, w = frame.shape[:2]
-                    if w > 640:
-                        frame = cv2.resize(frame, (640, int(h * 640 / w)))
-
-                    yolo = self._get_yolo()
-                    results = yolo(frame, verbose=False)
-
-                    if results and results[0].keypoints is not None:
-                        kps_data = results[0].keypoints.data.cpu().numpy()
-                        if kps_data.shape[0] > 0 and kps_data.shape[1] >= 17:
-                            kp_array = kps_data[0, :, :2]
-                            # Use all keypoints (kp_array is (17, 2))
-                            full_kps = np.zeros((17, 3), dtype=np.float32)
-                            full_kps[:, :2] = kp_array
-                            confs = kps_data[0, :, 2] if kps_data.shape[1] >= 3 else np.ones(17)
-                            full_kps[:, 2] = confs
-
-                            # Compute user angles
-                            user_angles = self.angle_calc.compute_all_angles(full_kps)
-
-                            # Compare with standard
-                            comparison = self._compare_angles(
-                                user_angles, standard_angles, common_errors, current_view
-                            )
-
-                            frame_count += 1
-                            if comparison.get("overall_score") is not None:
-                                total_score_sum += comparison["overall_score"]
-                                if comparison["overall_score"] > best_score:
-                                    best_score = comparison["overall_score"]
-
-                            angle_history.append({
-                                "frame": frame_count,
-                                "angles": {k: round(v, 1) for k, v in user_angles.items() if v is not None},
-                                "score": comparison.get("overall_score"),
-                            })
-
-                            for fb in comparison.get("feedbacks", []):
-                                name = fb.get("name", "")
-                                feedback_counts[name] = feedback_counts.get(name, 0) + 1
-
-                            # Send comparison result
-                            await ws.send_json({
-                                "type": "comparison",
-                                "frame": frame_count,
-                                "user_angles": {k: round(v, 1) for k, v in user_angles.items() if v is not None},
-                                "standard_angles": standard_angles,
-                                "diffs": comparison.get("diffs", []),
-                                "feedbacks": comparison.get("feedbacks", []),
-                                "overall_score": comparison.get("overall_score"),
-                                "best_score": best_score,
-                            })
-                    else:
+                    kp_xy, kp_confs, frame = self.extract_keypoints_from_msg(msg)
+                    if kp_xy is None:
                         await ws.send_json({
                             "type": "comparison",
                             "frame": frame_count,
@@ -269,6 +267,48 @@ class RealtimeLearningService:
                             "feedbacks": [{"name": "未检测到人体", "severity": "error", "message": "请确保全身在摄像头范围内"}],
                             "overall_score": None,
                         })
+                        continue
+
+                    # Build (17, 3) array with x, y, confidence
+                    full_kps = np.zeros((17, 3), dtype=np.float32)
+                    full_kps[:, :2] = kp_xy
+                    full_kps[:, 2] = kp_confs if kp_confs else np.ones(17)
+
+                    # Compute user angles
+                    user_angles = self.compute_angles(full_kps)
+
+                    # Compare with standard
+                    comparison = self._compare_angles(
+                        user_angles, standard_angles, common_errors, current_view
+                    )
+
+                    frame_count += 1
+                    if comparison.get("overall_score") is not None:
+                        total_score_sum += comparison["overall_score"]
+                        if comparison["overall_score"] > best_score:
+                            best_score = comparison["overall_score"]
+
+                    angle_history.append({
+                        "frame": frame_count,
+                        "angles": {k: round(v, 1) for k, v in user_angles.items() if v is not None},
+                        "score": comparison.get("overall_score"),
+                    })
+
+                    for fb in comparison.get("feedbacks", []):
+                        name = fb.get("name", "")
+                        feedback_counts[name] = feedback_counts.get(name, 0) + 1
+
+                    # Send comparison result
+                    await ws.send_json({
+                        "type": "comparison",
+                        "frame": frame_count,
+                        "user_angles": {k: round(v, 1) for k, v in user_angles.items() if v is not None},
+                        "standard_angles": standard_angles,
+                        "diffs": comparison.get("diffs", []),
+                        "feedbacks": comparison.get("feedbacks", []),
+                        "overall_score": comparison.get("overall_score"),
+                        "best_score": best_score,
+                    })
 
                 elif msg_type == "switch_view":
                     new_view = msg.get("view", "正面")
@@ -334,7 +374,7 @@ class RealtimeLearningService:
                         self.db.refresh(record)
                         record_id = record.id
                     except Exception as e:
-                        print(f"[Learning] DB save error: {e}")
+                        logger.warning("[Learning] DB save error: %s", e)
                         try:
                             self.db.rollback()
                         except:
@@ -358,9 +398,7 @@ class RealtimeLearningService:
                     session_start = None
 
         except Exception as e:
-            import traceback
-            print(f"[Learning WS] Error: {e}")
-            traceback.print_exc()
+            logger.exception("[Learning WS] Error: %s", e)
             try:
                 await ws.send_json({"type": "error", "message": f"会话异常: {str(e)}"})
             except:

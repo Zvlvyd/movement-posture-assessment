@@ -1,21 +1,13 @@
 import { useEffect, useState } from "react";
 import {
   Card, Descriptions, Tabs, Table, Tag, Statistic, Row, Col,
-  Button, Form, Input, Select, InputNumber, DatePicker, message, Modal, Spin, Space
+  Button, Form, Input, Select, InputNumber, DatePicker, message, Modal, Space
 } from "antd";
 import { EditOutlined, LockOutlined, SaveOutlined, CloseOutlined } from "@ant-design/icons";
 import { useAuthStore } from "../store/auth";
-import { recordsApi, fmsApi, authApi } from "../services/api";
+import { recordsApi, fmsApi, userApi } from "../services/api";
 import type { TrainingRecord, FMSRecord, TrainingStats } from "../types";
 import dayjs from "dayjs";
-import axios from "axios";
-
-const api = axios.create({ baseURL: "/api" });
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
 
 export default function ProfilePage() {
   const { user, setUser } = useAuthStore();
@@ -40,15 +32,15 @@ export default function ProfilePage() {
         recordsApi.stats(),
         recordsApi.history(90),
         fmsApi.getRecords(),
-        api.get("/auth/cycle-config"),
+        userApi.getCycleConfig(),
       ]);
       setStats(statsRes);
       setRecords(recsRes);
       setFmsRecords(fmsRes);
-      setCycleConfig(cycleRes.data);
+      setCycleConfig(cycleRes);
       cycleForm.setFieldsValue({
-        cycle_length: cycleRes.data.cycle_length,
-        last_period_date: cycleRes.data.last_period_date ? dayjs(cycleRes.data.last_period_date) : null,
+        cycle_length: cycleRes.cycle_length,
+        last_period_date: cycleRes.last_period_date ? dayjs(cycleRes.last_period_date) : null,
       });
     } catch { /* ignore */ }
   };
@@ -57,8 +49,8 @@ export default function ProfilePage() {
   const saveProfile = async () => {
     const vals = profileForm.getFieldsValue();
     try {
-      const res = await api.put("/auth/me", vals);
-      setUser(res.data);
+      const updated = await userApi.updateProfile(vals);
+      setUser(updated);
       message.success("个人信息已更新");
       setEditingProfile(false);
     } catch { message.error("更新失败"); }
@@ -70,7 +62,7 @@ export default function ProfilePage() {
     try {
       const payload: any = { cycle_length: vals.cycle_length || 28 };
       if (vals.last_period_date) payload.last_period_date = vals.last_period_date.format("YYYY-MM-DD");
-      await api.put("/auth/cycle-config", payload);
+      await userApi.updateCycleConfig(payload);
       message.success("月经周期已更新");
     } catch { message.error("更新失败"); }
     finally { setLoading(false); }
@@ -79,7 +71,7 @@ export default function ProfilePage() {
   const changePassword = async () => {
     try {
       const vals = await pwdForm.validateFields();
-      await api.put("/auth/change-password", vals);
+      await userApi.changePassword(vals);
       message.success("密码已修改");
       setPwdModal(false);
       pwdForm.resetFields();

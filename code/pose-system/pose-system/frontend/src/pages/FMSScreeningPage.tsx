@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/auth';
 import MovementDemo from '../components/MovementDemo';
 import { playStartBeep, playEndBeep, playCountdownBeep, playFinalBeep } from '../utils/audio';
 import { fmsApi } from '../services/api';
+import FMSDashboard from "./fms/FMSDashboard";
 
 const FMS_TESTS = [
   { id: 0, name: '闭眼单腿站立', instruction: '闭上双眼，抬起单腿，尽量保持平衡（站立越久分数越高，满分60秒）' },
@@ -34,7 +35,6 @@ export default function FMSScreeningPage() {
   const wsRef = useRef<WebSocket | null>(null);
   const intervalRef = useRef<number>(0);
   const streamRef = useRef<MediaStream | null>(null);
-  const autoAdvanceTimerRef = useRef<number>(0);
   const currentTestRef = useRef<number>(-1);
   const testPhaseRef = useRef<TestPhase>('preparing');
 
@@ -109,7 +109,6 @@ export default function FMSScreeningPage() {
   // ─── 清理 ──────────────────────────────────────────
   const stopCamera = useCallback(() => {
     clearInterval(intervalRef.current);
-    clearTimeout(autoAdvanceTimerRef.current);
     streamRef.current?.getTracks().forEach(t => t.stop());
     wsRef.current?.close();
     setStream(null);
@@ -251,7 +250,10 @@ export default function FMSScreeningPage() {
         playStartBeep();
         setCountdown(0);
         setTestPhase('running');
-        // 帧捕获已在 WS 连接后持续运行，无需重启
+        // 通知后端用户已准备好，开始评估帧
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: 'start_test' }));
+        }
       } else {
         playCountdownBeep();
         setCountdown(tick);
@@ -292,24 +294,14 @@ export default function FMSScreeningPage() {
       setTestScore(null);
       setNoPersonWarning(false);
       setProgress((data.test / 5) * 100);
-      // 第1项：手动准备；后续项：自动倒计时
-      if (data.test === 0) {
-        setTestPhase('preparing');
-      } else {
-        setTestPhase('countdown');
-        setCountdown(2);
-        let tick = 2;
-        const timer = setInterval(() => {
-          tick--;
-          if (tick <= 0) {
-            clearInterval(timer);
-            playStartBeep();
-            setCountdown(0);
-            setTestPhase('running');
-          } else {
-            setCountdown(tick);
-          }
-        }, 1000);
+      // 所有测试统一：用户手动点击"准备好了"才开始
+      setTestPhase('preparing');
+
+    } else if (data.type === 'test_skipped') {
+      // 后端确认跳过，同步本地状态
+      if (testPhaseRef.current !== 'skipped') {
+        setTestPhase('skipped');
+        playEndBeep();
       }
 
     } else if (data.type === 'frame_result') {
@@ -354,14 +346,6 @@ export default function FMSScreeningPage() {
         else if (data.depth_angle) setTestMessage(`深蹲深度: ${data.depth_angle}°, 躯干倾斜: ${data.trunk_tilt}°`);
         else if (data.hand_distance) setTestMessage(`双手距离: ${data.hand_distance}cm`);
         else if (data.score) setTestMessage(`得分: ${data.score}`);
-
-        if (data.wait_advance) {
-          autoAdvanceTimerRef.current = window.setTimeout(() => {
-            if (wsRef.current?.readyState === WebSocket.OPEN) {
-              wsRef.current.send(JSON.stringify({ type: 'next_test' }));
-            }
-          }, 2500);
-        }
       }
 
       // ── step_complete ──
@@ -390,28 +374,18 @@ export default function FMSScreeningPage() {
     setTestPhase('skipped');
     setNoPersonWarning(false);
     message.info('已跳过当前测试');
-
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: 'skip_test' }));
     }
+    // 不再自动推进 — 用户手动点击"进入下一个动作"按钮
+  }, []);
 
-    const nextIdx = currentTestRef.current + 1;
-    if (nextIdx < 5) {
-      const t = FMS_TESTS[nextIdx];
-      setTimeout(() => {
-        setCurrentTest(nextIdx);
-        setTestPhase('preparing');
-        setTestMessage(t.instruction);
-        setGuidance(t.instruction);
-        setTestScore(null);
-        setProgress((nextIdx / 5) * 100);
-      }, 800);
+  // ─── 手动推进到下一个测试 ──────────────────────────
+  const advanceToNextTest = useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'next_test' }));
     } else {
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ type: 'finish' }));
-      } else {
-        message.warning('WebSocket 已断开，请刷新页面重试');
-      }
+      message.warning('WebSocket 已断开，请刷新页面重试');
     }
   }, []);
 
@@ -598,7 +572,6 @@ export default function FMSScreeningPage() {
                   movementName={currentTestData.name}
                   instruction={currentTestData.instruction}
                   countdown={testPhase === 'countdown' ? countdown : 0}
-                  onCountdownEnd={() => {}}
                 />
                 {testPhase === 'preparing' && (
                   <div style={{ textAlign: 'center', marginTop: 4 }}>
@@ -686,8 +659,24 @@ export default function FMSScreeningPage() {
               </Space>
             </Card>
 
-            {/* 查看结果按钮 */}
-            {currentTest === 4 && testPhase === 'completed' && (
+            {/* 完成/跳过后：进入下一个动作 */}
+            {testPhase === 'completed' && currentTest < 4 && (
+              <Button type="primary" block style={{ marginTop: 16 }}
+                icon={<ArrowRightOutlined />}
+                onClick={advanceToNextTest}>
+                完成此动作，进入下一个
+              </Button>
+            )}
+            {testPhase === 'skipped' && currentTest < 4 && (
+              <Button type="primary" block style={{ marginTop: 16 }}
+                icon={<ArrowRightOutlined />}
+                onClick={advanceToNextTest}>
+                进入下一个动作
+              </Button>
+            )}
+
+            {/* 最后一个动作完成/跳过后：查看结果 */}
+            {(testPhase === 'completed' || testPhase === 'skipped') && currentTest === 4 && (
               <Button type="primary" block style={{ marginTop: 16 }} onClick={() => {
                 if (wsRef.current?.readyState === WebSocket.OPEN) {
                   wsRef.current.send(JSON.stringify({ type: 'finish' }));
@@ -704,6 +693,7 @@ export default function FMSScreeningPage() {
           </div>
         )}
       </Card>
+      <FMSDashboard />
     </div>
   );
 }

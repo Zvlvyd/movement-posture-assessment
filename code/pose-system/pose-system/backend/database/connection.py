@@ -26,4 +26,7 @@ def get_db():
         db.close()
 
 def init_db():
+    # 确保所有模型被导入，SQLAlchemy 才能发现并创建表
+    from backend.database import models  # noqa: F401
+    from backend.database import models_v2  # noqa: F401
     Base.metadata.create_all(bind=engine)
