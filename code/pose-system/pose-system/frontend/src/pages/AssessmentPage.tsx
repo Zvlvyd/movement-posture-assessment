@@ -69,6 +69,9 @@ export default function AssessmentPage() {
   const [captureInstruction, setCaptureInstruction] = useState("");
   const [captureError, setCaptureError] = useState("");
   const [capturedPreviews, setCapturedPreviews] = useState<Record<string, string>>({});
+  const [captureSkeletons, setCaptureSkeletons] = useState<Record<string, number[][]>>({});
+  const [previewModalView, setPreviewModalView] = useState<string | null>(null); // 点击查看已处理照片
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const [staticFindings, setStaticFindings] = useState<StaticFinding[]>([]);
   const [staticSummary, setStaticSummary] = useState("");
   const [verificationPlan, setVerificationPlan] = useState<any[]>([]);
@@ -80,6 +83,55 @@ export default function AssessmentPage() {
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { currentStepRef.current = currentStep; }, [currentStep]);
   useEffect(() => { currentIdxRef.current = currentIdx; }, [currentIdx]);
+
+  // ─── 预览弹窗：绘制已处理照片+骨架 ──────────────────────
+  useEffect(() => {
+    if (!previewModalView) return;
+    const photo = capturedPreviews[previewModalView];
+    const skel = captureSkeletons[previewModalView];
+    if (!photo || !skel) return;
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const img = new Image();
+    img.onload = () => {
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      canvas.width = iw;
+      canvas.height = ih;
+      ctx.clearRect(0, 0, iw, ih);
+      ctx.drawImage(img, 0, 0);
+      // YOLO 处理时缩放到宽度640且保持宽高比 → yoloW=640, yoloH=ih*(640/iw)
+      // 关键点坐标在 YOLO 坐标系中，需等比映射到照片坐标系
+      // scale = iw/640 = ih/yoloH（因等比缩放，两轴缩放比相同）
+      const scale = iw > 640 ? iw / 640 : 1;
+      ctx.strokeStyle = "#00ff88"; ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      for (const [i, j] of SKELETON) {
+        if (i < skel.length && j < skel.length) {
+          const [x1, y1] = skel[i]; const [x2, y2] = skel[j];
+          if (x1 > 0 && y1 > 0 && x2 > 0 && y2 > 0) {
+            ctx.beginPath();
+            ctx.moveTo(x1 * scale, y1 * scale);
+            ctx.lineTo(x2 * scale, y2 * scale);
+            ctx.stroke();
+          }
+        }
+      }
+      for (let i = 0; i < skel.length; i++) {
+        const [x, y] = skel[i];
+        if (x > 0 && y > 0) {
+          ctx.fillStyle = "#ff4466";
+          ctx.beginPath(); ctx.arc(x * scale, y * scale, 5, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+      }
+    };
+    img.src = photo;
+  }, [previewModalView, capturedPreviews, captureSkeletons]);
+
+  const isCapturePhase = phase === "capturing" || phase === "analyzing_capture";
 
   // ─── 骨架绘制 ───────────────────────────────────────
   const drawSkeleton = useCallback((keypointsList: any[]) => {
@@ -235,7 +287,7 @@ export default function AssessmentPage() {
     const ok = await startCamera(); if (!ok) { setPhase("idle"); return; }
     if (!token) { setError("请先登录"); setPhase("idle"); return; }
     const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const wsUrl = `${wsProtocol}://${window.location.host}/api/assessment/ws?token=${token}`;
+    const wsUrl = `${wsProtocol}://${window.location.host}/api/assessment/ws?token=${encodeURIComponent(token)}`;
     const ws = new WebSocket(wsUrl); wsRef.current = ws;
 
     ws.onopen = () => { ws.send(JSON.stringify({ type: "start" })); };
@@ -246,20 +298,33 @@ export default function AssessmentPage() {
         // Capture phase
         if (msg.type === "capture_ready") {
           setCaptureViewIdx(msg.view_index || 0); setCaptureView(msg.view); setCaptureInstruction(msg.instruction || ""); setCaptureError(""); setPhase("capturing"); clearInterval(intervalRef.current);
+          // 切到新视角 → 清除旧照片骨架，恢复摄像头画面
+          const ov0 = overlayCanvasRef.current;
+          if (ov0) { const c0 = ov0.getContext("2d"); if (c0) c0.clearRect(0, 0, ov0.width, ov0.height); }
         } else if (msg.type === "capture_ok") {
-          setPhase("capturing"); if (msg.keypoints) drawSkeleton([{ keypoints: msg.keypoints, confidences: Array(17).fill(1) }]);
+          setPhase("capturing");
+          // 保存骨架关键点，用于在叠加层上绘制"照片+骨架"
+          if (msg.keypoints) {
+            setCaptureSkeletons(prev => ({ ...prev, [msg.view]: msg.keypoints }));
+          }
         } else if (msg.type === "capture_error") {
           setCaptureError(msg.message || "检测失败"); setPhase("capturing");
         } else if (msg.type === "static_analysis") {
           setStaticFindings(msg.findings || []); setStaticSummary(msg.summary || "");
         } else if (msg.type === "verification_plan") {
           setVerificationPlan(msg.movements || []); setMovements(msg.movements || []);
+          // 清除拍照阶段残留的骨架，准备进入运动验证
+          const ov = overlayCanvasRef.current;
+          if (ov) { const c = ov.getContext("2d"); if (c) c.clearRect(0, 0, ov.width, ov.height); }
         }
         // Standard + movement
         else if (msg.type === "assessment_started") {
           setMovements(msg.movements || []);
         } else if (msg.type === "movement_ready") {
           setCurrentIdx(msg.index); setCurrentStep(0); setAngles({}); setPlateau(false); setTransitionHint(""); setGuidance(msg.instruction || "");
+          // 清除旧骨架，等待新动作的实时骨架
+          const ov2 = overlayCanvasRef.current;
+          if (ov2) { const c2 = ov2.getContext("2d"); if (c2) c2.clearRect(0, 0, ov2.width, ov2.height); }
           const item = getAssessmentItem(msg.index); setAssessmentItem(item || null); setPhase("preparing");
         } else if (msg.type === "angles_update") {
           if (phaseRef.current !== "running" && phaseRef.current !== "between_steps") return;
@@ -340,9 +405,23 @@ export default function AssessmentPage() {
 
         {/* Video */}
         {showVideo && (
-          <div style={{ position: "relative", width: "100%", background: "#000", borderRadius: 8, overflow: "hidden", isolation: "isolate" }}>
-            <video ref={videoCallbackRef} autoPlay playsInline muted style={{ width: "100%", borderRadius: 8, position: "relative", zIndex: 1 }} />
-            <canvas ref={overlayCanvasRef} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 10 }} />
+          <div style={{ position: "relative", width: "100%", background: "#000", borderRadius: 8, overflow: "hidden", isolation: "isolate", minHeight: isCapturePhase && capturedPreviews[captureView] ? 360 : "auto" }}>
+            {/* 拍照阶段：已拍当前视角 → 隐藏视频，显示提示文字 */}
+            {isCapturePhase && capturedPreviews[captureView] ? (
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                height: 360, color: "#888", fontSize: 14,
+              }}>
+                照片已处理✓<br/>点击上方视角标签查看骨架<br/>或继续拍摄下一张
+              </div>
+            ) : (
+              <video ref={videoCallbackRef} autoPlay playsInline muted style={{ width: "100%", borderRadius: 8, position: "relative", zIndex: 1 }} />
+            )}
+            <canvas ref={overlayCanvasRef} style={{
+              position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+              pointerEvents: "none", zIndex: 10,
+              display: isCapturePhase ? "none" : "block",
+            }} />
             <canvas ref={canvasRef} style={{ display: "none" }} />
           </div>
         )}
@@ -353,7 +432,11 @@ export default function AssessmentPage() {
             <Progress percent={Math.round((CAPTURE_VIEWS.indexOf(captureView as any) + 1) / 3 * 100)} style={{ marginBottom: 8 }} />
             <div style={{ marginBottom: 12, textAlign: "center" }}>
               {CAPTURE_VIEWS.map((v, i) => (
-                <Tag key={v} color={capturedPreviews[v] ? "success" : CAPTURE_VIEWS.indexOf(captureView as any) === i ? "processing" : "default"}>
+                <Tag key={v}
+                  color={capturedPreviews[v] ? "success" : CAPTURE_VIEWS.indexOf(captureView as any) === i ? "processing" : "default"}
+                  style={{ cursor: capturedPreviews[v] ? "pointer" : "default" }}
+                  onClick={() => { if (capturedPreviews[v]) setPreviewModalView(v); }}
+                >
                   {i + 1}. {CAPTURE_LABELS[v]}{capturedPreviews[v] ? " ✓" : ""}
                 </Tag>
               ))}
@@ -365,11 +448,6 @@ export default function AssessmentPage() {
             {captureError && (
               <div style={{ textAlign: "center", marginBottom: 12, padding: 8, background: "#fff2f0", borderRadius: 8 }}>
                 <Typography.Text type="danger">{captureError}</Typography.Text>
-              </div>
-            )}
-            {capturedPreviews[captureView] && (
-              <div style={{ textAlign: "center", marginBottom: 12 }}>
-                <img src={capturedPreviews[captureView]} alt={captureView} style={{ maxHeight: 200, borderRadius: 8, border: "2px solid #4ECDC4" }} />
               </div>
             )}
             <div style={{ textAlign: "center" }}>
@@ -496,6 +574,27 @@ export default function AssessmentPage() {
           extra={<Button onClick={() => { setError(""); setPhase("idle"); cleanup(); }}>重试</Button>} />}
       </Card>
       <AssessmentDashboard />
+
+      {/* ── 照片预览弹窗（点击已完成视角的 Tag 打开） ── */}
+      {previewModalView && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.75)", zIndex: 1000,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }} onClick={() => setPreviewModalView(null)}>
+          <div style={{
+            background: "#fff", borderRadius: 12, padding: 16, maxWidth: "90vw", maxHeight: "90vh",
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <Typography.Title level={5} style={{ margin: 0 }}>
+                {CAPTURE_LABELS[previewModalView]}照 · 骨架分析
+              </Typography.Title>
+              <Button size="small" onClick={() => setPreviewModalView(null)}>关闭</Button>
+            </div>
+            <canvas ref={previewCanvasRef} style={{ display: "block", borderRadius: 8, maxWidth: "80vw", maxHeight: "70vh", width: "auto", height: "auto" }} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

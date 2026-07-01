@@ -9,21 +9,26 @@ class FMSScoreItem(BaseModel):
     score: float
 
 class FMSResultResponse(BaseModel):
+    model_config = {"from_attributes": True, "extra": "allow"}
+
     id: int
     user_id: int
     test_date: datetime
-    balance_score: float
-    flexibility_score: float
-    upper_limb_score: float
-    core_score: float
-    symmetry_score: float
-    overall_score: float
-    risk_level: str
+    balance_score: Optional[float] = None
+    flexibility_score: Optional[float] = None
+    upper_limb_score: Optional[float] = None
+    core_score: Optional[float] = None
+    symmetry_score: Optional[float] = None
+    overall_score: Optional[float] = None
+    risk_level: Optional[str] = None
     radar_data: Optional[dict] = None
     problem_tags: Optional[List[dict]] = None
-
-    class Config:
-        from_attributes = True
+    # 富文本分析字段（由 build_fms_analysis 附加）
+    scores: Optional[List[dict]] = None
+    recommendations: Optional[List[str]] = None
+    posture_problems: Optional[List[dict]] = None
+    completed_count: Optional[int] = None
+    skipped_count: Optional[int] = None
 
 class FMSSubmitRequest(BaseModel):
     balance_duration: Optional[float] = None

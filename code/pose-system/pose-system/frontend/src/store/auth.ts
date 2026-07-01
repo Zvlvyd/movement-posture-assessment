@@ -2,6 +2,17 @@ import { create } from 'zustand';
 import type { User } from '../types';
 import { authApi } from '../services/api';
 
+function safeGetUser(): User | null {
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw || raw === 'null') return null;
+    return JSON.parse(raw);
+  } catch {
+    localStorage.removeItem('user');
+    return null;
+  }
+}
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -14,30 +25,49 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: JSON.parse(localStorage.getItem('user') || 'null'),
+  user: safeGetUser(),
   token: localStorage.getItem('token'),
   loading: false,
   login: async (username, password) => {
-    const res = await authApi.login({ username, password });
-    localStorage.setItem('token', res.access_token);
-    localStorage.setItem('user', JSON.stringify(res.user));
-    set({ user: res.user, token: res.access_token });
+    set({ loading: true });
+    try {
+      const res = await authApi.login({ username, password });
+      localStorage.setItem('token', res.access_token);
+      localStorage.setItem('user', JSON.stringify(res.user));
+      set({ user: res.user, token: res.access_token, loading: false });
+    } catch (e) {
+      set({ loading: false });
+      throw e;
+    }
   },
   register: async (username, password, phone?, gender?) => {
-    await authApi.register({ username, password, phone, gender });
+    set({ loading: true });
+    try {
+      await authApi.register({ username, password, phone, gender });
+      set({ loading: false });
+    } catch (e) {
+      set({ loading: false });
+      throw e;
+    }
   },
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     set({ user: null, token: null });
   },
-  setUser: (user) => { localStorage.setItem('user', JSON.stringify(user)); set({ user }); },
+  setUser: (user) => {
+    localStorage.setItem('user', JSON.stringify(user));
+    set({ user });
+  },
   fetchUser: async () => {
     try {
       const user = await authApi.me();
       set({ user });
-    } catch { set({ user: null, token: null }); }
+    } catch {
+      // Clear stale auth data on failure
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      set({ user: null, token: null });
+    }
   },
 }));
-
-

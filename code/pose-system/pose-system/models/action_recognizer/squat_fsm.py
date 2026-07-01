@@ -18,7 +18,7 @@ def create_squat_fsm() -> StateMachine:
         angle = ctx.get('knee_angle', 180.0)
         return angle > 100.0
     def cond_complete(ctx):
-        angle = ctx.get('knee_angle', 90.0)
+        angle = ctx.get('knee_angle', 180.0)
         return angle > 155.0
 
     fsm.add_transition('standing', 'descending', cond_descending)
@@ -37,9 +37,9 @@ def create_lunge_fsm() -> StateMachine:
     fsm.add_state('recovering')
     fsm.add_state('complete')
     fsm.add_transition('standing', 'lunging', lambda ctx: ctx.get('front_knee_angle', 180.0) < 150.0)
-    fsm.add_transition('lunging', 'bottom', lambda ctx: ctx.get('front_knee_angle', 120.0) < 90.0)
-    fsm.add_transition('bottom', 'recovering', lambda ctx: ctx.get('front_knee_angle', 90.0) > 100.0)
-    fsm.add_transition('recovering', 'complete', lambda ctx: ctx.get('front_knee_angle', 100.0) > 155.0)
+    fsm.add_transition('lunging', 'bottom', lambda ctx: ctx.get('front_knee_angle', 180.0) < 90.0)
+    fsm.add_transition('bottom', 'recovering', lambda ctx: ctx.get('front_knee_angle', 180.0) > 100.0)
+    fsm.add_transition('recovering', 'complete', lambda ctx: ctx.get('front_knee_angle', 180.0) > 155.0)
     fsm.add_transition('complete', 'standing', lambda ctx: ctx.get('front_knee_angle', 180.0) < 140.0)
     return fsm
 
@@ -51,9 +51,9 @@ def create_pushup_fsm() -> StateMachine:
     fsm.add_state('ascending')
     fsm.add_state('complete')
     fsm.add_transition('top', 'descending', lambda ctx: ctx.get('elbow_angle', 180.0) < 150.0)
-    fsm.add_transition('descending', 'bottom', lambda ctx: ctx.get('elbow_angle', 100.0) < 90.0)
-    fsm.add_transition('bottom', 'ascending', lambda ctx: ctx.get('elbow_angle', 80.0) > 100.0)
-    fsm.add_transition('ascending', 'complete', lambda ctx: ctx.get('elbow_angle', 100.0) > 160.0)
+    fsm.add_transition('descending', 'bottom', lambda ctx: ctx.get('elbow_angle', 180.0) < 90.0)
+    fsm.add_transition('bottom', 'ascending', lambda ctx: ctx.get('elbow_angle', 180.0) > 100.0)
+    fsm.add_transition('ascending', 'complete', lambda ctx: ctx.get('elbow_angle', 180.0) > 160.0)
     fsm.add_transition('complete', 'top', lambda ctx: ctx.get('elbow_angle', 180.0) < 140.0)
     return fsm
 
@@ -66,8 +66,9 @@ def create_plank_fsm() -> StateMachine:
     fsm.add_state('complete')
     fsm.add_transition('ready', 'holding', lambda ctx: 160.0 <= (ctx.get('hip_angle', 180.0)) <= 185.0)
     fsm.add_transition('holding', 'drooping', lambda ctx: ctx.get('hip_angle', 180.0) < 160.0)
-    fsm.add_transition('drooping', 'recovering', lambda ctx: ctx.get('hip_angle', 0.0) >= 160.0)
-    fsm.add_transition('recovering', 'complete', lambda ctx: True)
+    fsm.add_transition('drooping', 'recovering', lambda ctx: ctx.get('hip_angle', 180.0) >= 160.0)
+    # 需要髋角恢复到正常范围才计为完成一次（防止边界抖动误触发）
+    fsm.add_transition('recovering', 'complete', lambda ctx: 170.0 <= ctx.get('hip_angle', 180.0) <= 185.0)
     fsm.add_transition('complete', 'ready', lambda ctx: ctx.get('hip_angle', 180.0) < 150.0)
     return fsm
 
@@ -79,9 +80,9 @@ def create_shoulder_press_fsm() -> StateMachine:
     fsm.add_state('lowering')
     fsm.add_state('complete')
     fsm.add_transition('rest', 'pressing', lambda ctx: ctx.get('elbow_angle', 180.0) < 160.0)
-    fsm.add_transition('pressing', 'top', lambda ctx: ctx.get('elbow_angle', 90.0) > 160.0)
-    fsm.add_transition('top', 'lowering', lambda ctx: ctx.get('elbow_angle', 170.0) < 150.0)
-    fsm.add_transition('lowering', 'complete', lambda ctx: ctx.get('elbow_angle', 0.0) < 100.0)
+    fsm.add_transition('pressing', 'top', lambda ctx: ctx.get('elbow_angle', 180.0) > 160.0)
+    fsm.add_transition('top', 'lowering', lambda ctx: ctx.get('elbow_angle', 180.0) < 150.0)
+    fsm.add_transition('lowering', 'complete', lambda ctx: ctx.get('elbow_angle', 180.0) < 100.0)
     fsm.add_transition('complete', 'rest', lambda ctx: ctx.get('elbow_angle', 180.0) < 130.0)
     return fsm
 
@@ -93,9 +94,9 @@ def create_jumping_jack_fsm() -> StateMachine:
     fsm.add_state('closing')
     fsm.add_state('complete')
     fsm.add_transition('standing', 'jumping_up', lambda ctx: ctx.get('hip_angle', 180.0) < 170.0)
-    fsm.add_transition('jumping_up', 'open', lambda ctx: ctx.get('hip_angle', 150.0) < 150.0)
-    fsm.add_transition('open', 'closing', lambda ctx: ctx.get('hip_angle', 130.0) > 150.0)
-    fsm.add_transition('closing', 'complete', lambda ctx: ctx.get('hip_angle', 160.0) > 170.0)
+    fsm.add_transition('jumping_up', 'open', lambda ctx: ctx.get('hip_angle', 180.0) < 150.0)
+    fsm.add_transition('open', 'closing', lambda ctx: ctx.get('hip_angle', 180.0) > 150.0)
+    fsm.add_transition('closing', 'complete', lambda ctx: ctx.get('hip_angle', 180.0) > 170.0)
     fsm.add_transition('complete', 'standing', lambda ctx: ctx.get('hip_angle', 180.0) < 165.0)
     return fsm
 
@@ -108,9 +109,9 @@ def create_deadlift_fsm() -> StateMachine:
     fsm.add_state('lifting')
     fsm.add_state('complete')
     fsm.add_transition('standing', 'lowering', lambda ctx: ctx.get('hip_angle', 180.0) < 160.0)
-    fsm.add_transition('lowering', 'bottom', lambda ctx: ctx.get('hip_angle', 100.0) < 100.0)
-    fsm.add_transition('bottom', 'lifting', lambda ctx: ctx.get('hip_angle', 50.0) > 100.0)
-    fsm.add_transition('lifting', 'complete', lambda ctx: ctx.get('hip_angle', 120.0) > 160.0)
+    fsm.add_transition('lowering', 'bottom', lambda ctx: ctx.get('hip_angle', 180.0) < 100.0)
+    fsm.add_transition('bottom', 'lifting', lambda ctx: ctx.get('hip_angle', 180.0) > 100.0)
+    fsm.add_transition('lifting', 'complete', lambda ctx: ctx.get('hip_angle', 180.0) > 160.0)
     fsm.add_transition('complete', 'standing', lambda ctx: ctx.get('hip_angle', 180.0) < 150.0)
     return fsm
 
@@ -132,23 +133,23 @@ def get_fsm_context(action_name: str, angles: dict) -> dict:
     ctx = {}
     name = action_name.lower()
     if name == 'squat':
-        ctx['knee_angle'] = angles.get('left_knee') or angles.get('right_knee') or 180.0
+        ctx['knee_angle'] = angles.get('left_knee') if angles.get('left_knee') is not None else (angles.get('right_knee') if angles.get('right_knee') is not None else 180.0)
     elif name == 'lunge':
-        ctx['front_knee_angle'] = angles.get('left_knee') or angles.get('right_knee') or 180.0
+        ctx['front_knee_angle'] = angles.get('left_knee') if angles.get('left_knee') is not None else (angles.get('right_knee') if angles.get('right_knee') is not None else 180.0)
         ctx['knee_angle'] = ctx['front_knee_angle']
     elif name == 'pushup':
-        ctx['elbow_angle'] = angles.get('left_elbow') or angles.get('right_elbow') or 180.0
+        ctx['elbow_angle'] = angles.get('left_elbow') if angles.get('left_elbow') is not None else (angles.get('right_elbow') if angles.get('right_elbow') is not None else 180.0)
     elif name == 'plank':
-        ctx['hip_angle'] = angles.get('left_hip') or angles.get('right_hip') or 180.0
+        ctx['hip_angle'] = angles.get('left_hip') if angles.get('left_hip') is not None else (angles.get('right_hip') if angles.get('right_hip') is not None else 180.0)
     elif name == 'shoulder_press':
-        ctx['elbow_angle'] = angles.get('left_elbow') or angles.get('right_elbow') or 180.0
+        ctx['elbow_angle'] = angles.get('left_elbow') if angles.get('left_elbow') is not None else (angles.get('right_elbow') if angles.get('right_elbow') is not None else 180.0)
     elif name == 'jumping_jack':
-        ctx['hip_angle'] = angles.get('left_hip') or angles.get('right_hip') or 180.0
+        ctx['hip_angle'] = angles.get('left_hip') if angles.get('left_hip') is not None else (angles.get('right_hip') if angles.get('right_hip') is not None else 180.0)
     elif name == 'deadlift':
-        ctx['hip_angle'] = angles.get('left_hip') or angles.get('right_hip') or 180.0
-        ctx['knee_angle'] = angles.get('left_knee') or angles.get('right_knee') or 180.0
+        ctx['hip_angle'] = angles.get('left_hip') if angles.get('left_hip') is not None else (angles.get('right_hip') if angles.get('right_hip') is not None else 180.0)
+        ctx['knee_angle'] = angles.get('left_knee') if angles.get('left_knee') is not None else (angles.get('right_knee') if angles.get('right_knee') is not None else 180.0)
     else:
-        ctx['knee_angle'] = angles.get('left_knee') or angles.get('right_knee') or 180.0
+        ctx['knee_angle'] = angles.get('left_knee') if angles.get('left_knee') is not None else (angles.get('right_knee') if angles.get('right_knee') is not None else 180.0)
     return ctx
 
 def get_fsm_for_action(action_name: str) -> StateMachine:

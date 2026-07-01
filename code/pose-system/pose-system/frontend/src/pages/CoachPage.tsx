@@ -3,13 +3,16 @@ import { useNavigate } from "react-router-dom";
 import {
   Card, Table, Button, Modal, Input, Tag, Space, message,
   Statistic, Row, Col, Descriptions, Empty, Spin,
-  Form, Select
+  Form, Select, Popconfirm
 } from "antd";
 import {
   PlusOutlined, TeamOutlined, BarChartOutlined,
-  UserOutlined, TrophyOutlined, ArrowUpOutlined, ArrowDownOutlined
+  UserOutlined, TrophyOutlined, ArrowUpOutlined, ArrowDownOutlined,
+  DeleteOutlined, EditOutlined, SettingOutlined
 } from "@ant-design/icons";
 import { coachApi } from "../services/api";
+import ScoreBar from "../components/ScoreBar";
+import { riskColor } from "../utils/riskColor";
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface ClassInfo {
@@ -38,22 +41,6 @@ interface CoachSummary {
   class_count: number; total_students: number;
   sessions_7d: number; sessions_30d: number;
 }
-
-// ── Risk color helper ────────────────────────────────────────────────────
-const riskColor: Record<string, string> = {
-  low: "green", medium: "orange", high: "red",
-};
-
-// ── Score radar mini bar ────────────────────────────────────────────────
-const ScoreBar: React.FC<{ label: string; value: number }> = ({ label, value }) => (
-  <div style={{ marginBottom: 2, fontSize: 12 }}>
-    <span style={{ display: "inline-block", width: 60, color: "#888" }}>{label}</span>
-    <div style={{ display: "inline-block", width: 80, height: 10, background: "#f0f0f0", borderRadius: 5, verticalAlign: "middle", marginRight: 4 }}>
-      <div style={{ width: `${Math.min(value, 100)}%`, height: "100%", background: value >= 60 ? "#52c41a" : value >= 40 ? "#faad14" : "#f5222d", borderRadius: 5 }} />
-    </div>
-    <span style={{ fontWeight: 600 }}>{value}</span>
-  </div>
-);
 
 // ── Trend mini chart ────────────────────────────────────────────────────
 const MiniTrend: React.FC<{ data: TrendPoint[] }> = ({ data }) => {
@@ -105,6 +92,53 @@ export default function CoachPage() {
       setTraineeOptions(data.map((t: any) => ({ value: t.id, label: `${t.username} (ID:${t.id})` })));
     } catch { setTraineeOptions([]); }
     finally { setTraineeSearching(false); }
+  };
+
+  // Remove student from class
+  const handleRemoveStudent = async (studentId: number) => {
+    if (!selectedClassId) return;
+    try {
+      await coachApi.removeStudent(selectedClassId, studentId);
+      message.success('学员已移除');
+      loadClassDetail(selectedClassId);
+    } catch { message.error('移除失败'); }
+  };
+
+  // Delete class
+  const handleDeleteClass = async (classId: number) => {
+    try {
+      await coachApi.deleteClass(classId);
+      message.success('班级已删除');
+      setSelectedClassId(null);
+      setClassStats(null);
+      // Refresh class list
+      coachApi.classes().then(setClasses);
+      coachApi.summary().then(setSummary);
+    } catch (e: any) { message.error(e?.response?.data?.detail || '删除失败'); }
+  };
+
+  // Edit class
+  const [editClassModal, setEditClassModal] = useState(false);
+  const [editClassName, setEditClassName] = useState('');
+  const [editClassDesc, setEditClassDesc] = useState('');
+  const [editClassId, setEditClassId] = useState<number | null>(null);
+
+  const handleEditClass = (c: ClassInfo) => {
+    setEditClassId(c.id);
+    setEditClassName(c.name);
+    setEditClassDesc(c.description || '');
+    setEditClassModal(true);
+  };
+
+  const handleSaveClass = async () => {
+    if (!editClassId) return;
+    try {
+      await coachApi.updateClass(editClassId, { name: editClassName, description: editClassDesc });
+      message.success('班级已更新');
+      setEditClassModal(false);
+      coachApi.classes().then(setClasses);
+      if (selectedClassId === editClassId) loadClassDetail(editClassId);
+    } catch { message.error('更新失败'); }
   };
 
   // Load initial data
@@ -169,8 +203,22 @@ export default function CoachPage() {
           const s = classStats.summary;
           return (
             <div>
-              <Button type="link" onClick={() => { setSelectedClassId(null); setClassStats(null); }}
-                      style={{ marginBottom: 12, padding: 0 }}>← 返回班级列表</Button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <Button type="link" onClick={() => { setSelectedClassId(null); setClassStats(null); }}
+                        style={{ padding: 0 }}>← 返回班级列表</Button>
+                <Space>
+                  <Button icon={<EditOutlined />} size="small" onClick={() => {
+                    const c = classes.find(cl => cl.id === selectedClassId);
+                    if (c) handleEditClass(c);
+                  }}>编辑班级</Button>
+                  <Popconfirm
+                    title="确认删除此班级？班级中如有学员需先移除"
+                    onConfirm={() => selectedClassId && handleDeleteClass(selectedClassId)}
+                  >
+                    <Button icon={<DeleteOutlined />} danger size="small">删除班级</Button>
+                  </Popconfirm>
+                </Space>
+              </div>
 
               <Row gutter={16} style={{ marginBottom: 16 }}>
                 <Col span={6}><Card><Statistic title="班级" value={classStats.class_name} prefix={<TeamOutlined />} /></Card></Col>
@@ -244,6 +292,16 @@ export default function CoachPage() {
                     },
                     { title: "打卡天数", dataIndex: "streak_days", width: 80,
                       render: (v: number) => <span>{v > 0 ? `🔥 ${v}天` : "-"}</span>
+                    },
+                    { title: "操作", key: "actions", width: 70,
+                      render: (_: any, r: StudentProgress) => (
+                        <Popconfirm
+                          title="确认从班级移除此学员？"
+                          onConfirm={() => handleRemoveStudent(r.id)}
+                        >
+                          <Button type="link" danger size="small" icon={<DeleteOutlined />}>移除</Button>
+                        </Popconfirm>
+                      ),
                     },
                   ]}
                 />
@@ -325,6 +383,27 @@ export default function CoachPage() {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title="编辑班级"
+        open={editClassModal}
+        onOk={handleSaveClass}
+        onCancel={() => setEditClassModal(false)}
+      >
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Input
+            placeholder="班级名称"
+            value={editClassName}
+            onChange={e => setEditClassName(e.target.value)}
+          />
+          <Input.TextArea
+            placeholder="班级描述（可选）"
+            value={editClassDesc}
+            onChange={e => setEditClassDesc(e.target.value)}
+            rows={3}
+          />
+        </Space>
       </Modal>
     </div>
   );

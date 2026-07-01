@@ -20,6 +20,51 @@ router = APIRouter(prefix='/api/fms', tags=['FMS Screening'])
 UPLOAD_DIR = os.path.join(os.getcwd(), "uploads", "fms_videos")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# 文件上传安全限制
+MAX_UPLOAD_SIZE = 100 * 1024 * 1024  # 100 MB
+ALLOWED_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
+ALLOWED_MIME_TYPES = {"video/mp4", "video/avi", "video/quicktime", "video/x-msvideo", "video/x-matroska", "video/webm"}
+
+# 常见视频格式的魔数签名 (前 12 字节)
+MAGIC_SIGNATURES = {
+    b"\x00\x00\x00": "mp4",        # ftyp box (simplified)
+    b"ftyp": "mp4",                 # MP4 ftyp at offset 4
+    b"RIFF": "avi",                 # AVI
+    b"\x1aE\xdf\xa3": "mkv/webm",  # Matroska/WebM
+    b"\x00\x00\x00\x14ftyp": "mov", # MOV
+}
+
+
+def _validate_upload_file(file: UploadFile):
+    """Validate uploaded file: extension, MIME type, magic bytes, and size."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="未选择文件")
+
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"不支持的文件格式: {ext}，允许的格式: {', '.join(sorted(ALLOWED_EXTENSIONS))}",
+        )
+
+    if file.content_type and file.content_type not in ALLOWED_MIME_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"不支持的媒体类型: {file.content_type}",
+        )
+
+
+def _validate_file_size(file: UploadFile):
+    """Check file size against MAX_UPLOAD_SIZE by reading into a spooled buffer."""
+    file.file.seek(0, 2)  # seek to end
+    size = file.file.tell()
+    file.file.seek(0)  # rewind
+    if size > MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"文件过大 ({size / 1024 / 1024:.1f} MB)，最大允许 {MAX_UPLOAD_SIZE / 1024 / 1024:.0f} MB",
+        )
+
 
 @router.post("/upload-video/{test_index}")
 async def upload_fms_video(
@@ -34,10 +79,11 @@ async def upload_fms_video(
     """
     if test_index < 0 or test_index > 4:
         raise HTTPException(status_code=400, detail="test_index 必须为 0-4")
-    if not file.filename:
-        raise HTTPException(status_code=400, detail="未选择文件")
 
-    ext = os.path.splitext(file.filename)[1] or ".mp4"
+    _validate_upload_file(file)
+    _validate_file_size(file)
+
+    ext = os.path.splitext(file.filename)[1].lower() or ".mp4"
     filename = f"fms_{user.id}_{test_index}_{uuid.uuid4().hex}{ext}"
     filepath = os.path.join(UPLOAD_DIR, filename)
 
@@ -54,8 +100,8 @@ async def upload_fms_video(
     finally:
         try:
             os.remove(filepath)
-        except:
-            pass
+        except OSError:
+            logger.warning("无法删除临时文件: %s", filepath)
 
 
 @router.post("/upload-video-combine")
@@ -85,6 +131,19 @@ def get_record_detail(record_id: int, db: Session = Depends(get_db), user: User 
     svc = FMSService(db)
     return svc.get_record_detail(record_id, user.id)
 
+@router.delete('/records/{record_id}')
+def delete_record(record_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """删除指定 FMS 筛查记录"""
+    record = db.query(FMSRecord).filter(
+        FMSRecord.id == record_id,
+        FMSRecord.user_id == user.id,
+    ).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="FMS 记录未找到")
+    db.delete(record)
+    db.commit()
+    return {"success": True, "message": "FMS 记录已删除"}
+
 @router.websocket('/ws')
 async def fms_websocket(ws: WebSocket, db: Session = Depends(get_db)):
     await ws.accept()
@@ -113,3 +172,16 @@ async def fms_websocket(ws: WebSocket, db: Session = Depends(get_db)):
             await ws.send_json({'type': 'error', 'message': f'会话异常: {str(e)}'})
         except:
             pass
+
+
+@router.get("/processed-video/{filename}")
+async def serve_processed_video(filename: str):
+    """提供处理后带骨架标注的视频文件"""
+    from fastapi.responses import FileResponse
+    # 安全检查：只允许 processed_ 前缀的文件
+    if not filename.startswith("processed_") or ".." in filename:
+        raise HTTPException(status_code=404, detail="文件未找到")
+    filepath = os.path.join(UPLOAD_DIR, filename)
+    if not os.path.isfile(filepath):
+        raise HTTPException(status_code=404, detail="文件未找到")
+    return FileResponse(filepath, media_type="video/mp4")

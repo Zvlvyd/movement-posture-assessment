@@ -134,6 +134,12 @@ from datetime import datetime
 import json
 
 
+def _require_test_endpoints():
+    """If test endpoints are disabled, return 404 (hide their existence)."""
+    if not settings.ENABLE_TEST_ENDPOINTS:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+
 class MockAssessmentRequest(BaseModel):
     problems: list[str] = []          # 检测到的问题 flag 列表
     severities: dict[str, str] = {}   # {flag: "mild"|"moderate"|"severe"}
@@ -157,6 +163,7 @@ def create_mock_assessment(
     req: MockAssessmentRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    _enabled=Depends(_require_test_endpoints),
 ):
     """创建模拟体态评估记录，返回记录 ID。"""
     # 构造 severity weights
@@ -238,6 +245,7 @@ def create_mock_fms(
     req: MockFMSRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    _enabled=Depends(_require_test_endpoints),
 ):
     """创建模拟 FMS 筛查记录，返回记录 ID。"""
     scores = [
@@ -269,6 +277,7 @@ def create_mock_both(
     req: MockBothRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    _enabled=Depends(_require_test_endpoints),
 ):
     """同时创建模拟体态评估和 FMS 记录，返回两个 ID。"""
     ar = create_mock_assessment(req.assessment, current_user, db)

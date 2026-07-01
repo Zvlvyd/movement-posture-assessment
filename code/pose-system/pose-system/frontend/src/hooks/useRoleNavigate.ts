@@ -26,8 +26,8 @@ const ROLE_HOME: Record<Role, string> = {
 
 /** 角色可访问的路由白名单 */
 const ROLE_ACCESS: Record<Role, string[]> = {
-  admin: ['/admin', '/coach', '/home'],
-  coach: ['/coach', '/home'],
+  admin: ['/admin', '/coach', '/coach/actions', '/home'],
+  coach: ['/coach', '/coach/actions', '/home'],
   trainee: ['/home'],
 };
 

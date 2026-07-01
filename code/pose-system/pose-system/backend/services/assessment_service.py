@@ -176,6 +176,22 @@ class AssessmentService:
         if not record:
             raise HTTPException(status_code=404, detail="评估记录未找到")
         return record
+
+    def delete_record(self, record_id: int, user_id: int) -> bool:
+        """删除指定评估记录，返回是否成功"""
+        record = (
+            self.db.query(models.AssessmentRecord)
+            .filter(
+                models.AssessmentRecord.id == record_id,
+                models.AssessmentRecord.user_id == user_id,
+            )
+            .first()
+        )
+        if not record:
+            raise HTTPException(status_code=404, detail="评估记录未找到")
+        self.db.delete(record)
+        self.db.commit()
+        return True
     
     def build_detail_response(self, record: models.AssessmentRecord) -> Dict:
         """构建包含展开数据的详细响应"""
@@ -327,7 +343,8 @@ class RealtimeAssessmentService(BaseWebSocketHandler):
     }
 
     def __init__(self, db: Session):
-        super().__init__(db)
+        from backend.services.base import _get_nano_model_manager
+        super().__init__(db, model_manager=_get_nano_model_manager())
         self.tracker = ROMTracker()
         self.scoring_engine = UnifiedScoringEngine()
         self.posture_analyzer = PostureAnalyzer()
@@ -364,6 +381,9 @@ class RealtimeAssessmentService(BaseWebSocketHandler):
                     self._capture_keypoints = {}
                     self._capture_idx = 0
                     self._capture_phase = True
+                    # 提前加载 YOLO 模型
+                    from models.engine import model_manager
+                    model_manager.preload()
 
                     # 发送第一个视角的捕获指令
                     first_view = self.CAPTURE_ORDER[0]
@@ -470,7 +490,7 @@ class RealtimeAssessmentService(BaseWebSocketHandler):
                     self._frames_buffer.append(kp_array)
 
                     # 保存最佳帧（平均置信度最高的帧）
-                    if self._best_keypoints is None or kp_array[0, :, 2].mean() > 0.5:
+                    if self._best_keypoints is None or np.mean(kp_confs) > 0.5:
                         self._best_keypoints = kp_array.copy()
 
                     # ROM 追踪
@@ -777,7 +797,8 @@ class VerificationWebSocketHandler(BaseWebSocketHandler):
     """
 
     def __init__(self, db: Session):
-        super().__init__(db)
+        from backend.services.base import _get_nano_model_manager
+        super().__init__(db, model_manager=_get_nano_model_manager())
         self.tracker = ROMTracker()
         self.velocity_analyzer = None  # Lazy init
 
@@ -818,6 +839,8 @@ class VerificationWebSocketHandler(BaseWebSocketHandler):
                         continue
 
                     verification_plan = session.verification_plan
+                    from models.engine import model_manager
+                    model_manager.preload()
                     self.tracker.reset()
                     all_velocity_findings = []
                     all_rom_ratios = {}

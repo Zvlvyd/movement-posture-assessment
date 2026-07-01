@@ -28,6 +28,18 @@ export interface TrainingSessionState {
   overallScore: number | null;
   bestScore: number;
   frameCount: number;
+  /** 自动完成触发标志（用于显示庆祝模态框） */
+  autoCompleted: boolean;
+  /** 用户关键点坐标 [[x,y], ...] 用于骨架叠加 */
+  userKeypoints: number[][] | null;
+  /** 各关键点置信度 [conf, ...] 用于骨架过滤 */
+  userConfidences: number[] | null;
+  /** YOLO 推理时帧的实际宽度 */
+  frameWidth: number;
+  /** YOLO 推理时帧的实际高度 */
+  frameHeight: number;
+  /** 当前会话阶段: waiting_for_body | body_confirmed | learning */
+  sessionPhase: string;
 }
 
 export interface TrainingSessionActions {
@@ -36,6 +48,8 @@ export interface TrainingSessionActions {
   startSession: () => Promise<boolean>;
   endSession: () => void;
   switchView: (view: string) => void;
+  /** 关闭自动完成模态框，触发 onComplete 回调 */
+  confirmAutoComplete: () => void;
 }
 
 // ---------- Hook ----------
@@ -51,6 +65,8 @@ export function useTrainingSession(
   const wsRef = useRef<WebSocket | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<number | null>(null);
+  // 存储自动完成结果，在用户关闭模态框后才触发 onComplete
+  const resultRef = useRef<LearningComplete | null>(null);
 
   // State
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -63,6 +79,12 @@ export function useTrainingSession(
   const [overallScore, setOverallScore] = useState<number | null>(null);
   const [bestScore, setBestScore] = useState(0);
   const [frameCount, setFrameCount] = useState(0);
+  const [autoCompleted, setAutoCompleted] = useState(false);
+  const [userKeypoints, setUserKeypoints] = useState<number[][] | null>(null);
+  const [userConfidences, setUserConfidences] = useState<number[] | null>(null);
+  const [frameWidth, setFrameWidth] = useState(640);
+  const [frameHeight, setFrameHeight] = useState(480);
+  const [sessionPhase, setSessionPhase] = useState("waiting_for_body");
 
   // --- Camera ---
   const startCamera = useCallback(async (): Promise<boolean> => {
@@ -119,7 +141,7 @@ export function useTrainingSession(
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     try {
-      socket.send(JSON.stringify({ type: "frame", data: canvas.toDataURL("image/jpeg", 0.7) }));
+      socket.send(JSON.stringify({ type: "frame", data: canvas.toDataURL("image/jpeg", 0.6) }));
       setFrameCount(prev => prev + 1);
     } catch { /* ignore */ }
   }, []);
@@ -158,30 +180,56 @@ export function useTrainingSession(
             setKeyChecks(data.key_checks || []);
             setInstruction(data.instruction || "");
             setBestScore(0);
+            setSessionPhase("waiting_for_body");
+            setUserKeypoints(null);
+            setUserConfidences(null);
             // Start frame capture now that session is ready
             if (intervalRef.current) clearInterval(intervalRef.current);
             intervalRef.current = window.setInterval(() => {
               captureAndSend();
-            }, 150);
+            }, 200);  // 200ms = 5fps，与 FMS 对齐
             break;
           case "comparison":
             setDiffs(data.diffs || []);
             setFeedbacks(data.feedbacks || []);
             setOverallScore(data.overall_score);
             setBestScore(data.best_score || 0);
+            if (data.user_keypoints !== undefined) setUserKeypoints(data.user_keypoints);
+            if (data.user_confidences !== undefined) setUserConfidences(data.user_confidences);
+            if (data.frame_width) setFrameWidth(data.frame_width);
+            if (data.frame_height) setFrameHeight(data.frame_height);
+            if (data.session_phase) setSessionPhase(data.session_phase);
+            break;
+          case "body_confirmed":
+            setSessionPhase(data.session_phase || "body_confirmed");
+            setInstruction(data.message || "已确认人体，请开始动作");
             break;
           case "view_switched":
             setCurrentView(data.view);
             setStandardAngles(data.standard_angles || {});
             setKeyChecks(data.key_checks || []);
+            setSessionPhase("waiting_for_body");
+            setUserKeypoints(null);
+            setUserConfidences(null);
             break;
           case "learning_complete":
             stopCamera();
             closeWS();
             setIsSessionActive(false);
-            onComplete?.(data as LearningComplete);
+            if (data.auto_triggered) {
+              // 自动完成：先展示庆祝模态框，用户点击后再回调
+              setAutoCompleted(true);
+              resultRef.current = data as LearningComplete;
+            } else {
+              // 手动完成：直接回调
+              onComplete?.(data as LearningComplete);
+            }
             break;
           case "error":
+            // 错误时清理资源
+            stopCamera();
+            closeWS();
+            setIsSessionActive(false);
             onError?.(data.message);
             break;
         }
@@ -213,6 +261,15 @@ export function useTrainingSession(
     }
   }, []);
 
+  // --- Confirm Auto Complete ---
+  const confirmAutoComplete = useCallback(() => {
+    setAutoCompleted(false);
+    if (resultRef.current) {
+      onComplete?.(resultRef.current);
+      resultRef.current = null;
+    }
+  }, [onComplete]);
+
   // --- Cleanup ---
   useEffect(() => {
     return () => {
@@ -224,11 +281,13 @@ export function useTrainingSession(
   const state: TrainingSessionState = {
     isSessionActive, currentView, standardAngles, keyChecks,
     instruction, diffs, feedbacks, overallScore, bestScore, frameCount,
+    autoCompleted, userKeypoints, userConfidences, frameWidth, frameHeight, sessionPhase,
   };
 
   const actions: TrainingSessionActions = {
     videoRef, canvasRef,
     startSession, endSession, switchView,
+    confirmAutoComplete,
   };
 
   return [state, actions];

@@ -83,6 +83,36 @@ def search_available_trainees(
     return coach_service.search_available_trainees(db, keyword)
 
 
+@router.delete('/classes/{class_id}/students/{student_id}')
+def remove_student(
+    class_id: int,
+    student_id: int,
+    db: Session = Depends(get_db),
+    coach: User = Depends(require_role(*COACH_OR_ADMIN)),
+):
+    return coach_service.remove_student_from_class(db, coach, class_id, student_id)
+
+
+@router.put('/classes/{class_id}')
+def update_class(
+    class_id: int,
+    name: str = None,
+    description: str = None,
+    db: Session = Depends(get_db),
+    coach: User = Depends(require_role(*COACH_OR_ADMIN)),
+):
+    return coach_service.update_class(db, coach, class_id, name, description)
+
+
+@router.delete('/classes/{class_id}')
+def delete_class(
+    class_id: int,
+    db: Session = Depends(get_db),
+    coach: User = Depends(require_role(*COACH_OR_ADMIN)),
+):
+    return coach_service.delete_class(db, coach, class_id)
+
+
 @router.get('/students/{student_id}/profile')
 def get_student_profile(
     student_id: int,
@@ -90,3 +120,32 @@ def get_student_profile(
     coach: User = Depends(require_role(*COACH_OR_ADMIN)),
 ):
     return coach_service.get_student_profile(db, student_id, coach)
+
+
+@router.get('/students/{student_id}/plans')
+def list_student_plans(
+    student_id: int,
+    db: Session = Depends(get_db),
+    coach: User = Depends(require_role(*COACH_OR_ADMIN)),
+):
+    return coach_service.get_student_prescription_plans(db, student_id, coach)
+
+
+@router.get('/students/{student_id}/plans/{plan_id}')
+def get_student_plan_detail(
+    student_id: int,
+    plan_id: int,
+    db: Session = Depends(get_db),
+    coach: User = Depends(require_role(*COACH_OR_ADMIN)),
+):
+    return coach_service.get_student_plan_detail(db, student_id, plan_id, coach)
+
+
+@router.delete('/students/{student_id}/plans/{plan_id}')
+def delete_student_plan(
+    student_id: int,
+    plan_id: int,
+    db: Session = Depends(get_db),
+    coach: User = Depends(require_role(*COACH_OR_ADMIN)),
+):
+    return coach_service.delete_student_prescription_plan(db, student_id, plan_id, coach)

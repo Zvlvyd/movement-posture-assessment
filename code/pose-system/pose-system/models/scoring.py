@@ -40,6 +40,17 @@ class DualModeScorer:
             penalty = min(20.0, diff * 0.5)
             total_points -= penalty
             penalties.append({'joint': right_key, 'deviation': diff, 'penalty': penalty, 'message': 'right ROM insufficient'})
+        # Check max_angle for hyperextension
+        if left_angle is not None and left_angle > action_def.max_angle:
+            diff = left_angle - action_def.max_angle
+            penalty = min(20.0, diff * 0.5)
+            total_points -= penalty
+            penalties.append({'joint': left_key, 'deviation': diff, 'penalty': penalty, 'message': 'left hyperextension'})
+        if right_angle is not None and right_angle > action_def.max_angle:
+            diff = right_angle - action_def.max_angle
+            penalty = min(20.0, diff * 0.5)
+            total_points -= penalty
+            penalties.append({'joint': right_key, 'deviation': diff, 'penalty': penalty, 'message': 'right hyperextension'})
         if left_angle is not None and right_angle is not None:
             sym_diff = abs(left_angle - right_angle)
             sym_threshold = action_def.advanced_thresholds.get('depth_symmetry', 10.0)

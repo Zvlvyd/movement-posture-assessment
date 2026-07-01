@@ -112,7 +112,164 @@ def add_student_to_class(db: Session, coach: User, class_id: int, student_id: in
     return {'message': 'student added'}
 
 
-# ── Class statistics ───────────────────────────────────────────────────
+def remove_student_from_class(db: Session, coach: User, class_id: int, student_id: int) -> dict:
+    """Remove a trainee from a class group."""
+    group = db.query(ClassGroup).filter(
+        ClassGroup.id == class_id,
+        ClassGroup.coach_id == coach.id,
+    ).first()
+    if not group:
+        raise HTTPException(status_code=404, detail='Class not found')
+
+    student = db.query(User).filter(User.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail='Student not found')
+
+    if student in group.students:
+        group.students.remove(student)
+        db.commit()
+    return {'message': 'student removed'}
+
+
+def update_class(db: Session, coach: User, class_id: int, name: str = None, description: str = None) -> dict:
+    """Update a class group's name and/or description."""
+    group = db.query(ClassGroup).filter(
+        ClassGroup.id == class_id,
+        ClassGroup.coach_id == coach.id,
+    ).first()
+    if not group:
+        raise HTTPException(status_code=404, detail='Class not found')
+
+    if name is not None:
+        group.name = name
+    if description is not None:
+        group.description = description
+    db.commit()
+    return {'id': group.id, 'name': group.name, 'description': group.description}
+
+
+def delete_class(db: Session, coach: User, class_id: int) -> dict:
+    """Delete a class group (cascade removes student associations)."""
+    group = db.query(ClassGroup).filter(
+        ClassGroup.id == class_id,
+        ClassGroup.coach_id == coach.id,
+    ).first()
+    if not group:
+        raise HTTPException(status_code=404, detail='Class not found')
+
+    db.delete(group)
+    db.commit()
+    return {'message': f'Class "{group.name}" deleted'}
+
+
+# ── Student Prescription Management ──────────────────────────────────────
+
+def get_student_prescription_plans(db: Session, student_id: int, coach: User) -> List[dict]:
+    """Get all v2 prescription plans for a student (coach must have access)."""
+    student = _verify_coach_access(db, student_id, coach)
+
+    from backend.database.models_v2 import PrescriptionPlan
+    plans = db.query(PrescriptionPlan).filter(
+        PrescriptionPlan.user_id == student_id,
+    ).order_by(PrescriptionPlan.created_at.desc()).all()
+
+    return [
+        {
+            'id': p.id,
+            'plan_name': p.plan_name,
+            'status': p.status,
+            'generation_method': p.generation_method,
+            'overall_strategy': p.overall_strategy,
+            'created_at': str(p.created_at),
+            'item_count': len(p.items) if p.items else 0,
+        }
+        for p in plans
+    ]
+
+
+def get_student_plan_detail(db: Session, student_id: int, plan_id: int, coach: User) -> dict:
+    """Get full detail of a v2 prescription plan."""
+    _verify_coach_access(db, student_id, coach)
+
+    from backend.database.models_v2 import PrescriptionPlan
+    plan = db.query(PrescriptionPlan).filter(
+        PrescriptionPlan.id == plan_id,
+        PrescriptionPlan.user_id == student_id,
+    ).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail='Plan not found')
+
+    return {
+        'id': plan.id,
+        'user_id': plan.user_id,
+        'plan_name': plan.plan_name,
+        'overall_strategy': plan.overall_strategy,
+        'status': plan.status,
+        'generation_method': plan.generation_method,
+        'template_version': plan.template_version,
+        'plan_meta': plan.plan_meta,
+        'created_at': str(plan.created_at),
+        'items': [
+            {
+                'id': item.id,
+                'action_id': item.action_id,
+                'action_name': item.action_name,
+                'family_name': item.family_name,
+                'category': item.category,
+                'phase': item.phase,
+                'sets': item.sets,
+                'reps': item.reps,
+                'duration_seconds': item.duration_seconds,
+                'order_index': item.order_index,
+                'difficulty': item.difficulty,
+                'intensity': item.intensity,
+                'notes': item.notes,
+                'is_substitution': item.is_substitution,
+            }
+            for item in (plan.items or [])
+        ],
+    }
+
+
+def delete_student_prescription_plan(db: Session, student_id: int, plan_id: int, coach: User) -> dict:
+    """Delete a v2 prescription plan (cascade deletes items)."""
+    _verify_coach_access(db, student_id, coach)
+
+    from backend.database.models_v2 import PrescriptionPlan
+    plan = db.query(PrescriptionPlan).filter(
+        PrescriptionPlan.id == plan_id,
+        PrescriptionPlan.user_id == student_id,
+    ).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail='Plan not found')
+
+    plan_name = plan.plan_name
+    db.delete(plan)
+    db.commit()
+    return {'message': f'Plan "{plan_name}" deleted'}
+
+
+def _verify_coach_access(db: Session, student_id: int, coach: User) -> User:
+    """Verify coach has access to a student. Returns the student."""
+    student = db.query(User).filter(
+        User.id == student_id,
+        User.role == UserRole.TRAINEE,
+        User.is_active == True,
+    ).first()
+    if not student:
+        raise HTTPException(status_code=404, detail='学员未找到')
+
+    if coach.role != UserRole.ADMIN:
+        membership = db.query(class_group_student).join(
+            ClassGroup, class_group_student.c.class_group_id == ClassGroup.id,
+        ).filter(
+            class_group_student.c.user_id == student_id,
+            ClassGroup.coach_id == coach.id,
+        ).first()
+        if not membership:
+            raise HTTPException(status_code=403, detail='无权操作该学员')
+
+    return student
 
 def get_class_stats(db: Session, coach: User, class_id: int) -> dict:
     """Detailed statistics for a single class."""
@@ -396,3 +553,5 @@ def _serialize_prescription(rx) -> dict:
         'created_at': str(rx.created_at),
         'items': items,
     }
+
+

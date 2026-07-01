@@ -165,11 +165,13 @@ class VolumeCalculator:
         duration = max(LIMITS["duration_seconds"][0],
                        min(LIMITS["duration_seconds"][1], round(raw_dur)))
 
-        # 6. 如果是拉伸/计时类动作，reps 可能为 0
+        # 6. 类型微调：保证前端展示合理，不归零
         if action.default_reps == 0 and action.default_duration_seconds > 0:
-            reps = 0
+            # 纯计时类动作（如拉伸）：reps 无计数意义，设为 1 表示"每组保持"
+            reps = 1
         elif action.default_duration_seconds == 0 and action.default_reps > 0:
-            duration = 0
+            # 计数类动作：duration 为估算参考值，不强制归零
+            duration = max(duration, int(reps * 2))  # 约每个动作2秒
 
         # 7. 生成说明
         notes_parts = []

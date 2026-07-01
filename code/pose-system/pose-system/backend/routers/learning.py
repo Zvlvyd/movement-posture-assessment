@@ -55,16 +55,21 @@ def get_action(
 # ==============================
 
 @router.get('/learnable')
-def list_learnable_actions():
-    """列出所有支持标准学习模式的动作"""
-    svc = LearningService()
+def list_learnable_actions(
+    db: Session = Depends(get_db),
+):
+    """列出所有支持标准学习模式的动作（含 DB 中教练编辑的媒体和描述）"""
+    svc = LearningService(db)
     return svc.list_learnable_actions()
 
 
 @router.get('/learnable/{name}')
-def get_learnable_action(name: str):
-    """获取指定动作的标准学习数据（含标准角度、常见错误等）"""
-    svc = LearningService()
+def get_learnable_action(
+    name: str,
+    db: Session = Depends(get_db),
+):
+    """获取指定动作的标准学习数据（含标准角度、常见错误、DB 中的媒体和描述）"""
+    svc = LearningService(db)
     detail = svc.get_action_detail(name)
     if not detail:
         raise HTTPException(status_code=404, detail=f'未找到可学习的动作: {name}')
@@ -75,7 +80,7 @@ def get_learnable_action(name: str):
 def get_action_views(name: str):
     """获取动作支持的观察视角列表"""
     loader = UnifiedActionLoader()
-    action = loader.get_action(name)
+    action = loader.get_by_name(name)
     if not action:
         raise HTTPException(status_code=404, detail=f'未找到动作: {name}')
     return {

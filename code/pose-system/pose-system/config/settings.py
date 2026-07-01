@@ -58,7 +58,7 @@ class Settings:
     DB_HOST: str = os.getenv("DB_HOST", "localhost")
     DB_PORT: int = int(os.getenv("DB_PORT", "3306"))
     DB_USER: str = os.getenv("DB_USER", "root")
-    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "Zly20050708")
+    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
     DB_NAME: str = os.getenv("DB_NAME", "pose_correction")
 
     @property
@@ -71,15 +71,15 @@ class Settings:
         )
 
     # ── Auth ──────────────────────────────────────────────
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "pose-correction-secret-key-2026")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
 
     # ── Seed Users (created on first startup if not exist) ──
     DEFAULT_ADMIN_USERNAME: str = os.getenv("DEFAULT_ADMIN_USERNAME", "admin")
-    DEFAULT_ADMIN_PASSWORD: str = os.getenv("DEFAULT_ADMIN_PASSWORD", "admin123")
+    DEFAULT_ADMIN_PASSWORD: str = os.getenv("DEFAULT_ADMIN_PASSWORD", "")
     DEFAULT_COACH_USERNAME: str = os.getenv("DEFAULT_COACH_USERNAME", "coach")
-    DEFAULT_COACH_PASSWORD: str = os.getenv("DEFAULT_COACH_PASSWORD", "coach123")
+    DEFAULT_COACH_PASSWORD: str = os.getenv("DEFAULT_COACH_PASSWORD", "")
 
     # ── Model ─────────────────────────────────────────────
     MODEL_PATH: str = os.getenv("MODEL_PATH", "yolov8s-pose.pt")
@@ -100,6 +100,19 @@ class Settings:
     CORS_ALLOW_LAN: bool = os.getenv("CORS_ALLOW_LAN", "false").lower() in ("1", "true", "yes")
     # CORS_EXTRA_ORIGINS 手动追加额外来源，逗号分隔
     CORS_EXTRA_ORIGINS: str = os.getenv("CORS_EXTRA_ORIGINS", "")
+
+    # ── Feature Flags ─────────────────────────────────────
+    ENABLE_TEST_ENDPOINTS: bool = os.getenv("ENABLE_TEST_ENDPOINTS", "false").lower() in ("1", "true", "yes")
+
+    def validate(self):
+        """启动时校验必需配置项，缺失则抛出 ValueError 并给出明确提示。"""
+        errors = []
+        if not self.SECRET_KEY:
+            errors.append("SECRET_KEY 未设置 — 请在 .env 文件或环境变量中设置 (建议: openssl rand -hex 32)")
+        if self.DB_TYPE == "mysql" and not self.DB_PASSWORD:
+            errors.append("DB_PASSWORD 未设置 — 请在 .env 文件或环境变量中设置数据库密码")
+        if errors:
+            raise ValueError("配置校验失败:\n  " + "\n  ".join(errors))
 
     @property
     def CORS_ORIGINS(self) -> list:

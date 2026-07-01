@@ -31,7 +31,9 @@ class AngleCalculator:
         if idx >= len(keypoints):
             return None
         # keypoints may be (17,2) [x,y] or (17,3) [x,y,conf]
-        if keypoints.shape[1] >= 3 and keypoints[idx][2] < 0.3:
+        # 阈值 0.15：与 learning_service MIN_KEYPOINTS_FOR_BODY 对齐，
+        # 避免身体检测通过但角度计算失败的不一致
+        if keypoints.shape[1] >= 3 and keypoints[idx][2] < 0.15:
             return None
         return keypoints[idx][:2]
     

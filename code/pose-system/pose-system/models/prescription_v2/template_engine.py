@@ -91,8 +91,15 @@ class TemplateEngine:
         """
         return self.render("prescription_plan.txt", context)
 
-    def get_system_prompt(self) -> str:
-        """获取系统提示词。"""
+    def get_system_prompt(self, context: Dict[str, Any] = None) -> str:
+        """获取系统提示词。
+
+        Args:
+            context: 可选变量字典，如 {'user_level': 3}。
+                     提供后会对模板中的 {{ placeholder }} 进行替换。
+        """
+        if context:
+            return self.render("system.txt", context)
         return self.load("system.txt")
 
     def clear_cache(self):

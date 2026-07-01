@@ -1,12 +1,12 @@
 /**
- * AI 处方生成
+ * AI 训练计划
  *
- * 基于体态评估与FMS筛查结果，智能生成个性化训练处方
+ * 基于体态评估与FMS筛查结果，智能生成个性化训练计划
  */
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Card, Tabs, Table, Tag, Button, Select, InputNumber,
-  Switch, Space, Spin, Empty, message, Modal,
+  Space, Spin, Empty, message, Modal,
   Descriptions, Steps, Typography, Divider,
 } from "antd";
 import {
@@ -50,7 +50,6 @@ const PrescriptionPage: React.FC = () => {
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<number | null>(null);
   const [selectedFMSId, setSelectedFMSId] = useState<number | null>(null);
   const [userLevel, setUserLevel] = useState(1);
-  const [forceLocal, setForceLocal] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [plan, setPlan] = useState<PlanV2 | null>(null);
   const [genMethod, setGenMethod] = useState("");
@@ -100,11 +99,10 @@ const PrescriptionPage: React.FC = () => {
         assessment_record_id: selectedAssessmentId || 0,
         fms_record_id: selectedFMSId || 0,
         user_level: userLevel,
-        force_local: forceLocal,
       });
       setPlan(r.plan || null);
       setGenMethod(r.generation_method || "");
-      message.success("处方生成成功");
+      message.success("训练计划生成成功");
       loadPlans();
     } catch (e: any) {
       message.error(e?.response?.data?.detail || "生成失败");
@@ -237,12 +235,8 @@ const PrescriptionPage: React.FC = () => {
               ]}
             />
           </Space>
-          <Space>
-            <Text>强制本地引擎：</Text>
-            <Switch checked={forceLocal} onChange={setForceLocal} />
-          </Space>
           <Button type="primary" icon={<ThunderboltOutlined />} loading={generating} onClick={handleGenerate} size="large">
-            生成 AI 训练处方
+            生成 AI 训练计划
           </Button>
         </Space>
       </Card>
@@ -325,17 +319,17 @@ const PrescriptionPage: React.FC = () => {
       <div style={{ marginBottom: 16 }}>
         <Space>
           <ThunderboltOutlined style={{ fontSize: 24, color: "var(--color-primary)" }} />
-          <Title level={3} style={{ margin: 0, color: "var(--color-text-primary)" }}>AI 处方生成</Title>
+          <Title level={3} style={{ margin: 0, color: "var(--color-text-primary)" }}>AI 训练计划生成</Title>
         </Space>
         <Paragraph type="secondary" style={{ marginTop: 4 }}>
-          基于体态评估与FMS筛查结果，智能生成个性化训练处方
+          基于体态评估与FMS筛查结果，智能生成个性化训练计划
         </Paragraph>
       </div>
 
       <Tabs activeKey={activeTab} onChange={setActiveTab} size="large" items={[
         {
           key: "prescription",
-          label: <span><ThunderboltOutlined /> 处方生成</span>,
+          label: <span><ThunderboltOutlined /> 训练计划生成</span>,
           children: renderPrescriptionTab(),
         },
         {

@@ -12,9 +12,18 @@ const FMS_TESTS = [
   { id: 0, name: '闭眼单腿站立', instruction: '闭上双眼，抬起单腿，尽量保持平衡（站立越久分数越高，满分60秒）' },
   { id: 1, name: '徒手过头深蹲', instruction: '双手举过头顶，做深蹲至最低点保持（膝盖弯曲角度越小分数越高）' },
   { id: 2, name: '肩关节活动度', instruction: '一手从肩上、一手从腰后向背后靠拢（双手距离越近分数越高）' },
-  { id: 3, name: '平板支撑', instruction: '保持平板支撑姿势，尽量坚持（坚持越久分数越高，满分120秒）' },
+  { id: 3, name: '平板支撑', instruction: '保持平板支撑姿势，尽量坚持（坚持越久分数越高，满分90秒）' },
   { id: 4, name: '弓步蹲对称', instruction: '先做左侧弓步蹲，再做右侧弓步蹲（左右角度越对称分数越高）' },
 ];
+
+// 标准动作示范素材映射
+const FMS_MEDIA: Record<number, { image: string; video: string }> = {
+  0: { image: '/media/fms/images/balance.jpg', video: '/media/fms/videos/balance.mp4' },
+  1: { image: '/media/fms/images/squat.jpg',   video: '/media/fms/videos/squat.mp4' },
+  2: { image: '/media/fms/images/shoulder.jpg', video: '/media/fms/videos/shoulder.mp4' },
+  3: { image: '/media/fms/images/plank.jpg',   video: '/media/fms/videos/plank.mp4' },
+  4: { image: '/media/fms/images/lunge.jpg',   video: '/media/fms/videos/lunge.mp4' },
+};
 
 // COCO pose skeleton connections (0-indexed)
 const SKELETON: [number, number][] = [
@@ -129,12 +138,12 @@ export default function FMSScreeningPage() {
   const drawSkeleton = useCallback((keypointsList: any[]) => {
     const canvas = overlayCanvasRef.current;
     const video = videoRef.current;
-    if (!canvas || !video) { console.log('[drawSkeleton] no canvas or video'); return; }
+    if (!canvas || !video) { return; }
 
     const rect = canvas.getBoundingClientRect();
     const displayW = rect.width || video.videoWidth || 640;
     const displayH = rect.height || video.videoHeight || 480;
-    if (displayW === 0 || displayH === 0) { console.log('[drawSkeleton] zero size', {rectW: rect.width, rectH: rect.height, vw: video.videoWidth, vh: video.videoHeight}); return; }
+    if (displayW === 0 || displayH === 0) { return; }
 
     canvas.width = displayW;
     canvas.height = displayH;
@@ -150,7 +159,7 @@ export default function FMSScreeningPage() {
     for (const person of keypointsList) {
       const kps = person.keypoints || [];
       const confs = person.confidences || Array(kps.length).fill(1);
-      if (kps.length < 17) { console.log('[drawSkeleton] skip: kps.length=', kps.length); continue; }
+      if (kps.length < 17) { continue; }
 
       ctx.strokeStyle = '#00ff88';
       ctx.lineWidth = 2;
@@ -180,7 +189,7 @@ export default function FMSScreeningPage() {
       personsDrawn++;
     }
     if (personsDrawn > 0 && personsDrawn % 30 === 1) {
-      console.log('[drawSkeleton] drew', personsDrawn, 'persons, canvas:', canvas.width, 'x', canvas.height, 'scale:', scaleX.toFixed(2), scaleY.toFixed(2));
+      // DEBUG: console.log('[drawSkeleton] drew', personsDrawn, 'persons, canvas:', canvas.width, 'x', canvas.height, 'scale:', scaleX.toFixed(2), scaleY.toFixed(2));
     }
   }, []);
 
@@ -196,7 +205,7 @@ export default function FMSScreeningPage() {
       streamRef.current = s;
       if (videoRef.current) {
         videoRef.current.srcObject = s;
-        console.log('[FMS] Camera stream attached to video element immediately');
+        // DEBUG: console.log('[FMS] Camera stream attached to video element immediately');
       }
       return true;
     } catch (e: any) {
@@ -206,18 +215,26 @@ export default function FMSScreeningPage() {
   };
 
   // ─── 帧捕获 ────────────────────────────────────────
+  const captureRetryRef = useRef(0);
+  const MAX_CAPTURE_RETRIES = 25; // 5 seconds max (25 × 200ms)
+
   const startFrameCapture = useCallback(() => {
     clearInterval(intervalRef.current);
     const canvas = canvasRef.current;
     const video = videoRef.current;
     if (!canvas || !video || !video.videoWidth) {
-      // Retry after 200ms if video not ready yet
-      setTimeout(() => startFrameCapture(), 200);
+      // Retry after 200ms if video not ready yet (with max retries)
+      captureRetryRef.current += 1;
+      if (captureRetryRef.current <= MAX_CAPTURE_RETRIES) {
+        setTimeout(() => startFrameCapture(), 200);
+      } else {
+        message.error('摄像头初始化超时，请刷新页面重试');
+      }
       return false;
     }
+    captureRetryRef.current = 0;
     const ctx = canvas.getContext('2d');
     if (!ctx) return false;
-    console.log('[FMS] Frame capture started');
     intervalRef.current = window.setInterval(() => {
       if (!video.videoWidth) return;
       canvas.width = video.videoWidth;
@@ -234,7 +251,7 @@ export default function FMSScreeningPage() {
 
   const stopFrameCapture = useCallback(() => {
     clearInterval(intervalRef.current);
-    console.log('[FMS] Frame capture stopped');
+    // DEBUG: console.log('[FMS] Frame capture stopped');
   }, []);
 
   // ─── 倒计时 → 开始检测 ──
@@ -242,6 +259,10 @@ export default function FMSScreeningPage() {
     setCountdown(3);
     setTestPhase('countdown');
     setNoPersonWarning(false);
+    // 立即通知后端开始处理帧，让骨架在倒计时期间就能显示
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'start_test' }));
+    }
     let tick = 3;
     const timer = setInterval(() => {
       tick--;
@@ -250,10 +271,6 @@ export default function FMSScreeningPage() {
         playStartBeep();
         setCountdown(0);
         setTestPhase('running');
-        // 通知后端用户已准备好，开始评估帧
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send(JSON.stringify({ type: 'start_test' }));
-        }
       } else {
         playCountdownBeep();
         setCountdown(tick);
@@ -267,8 +284,9 @@ export default function FMSScreeningPage() {
     setTestPhase('preparing');
     const ok = await startCamera();
     if (!ok) return;
+    if (!token) { message.error('请先登录'); return; }
     const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${wsProtocol}://${window.location.host}/api/fms/ws?token=${token}`);
+    const ws = new WebSocket(`${wsProtocol}://${window.location.host}/api/fms/ws?token=${encodeURIComponent(token)}`);
     wsRef.current = ws;
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: 'start' }));
@@ -276,8 +294,12 @@ export default function FMSScreeningPage() {
       setTimeout(() => startFrameCapture(), 300);
     };
     ws.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      handleWSMessage(data);
+      try {
+        const data = JSON.parse(e.data);
+        handleWSMessage(data);
+      } catch {
+        // Malformed message — ignore
+      }
     };
     ws.onerror = () => message.error('WebSocket 连接失败');
   };
@@ -317,20 +339,17 @@ export default function FMSScreeningPage() {
       // 有人检测到后清除警告
       setNoPersonWarning(false);
 
-      // ── 骨架绘制（仅运行/完成阶段） ──
-      if (testPhaseRef.current === 'running' || testPhaseRef.current === 'completed') {
+      // ── 骨架绘制（所有阶段都绘制，只要有关键点数据） ──
+      if (testPhaseRef.current) {
         if (data.keypoints?.length) {
           drawSkeleton(data.keypoints);
-        } else {
-          console.log('[FMS] no keypoints in frame_result, keys:', Object.keys(data).filter(k => k !== 'keypoints'));
         }
         if (data.guidance) setGuidance(data.guidance);
       }
 
-      // ── started / running ── 仅在倒计时或已运行时才推进
+      // ── started / running ── 仅在已运行时推进状态（不提前结束倒计时）
       if (data.fms_status === 'started' || data.fms_status === 'running') {
-        if (testPhaseRef.current === 'countdown' || testPhaseRef.current === 'running') {
-          if (testPhaseRef.current !== 'running') setTestPhase('running');
+        if (testPhaseRef.current === 'running') {
           setTestMessage(data.guidance || data.message || '检测中...');
         }
       }
@@ -342,10 +361,10 @@ export default function FMSScreeningPage() {
         setTestPhase('completed');
         setTestScore(data.score);
         setAllScores(prev => ({...prev, [currentTestRef.current]: data.score}));
-        if (data.duration) setTestMessage(`保持时间: ${data.duration}秒`);
-        else if (data.depth_angle) setTestMessage(`深蹲深度: ${data.depth_angle}°, 躯干倾斜: ${data.trunk_tilt}°`);
-        else if (data.hand_distance) setTestMessage(`双手距离: ${data.hand_distance}cm`);
-        else if (data.score) setTestMessage(`得分: ${data.score}`);
+        if (data.duration !== undefined && data.duration !== null) setTestMessage(`保持时间: ${data.duration}秒`);
+        else if (data.depth_angle !== undefined) setTestMessage(`深蹲深度: ${data.depth_angle}°, 躯干倾斜: ${data.trunk_tilt ?? '--'}°`);
+        else if (data.hand_distance !== undefined) setTestMessage(`双手距离: ${data.hand_distance}cm`);
+        else if (data.score !== undefined) setTestMessage(`得分: ${data.score}`);
       }
 
       // ── step_complete ──
@@ -360,7 +379,7 @@ export default function FMSScreeningPage() {
       }
     } else if (data.type === 'fms_result') {
       playFinalBeep();
-      console.log('[FMS] Got fms_result, setting state:', data);
+      // DEBUG: console.log('[FMS] Got fms_result, setting state:', data);
       setFmsResult(data);
       stopCamera();
     } else if (data.type === 'error') {
@@ -429,7 +448,8 @@ export default function FMSScreeningPage() {
 
   const currentTestData = FMS_TESTS[currentTest];
   const showPreparing = testPhase === 'preparing' || testPhase === 'countdown';
-  const showVideo = testPhase === 'running' || testPhase === 'completed';
+  // 始终显示视频，让用户看到自己和骨架标注
+  const showVideo = testPhase !== 'skipped';
 
   // ─── 主界面 ────────────────────────────────────────
   return (
@@ -499,6 +519,12 @@ export default function FMSScreeningPage() {
                           <span>第 {test.id + 1} 项</span>
                           <Tag>{test.name}</Tag>
                           {isDone && <Tag color="green">评分: {result.score} 分</Tag>}
+                          {isDone && result?.processed_video_url && (
+                            <a href={result.processed_video_url} download
+                              style={{ fontSize: 12, color: '#1677ff' }}>
+                              📹 下载分析视频（用本地播放器打开）
+                            </a>
+                          )}
                         </Space>
                       }
                       description={test.instruction}
@@ -572,6 +598,8 @@ export default function FMSScreeningPage() {
                   movementName={currentTestData.name}
                   instruction={currentTestData.instruction}
                   countdown={testPhase === 'countdown' ? countdown : 0}
+                  imageUrl={FMS_MEDIA[currentTest]?.image}
+                  videoUrl={FMS_MEDIA[currentTest]?.video}
                 />
                 {testPhase === 'preparing' && (
                   <div style={{ textAlign: 'center', marginTop: 4 }}>

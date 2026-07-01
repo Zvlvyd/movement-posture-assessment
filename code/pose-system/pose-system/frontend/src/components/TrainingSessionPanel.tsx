@@ -1,12 +1,13 @@
-import React from "react";
-import { Row, Col, Card, Tag, Space, Badge, Progress, Button, Typography, Descriptions, Segmented, Empty } from "antd";
+import React, { useEffect } from "react";
+import { Row, Col, Card, Tag, Space, Badge, Progress, Button, Typography, Descriptions, Segmented, Empty, Modal } from "antd";
 import {
   TrophyOutlined, BulbOutlined, EyeOutlined,
   CheckCircleOutlined, CloseCircleOutlined, WarningOutlined,
-  StopOutlined,
+  StopOutlined, SmileOutlined,
 } from "@ant-design/icons";
 import type { AngleDiff, LearningFeedback } from "../types";
 import type { TrainingSessionState, TrainingSessionActions } from "../hooks/useTrainingSession";
+import SkeletonOverlay from "./SkeletonOverlay";
 
 const { Text, Title } = Typography;
 
@@ -24,6 +25,11 @@ const STATUS_COLORS: Record<string, string> = {
 };
 const STATUS_LABELS: Record<string, string> = {
   good: "优秀", close: "接近", warning: "注意", bad: "偏差", unknown: "未知",
+};
+const PHASE_BADGES: Record<string, { status: "processing" | "success" | "default"; text: string }> = {
+  waiting_for_body: { status: "processing", text: "等待人体检测" },
+  body_confirmed: { status: "success", text: "已确认人体，请开始" },
+  learning: { status: "processing", text: "实时分析中" },
 };
 
 // ---------- Props ----------
@@ -53,10 +59,30 @@ export default function TrainingSessionPanel({
   const {
     isSessionActive, currentView, standardAngles, keyChecks,
     instruction, diffs, feedbacks, overallScore, bestScore, frameCount,
+    autoCompleted, userKeypoints, userConfidences, frameWidth, frameHeight, sessionPhase,
   } = state;
-  const { videoRef, canvasRef, endSession, switchView } = actions;
+  const { videoRef, canvasRef, endSession, switchView, confirmAutoComplete } = actions;
+
+  // 摄像头恢复：如果挂载时 video.srcObject 为空，重新获取媒体流
+  useEffect(() => {
+    if (!videoRef?.current) return;
+    const video = videoRef.current;
+    if (!video.srcObject && navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480, facingMode: "user" },
+      }).then(stream => {
+        if (videoRef.current && !videoRef.current.srcObject) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+        } else {
+          stream.getTracks().forEach(t => t.stop());
+        }
+      }).catch(() => {});
+    }
+  }, [videoRef]);
 
   const availableViews = views?.length ? views : ["正面"];
+  const phaseBadge = PHASE_BADGES[sessionPhase] || PHASE_BADGES.learning;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 80px)", padding: "0 16px 16px" }}>
@@ -94,9 +120,18 @@ export default function TrainingSessionPanel({
               style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             <canvas ref={canvasRef as React.RefObject<HTMLCanvasElement>} style={{ display: "none" }} />
 
+            {/* 骨架叠加层（含置信度过滤 + 坐标缩放） */}
+            <SkeletonOverlay
+              userKeypoints={userKeypoints}
+              confidences={userConfidences || undefined}
+              frameWidth={frameWidth}
+              frameHeight={frameHeight}
+              videoRef={videoRef as React.RefObject<HTMLVideoElement | null>}
+            />
+
             {isSessionActive && (
               <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 8 }}>
-                <Badge status="processing" text="实时分析中" />
+                <Badge status={phaseBadge.status} text={phaseBadge.text} />
                 <Tag>{frameCount} 帧</Tag>
               </div>
             )}
@@ -233,6 +268,26 @@ export default function TrainingSessionPanel({
           </Button>
         </Space>
       </div>
+
+      {/* 自动完成庆祝模态框 */}
+      <Modal
+        open={autoCompleted}
+        closable={false}
+        footer={null}
+        centered
+        width={400}
+      >
+        <div style={{ textAlign: "center", padding: "24px 0" }}>
+          <SmileOutlined style={{ fontSize: 56, color: "#52c41a", marginBottom: 16 }} />
+          <Title level={3} style={{ marginBottom: 8 }}>恭喜完成学习！</Title>
+          <Text type="secondary">您的动作已连续多帧达标，系统自动完成本次学习。</Text>
+          <div style={{ marginTop: 24 }}>
+            <Button type="primary" size="large" onClick={confirmAutoComplete}>
+              查看学习结果
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

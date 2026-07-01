@@ -45,7 +45,7 @@ class FMSScoringEngine:
         depth_score = min(50, max(0, depth_cm / 20.0 * 50))
         trunk_score = min(50, max(0, (1.0 - abs(trunk_angle) / 30.0) * 50))
         arm_score = min(20, max(0, arm_ratio * 20))
-        s = depth_score + trunk_score + arm_score
+        s = min(100, depth_score + trunk_score + arm_score)
         detail = f"体前屈 {depth_cm:.1f}cm"
         if trunk_angle > 0:
             detail += f"，躯干倾斜 {trunk_angle:.0f}°"
@@ -57,8 +57,8 @@ class FMSScoringEngine:
         Args:
             distance_cm: 背后触肩距离（cm，越小越好）
         """
-        s = min(100, max(0, (1.0 - distance_cm / 20.0) * 100))
-        detail = f"背后触肩距 {distance_cm:.1f}cm"
+        s = min(100, max(0, (1.0 - distance_cm / 200.0) * 100))
+        detail = f"背后双手距 {distance_cm:.1f}cm"
         return Score("upper_limb", s, detail)
 
     def score_core(self, duration_sec: float, hip_drop_angle: float = 0) -> Score:
@@ -68,7 +68,7 @@ class FMSScoringEngine:
             duration_sec: 平板支撑持续时间（秒）
             hip_drop_angle: 臀部下降角度（°，可选）
         """
-        base_score = min(100, max(0, duration_sec / 120.0 * 100))
+        base_score = min(100, max(0, duration_sec / 90.0 * 100))
         if hip_drop_angle > 5:
             penalty = min(30, (hip_drop_angle - 5) * 3)
             base_score = max(0, base_score - penalty)

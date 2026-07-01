@@ -34,8 +34,10 @@ export default function MathCaptcha({
         value={value}
         onChange={e => onChange?.(e.target.value)}
         style={{ flex: 1 }}
+        aria-label={`验证码：${a} 加 ${b} 等于多少？`}
+        inputMode="numeric"
       />
-      <Button onClick={onRefresh} type="link" size="small">
+      <Button onClick={onRefresh} type="link" size="small" aria-label="换一个验证码">
         换一个
       </Button>
     </Space.Compact>

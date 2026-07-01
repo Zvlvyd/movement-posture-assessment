@@ -1,17 +1,19 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import {
-  Card, Select, Input, List, Typography, Tag, Spin,
-  Space, Button, message, Empty, Modal, Descriptions, Tooltip, Collapse,
+  Card, Row, Col, Select, Input, List, Typography, Tag, Spin,
+  Space, Button, message, Empty, Modal, Descriptions, Tooltip,
 } from "antd";
 import {
   PlayCircleOutlined, InfoCircleOutlined, SearchOutlined,
   ThunderboltOutlined, BookOutlined, CaretRightOutlined,
+  WarningOutlined,
   CheckCircleOutlined, AimOutlined,
 } from "@ant-design/icons";
 import { learningApi } from "../services/api";
 import { useTrainingSession } from "../hooks/useTrainingSession";
 import TrainingSessionPanel from "../components/TrainingSessionPanel";
 import TrainingResultPanel from "./training/TrainingResultPanel";
+import MovementDemo from "../components/MovementDemo";
 import type {
   ActionItem, LearnableAction, LearnableActionDetail, LearningComplete,
 } from "../types";
@@ -27,7 +29,7 @@ const PHASE_LABELS: Record<string, string> = { warmup: "热身", main: "主体",
 function diffLabel(d: number) { return DIFFICULTY_LABELS[d] || "Lv." + d; }
 function diffColor(d: number) { return DIFFICULTY_COLORS[d] || "default"; }
 
-type PageMode = "list" | "learning" | "result";
+type PageMode = "list" | "demo" | "learning" | "result";
 
 export default function LearningPage() {
   const [mode, setMode] = useState<PageMode>("list");
@@ -43,6 +45,8 @@ export default function LearningPage() {
   const [detailOpen, setDetailOpen] = useState(false);
 
   const [selectedAction, setSelectedAction] = useState("");
+  const [demoAction, setDemoAction] = useState<LearnableActionDetail | null>(null);
+  const [mediaFailed, setMediaFailed] = useState(false);
   const [result, setResult] = useState<LearningComplete | null>(null);
 
   const [sessionState, sessionActions] = useTrainingSession({
@@ -93,12 +97,27 @@ export default function LearningPage() {
     return map;
   }, [learnable]);
 
-  // Filter DB actions
+  // Filter DB actions (merge with learnable-only actions from JSON, may not be in DB)
   const filtered = useMemo(() => {
-    let list = actions;
+    const dbNames = new Set(actions.map(a => a.name));
+    const allActions: ActionItem[] = [...actions];
+    // 合并 learnable 中但不在 DB 中的动作
+    for (const l of learnable) {
+      if (!dbNames.has(l.name)) {
+        allActions.push({
+          id: 0,
+          name: l.name,
+          category: l.category || "",
+          difficulty: l.difficulty || 1,
+          description: l.description || "",
+          target_body_parts: (l.target_body_parts || []).join(", "),
+        });
+      }
+    }
+
+    let list = allActions;
     if (category) list = list.filter(a => a.category === category);
     if (family) {
-      // Filter DB actions by matching against learnable family
       list = list.filter(a => {
         const l = learnableMap.get(a.name);
         return l && l.family === family;
@@ -120,12 +139,30 @@ export default function LearningPage() {
       if (aL !== bL) return aL - bL;
       return (a.difficulty ?? 99) - (b.difficulty ?? 99);
     });
-  }, [actions, category, family, search, learnableNames, learnableMap]);
+  }, [actions, learnable, category, family, search, learnableNames, learnableMap]);
 
   const enterLearning = useCallback(async (actionName: string) => {
     setSelectedAction(actionName);
+    setDetailLoading(true);
+    try {
+      const d = await learningApi.getLearnableDetail(actionName);
+      setDemoAction(d);
+      setMediaFailed(false);
+      setMode("demo");
+    } catch {
+      message.error("加载动作详情失败");
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
+
+  // 从 demo 模式切换到学习模式：先挂载 TrainingSessionPanel（包含 video 元素），
+  // 等 DOM 提交后再启动摄像头 + WS，确保 videoRef 已可用
+  const startCameraFromDemo = useCallback(async () => {
+    setMode("learning");
+    await new Promise(r => setTimeout(r, 150));
     const ok = await sessionActions.startSession();
-    if (ok) setMode("learning");
+    if (!ok) setMode("list");
   }, [sessionActions]);
 
   const showDetail = useCallback(async (name: string) => {
@@ -141,6 +178,161 @@ export default function LearningPage() {
       setDetailLoading(false);
     }
   }, []);
+
+  // ============================================================
+  // Demo 模式：展示动作示范，用户确认后进入实时学习
+  if (mode === "demo" && demoAction) {
+    // Gather media: prefer DB-uploaded media, fall back to thumbnail_url/video_url
+    const mediaImages = (demoAction.media || []).filter(m => m.media_type !== 'video');
+    const mediaVideos = (demoAction.media || []).filter(m => m.media_type === 'video');
+    const bestImage = demoAction.thumbnail_url
+      || mediaImages[0]?.url
+      || '';
+    const bestVideo = demoAction.video_url
+      || mediaVideos[0]?.url
+      || '';
+    const hasImage = !!bestImage;
+    const hasVideo = !!bestVideo;
+
+    return (
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "16px 16px 32px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <Title level={3} style={{ margin: 0 }}>
+            <BookOutlined style={{ marginRight: 8, color: "var(--color-accent)" }} />
+            {demoAction.name} — 标准动作示范
+          </Title>
+          <Button onClick={() => setMode("list")}>返回列表</Button>
+        </div>
+
+        <Card style={{ marginBottom: 20 }}>
+          {/* 视频 / 图片 / SVG 示范 */}
+          <div style={{
+            position: "relative", background: "#000", borderRadius: 12,
+            width: "100%", height: 420, display: "flex", alignItems: "center",
+            justifyContent: "center", overflow: "hidden", marginBottom: 16,
+          }}>
+            {(!mediaFailed && hasVideo) && (
+              <video
+                src={bestVideo}
+                controls autoPlay loop muted playsInline
+                poster={bestImage || undefined}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                onError={() => setMediaFailed(true)}
+              />
+            )}
+            {(!mediaFailed && !hasVideo && hasImage) && (
+              <img
+                src={bestImage}
+                alt={demoAction.name}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                onError={() => setMediaFailed(true)}
+              />
+            )}
+            {(mediaFailed || (!hasVideo && !hasImage)) && (
+              <MovementDemo
+                movementName={demoAction.name}
+                instruction={demoAction.description || "请观察标准动作示范"}
+                countdown={0}
+              />
+            )}
+            <Tag color="var(--color-accent)" style={{ position: "absolute", top: 12, left: 12, fontSize: 14 }}>
+              标准示范
+            </Tag>
+          </div>
+
+          <Row gutter={12} style={{ marginBottom: 12 }}>
+            {demoAction.steps && demoAction.steps.length > 0 && (
+              <Col span={12}>
+                <Card title="动作步骤" size="small">
+                  {demoAction.steps.map((s: string, i: number) => (
+                    <div key={i} style={{ marginBottom: 4, display: "flex", gap: 8 }}>
+                      <Tag color="blue" style={{ flexShrink: 0 }}>{i + 1}</Tag>
+                      <Text style={{ fontSize: 13 }}>{s}</Text>
+                    </div>
+                  ))}
+                </Card>
+              </Col>
+            )}
+            <Col span={12}>
+              {demoAction.cues && demoAction.cues.length > 0 && (
+                <Card title="动作要领" size="small" style={{ marginBottom: 8 }}>
+                  <Space wrap>
+                    {demoAction.cues.map((cue: string, i: number) => (
+                      <Tag key={i} icon={<AimOutlined />} color="processing">{cue}</Tag>
+                    ))}
+                  </Space>
+                </Card>
+              )}
+              {demoAction.target_body_parts && demoAction.target_body_parts.length > 0 && (
+                <Card title="目标部位" size="small">
+                  <Space wrap>
+                    {demoAction.target_body_parts.map((bp: string, i: number) => (
+                      <Tag key={i} color="purple">{bp}</Tag>
+                    ))}
+                  </Space>
+                </Card>
+              )}
+            </Col>
+          </Row>
+
+          {/* 常见错误 */}
+          {demoAction.common_errors && demoAction.common_errors.length > 0 && (
+            <Card title="常见错误" size="small" style={{ marginBottom: 12 }}>
+              {demoAction.common_errors.map((err: any, i: number) => (
+                <div key={i} style={{ marginBottom: 6 }}>
+                  <Text strong style={{ color: "var(--color-error)", fontSize: 13 }}>{err.name}</Text>
+                  <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>{err.feedback}</Text>
+                </div>
+              ))}
+            </Card>
+          )}
+
+          <Descriptions size="small" column={2} style={{ marginBottom: 16 }}>
+            <Descriptions.Item label="支持视角">
+              {demoAction.views?.join(" / ") || "正面"}
+            </Descriptions.Item>
+            <Descriptions.Item label="难度">
+              <Tag color={diffColor(demoAction.difficulty)}>{diffLabel(demoAction.difficulty)}</Tag>
+            </Descriptions.Item>
+          </Descriptions>
+
+          {/* 进入学习按钮 */}
+          <div style={{ textAlign: "center", paddingTop: 8 }}>
+            {demoAction.has_standard_angles ? (
+              <>
+                <Button
+                  type="primary" size="large"
+                  icon={<PlayCircleOutlined />}
+                  onClick={startCameraFromDemo}
+                  style={{ height: 48, paddingLeft: 32, paddingRight: 32, fontSize: 16, borderRadius: 8 }}
+                >
+                  学习完毕，亲自上阵
+                </Button>
+                <div style={{ marginTop: 8 }}>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    点击后将打开摄像头，实时检测动作并给出反馈
+                  </Text>
+                </div>
+              </>
+            ) : (
+              <div style={{
+                background: "var(--color-surface)", border: "1px solid var(--color-border)",
+                borderRadius: 8, padding: "16px 24px",
+              }}>
+                <WarningOutlined style={{ color: "#faad14", fontSize: 20, marginRight: 8 }} />
+                <Text type="warning" style={{ fontSize: 14 }}>
+                  该动作暂未配置标准角度数据，无法进行实时对比学习
+                </Text>
+                <div style={{ marginTop: 8 }}>
+                  <Button onClick={() => setMode("list")}>返回列表</Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   // ============================================================
   if (mode === "learning") {

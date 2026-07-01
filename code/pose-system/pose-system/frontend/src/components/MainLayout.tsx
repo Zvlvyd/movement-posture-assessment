@@ -13,19 +13,33 @@ const { Sider, Content, Footer } = Layout;
 const { Text } = Typography;
 
 interface MenuItem {
-  key: string;
-  icon: React.ReactNode;
-  label: string;
+  key?: string;
+  icon?: React.ReactNode;
+  label?: string;
+  type?: 'divider';
 }
 
-const CORE_MENU: MenuItem[] = [
+const TRAINEE_MENU: MenuItem[] = [
   { key: "/home",          icon: <HomeOutlined />,          label: "首页" },
   { key: "/assessment",   icon: <PlayCircleOutlined />,    label: "体态评估" },
   { key: "/fms",           icon: <ExperimentOutlined />,    label: "FMS 筛查" },
-  { key: "/prescription",  icon: <ThunderboltOutlined />,  label: "AI 处方" },
+  { key: "/prescription",  icon: <ThunderboltOutlined />,  label: "AI 训练计划" },
   { key: "/training",      icon: <PlayCircleOutlined />,    label: "计划训练" },
   { key: "/learning",      icon: <BookOutlined />,          label: "标准学习" },
   { key: "/checkin",       icon: <CheckCircleOutlined />,   label: "每日打卡" },
+];
+
+const COACH_MENU: MenuItem[] = [
+  ...TRAINEE_MENU,
+  { type: "divider" },
+  { key: "/coach",         icon: <TeamOutlined />,           label: "教练工作台" },
+  { key: "/coach/actions", icon: <BookOutlined />,           label: "动作库管理" },
+];
+
+const ADMIN_MENU: MenuItem[] = [
+  ...COACH_MENU,
+  { type: "divider" },
+  { key: "/admin",         icon: <SettingOutlined />,        label: "系统管理" },
 ];
 
 export default function MainLayout() {
@@ -34,21 +48,24 @@ export default function MainLayout() {
   const { user, logout } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
 
-  const selectedKey = "/" + location.pathname.split("/")[1];
-
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  const roleMenu: MenuItem[] =
+    user?.role === "admin" ? ADMIN_MENU :
+    user?.role === "coach" ? COACH_MENU :
+    TRAINEE_MENU;
+
+  // 菜单高亮：优先完整路径匹配（如 /coach/actions），无匹配时回退到父路径（如 /coach/student/42 → /coach）
+  const menuKeys = roleMenu.map(item => item.key).filter(Boolean) as string[];
+  const selectedKey = menuKeys.includes(location.pathname)
+    ? location.pathname
+    : "/" + location.pathname.split("/")[1];
+
   const userMenuItems: any[] = [
     { key: "/profile", icon: <UserOutlined />,  label: "个人中心" },
-    ...(user?.role === "coach" || user?.role === "admin"
-      ? [{ key: "/coach", icon: <TeamOutlined />, label: "教练管理" }]
-      : []),
-    ...(user?.role === "admin"
-      ? [{ key: "/admin", icon: <SettingOutlined />, label: "系统管理" }]
-      : []),
     { type: "divider" },
     { key: "logout", icon: <LogoutOutlined />, label: "退出登录" },
   ];
@@ -94,10 +111,8 @@ export default function MainLayout() {
             {collapsed ? (
               <ThunderboltOutlined style={{
                 fontSize: 24,
-                background: "linear-gradient(135deg, var(--color-cyan), var(--color-violet))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }} />
+                color: "var(--color-primary)",
+              }} aria-label="系统图标" />
             ) : (
               <div>
                 <Text style={{
@@ -105,9 +120,7 @@ export default function MainLayout() {
                   fontWeight: 800,
                   fontSize: 18,
                   letterSpacing: "-0.02em",
-                  background: "linear-gradient(135deg, var(--color-cyan), var(--color-magenta))",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  color: "var(--color-primary)",
                   lineHeight: 1.3,
                   display: "block",
                 }}>
@@ -132,7 +145,8 @@ export default function MainLayout() {
             mode="inline"
             selectedKeys={[selectedKey]}
             onClick={({ key }) => navigate(key)}
-            items={CORE_MENU as any}
+            items={roleMenu as any}
+            aria-label="主导航"
             style={{
               flex: 1,
               padding: "12px 8px",
@@ -145,21 +159,30 @@ export default function MainLayout() {
           />
 
           {/* Collapse Toggle */}
-          <div
+          <button
+            type="button"
             onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? "展开侧边栏" : "折叠侧边栏"}
+            className="sider-collapse-btn"
             style={{
               padding: "14px",
               textAlign: "center",
               cursor: "pointer",
               color: "var(--color-text-muted)",
+              border: "none",
               borderTop: "1px solid var(--color-hairline)",
+              borderBottom: "none",
+              background: "transparent",
+              width: "100%",
+              fontSize: "inherit",
+              fontFamily: "inherit",
               transition: "color 250ms var(--ease-smooth)",
             }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--color-primary)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--color-text-muted)")}
+            onMouseEnter={e => { e.currentTarget.style.color = "var(--color-primary)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "var(--color-text-muted)"; }}
           >
             {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          </div>
+          </button>
 
           {/* User Area */}
           <Dropdown
@@ -211,7 +234,7 @@ export default function MainLayout() {
 
       {/* Main Content */}
       <Layout style={{ background: "transparent" }}>
-        <Content style={{ padding: 24, minHeight: "calc(100vh - 48px)" }}>
+        <Content style={{ padding: "clamp(12px, 3vw, 24px)", minHeight: "calc(100vh - 48px)" }}>
           <Outlet />
         </Content>
         <Footer

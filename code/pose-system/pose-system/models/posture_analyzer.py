@@ -38,9 +38,21 @@ def calc_angle(a, b, c):
 
 
 def safe_kp(keypoints, idx):
-    """Safely get keypoint, return [0,0] if not available"""
-    if idx < len(keypoints) and keypoints[idx][0] > 0 and keypoints[idx][1] > 0:
-        return list(keypoints[idx])
+    """Safely get keypoint, return [0,0] if not available or low confidence.
+
+    Uses confidence score (third column) when available for more reliable detection check.
+    """
+    if idx >= len(keypoints):
+        return [0, 0]
+    kp = keypoints[idx]
+    # Use confidence if available (3-column format)
+    if len(kp) >= 3:
+        if kp[2] < 0.3:  # Low confidence threshold
+            return [0, 0]
+        return list(kp[:2])
+    # Fallback: check non-zero coordinates (COCO convention)
+    if kp[0] > 0 and kp[1] > 0:
+        return list(kp[:2])
     return [0, 0]
 
 

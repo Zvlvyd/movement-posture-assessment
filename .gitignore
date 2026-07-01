@@ -61,3 +61,21 @@ backend.log
 # Test outputs
 test_data/
 tests/output/
+
+# Temp / debug scripts
+_tmp*.py
+test_*.py
+diagnose_*.py
+
+# Backup directories
+*_backup_*/
+
+# Empty config placeholders
+ultralytics_config/
+
+# OS / App temp files
+~$*
+*.pkl
+
+# Runtime uploads
+uploads/

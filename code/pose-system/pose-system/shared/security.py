@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 Shared security utilities — password hashing and verification.
-Uses bcrypt via passlib for secure password storage.
+Uses bcrypt directly for secure password storage.
 Legacy SHA-256 compatibility retained for existing user passwords.
 """
 import hashlib
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Characters that bcrypt $2b$ prefix wonʼt match, to help detect legacy hashes
-_BCRYPT_PREFIX = "$2"
+import bcrypt
 
 
 def hash_password(password: str) -> str:
@@ -18,7 +13,10 @@ def hash_password(password: str) -> str:
 
     Returns a bcrypt hash string (e.g. $2b$12$...).
     """
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(
+        password.encode('utf-8'),
+        bcrypt.gensalt()
+    ).decode('utf-8')
 
 
 def verify_password(plain: str, hashed: str) -> bool:
@@ -30,16 +28,20 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
     # Legacy SHA-256 format: salt$sha256hex (salt is 32 hex chars)
-    if not hashed.startswith(_BCRYPT_PREFIX) and '$' in hashed:
+    if not hashed.startswith("$2") and '$' in hashed:
         parts = hashed.split('$')
         if len(parts) == 2:
             salt, h = parts
             return hashlib.sha256((salt + plain).encode()).hexdigest() == h
+        return False
 
     # Current bcrypt format
-    return pwd_context.verify(plain, hashed)
+    try:
+        return bcrypt.checkpw(plain.encode('utf-8'), hashed.encode('utf-8'))
+    except (ValueError, TypeError):
+        return False
 
 
 def needs_password_upgrade(hashed: str) -> bool:
     """Check if a password hash should be upgraded to bcrypt."""
-    return not hashed.startswith(_BCRYPT_PREFIX) and '$' in hashed
+    return not hashed.startswith("$2") and '$' in hashed

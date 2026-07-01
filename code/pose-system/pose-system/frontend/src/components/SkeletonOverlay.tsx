@@ -35,20 +35,40 @@ const SKELETON_COLORS: Record<string, string> = {
 };
 
 interface Props {
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   userKeypoints?: number[][] | null;
+  confidences?: number[];
   statuses?: string[];
   showStandard?: boolean;
   standardKeypoints?: number[][] | null;
+  /** 可选：从 video 元素动态推导画布尺寸 */
+  videoRef?: React.RefObject<HTMLVideoElement | null>;
+  /** YOLO 推理时帧的实际宽度（用于坐标缩放） */
+  frameWidth?: number;
+  /** YOLO 推理时帧的实际高度（用于坐标缩放） */
+  frameHeight?: number;
 }
 
+/** 最小置信度阈值，低于此值的关键点不绘制（与后端 0.15 对齐） */
+const MIN_CONFIDENCE = 0.15;
+
 const SkeletonOverlay: React.FC<Props> = ({
-  width, height,
-  userKeypoints, statuses,
+  width: explicitWidth, height: explicitHeight,
+  userKeypoints, confidences, statuses,
   showStandard, standardKeypoints,
+  videoRef, frameWidth = 640, frameHeight = 480,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // 从 video 元素推导尺寸，回退到显式 props
+  const videoEl = videoRef?.current;
+  const width = explicitWidth ?? (videoEl ? videoEl.getBoundingClientRect().width : 0);
+  const height = explicitHeight ?? (videoEl ? videoEl.getBoundingClientRect().height : 0);
+
+  // 坐标缩放：从 YOLO 帧空间 → 显示画布空间
+  const scaleX = frameWidth > 0 ? width / frameWidth : 1;
+  const scaleY = frameHeight > 0 ? height / frameHeight : 1;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -58,6 +78,10 @@ const SkeletonOverlay: React.FC<Props> = ({
 
     ctx.clearRect(0, 0, width, height);
     if (width === 0 || height === 0) return;
+
+    // 将帧坐标缩放到画布坐标
+    const sx = (x: number) => x * scaleX;
+    const sy = (y: number) => y * scaleY;
 
     // ── Standard skeleton (dashed gray) ──
     if (showStandard && standardKeypoints) {
@@ -70,8 +94,8 @@ const SkeletonOverlay: React.FC<Props> = ({
           const [x2, y2] = standardKeypoints[j];
           if (x1 > 0 && y1 > 0 && x2 > 0 && y2 > 0) {
             ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
+            ctx.moveTo(sx(x1), sy(y1));
+            ctx.lineTo(sx(x2), sy(y2));
             ctx.stroke();
           }
         }
@@ -82,7 +106,7 @@ const SkeletonOverlay: React.FC<Props> = ({
         const [x, y] = kp;
         if (x > 0 && y > 0) {
           ctx.beginPath();
-          ctx.arc(x, y, 3, 0, Math.PI * 2);
+          ctx.arc(sx(x), sy(y), 3, 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -90,54 +114,58 @@ const SkeletonOverlay: React.FC<Props> = ({
 
     // ── User skeleton ──
     if (userKeypoints) {
-      // Lines
+      // 辅助函数：检查关键点是否满足置信度阈值
+      const isValid = (idx: number) =>
+        idx < userKeypoints.length &&
+        userKeypoints[idx][0] > 0 &&
+        userKeypoints[idx][1] > 0 &&
+        (!confidences || confidences[idx] >= MIN_CONFIDENCE);
+
+      // Lines — 两端点都需通过置信度检查
       ctx.lineWidth = 3;
       ctx.lineCap = "round";
       for (const [i, j] of SKELETON) {
-        if (i < userKeypoints.length && j < userKeypoints.length) {
+        if (isValid(i) && isValid(j)) {
           const [x1, y1] = userKeypoints[i];
           const [x2, y2] = userKeypoints[j];
-          if (x1 > 0 && y1 > 0 && x2 > 0 && y2 > 0) {
-            const s = statuses?.[i] || "unknown";
-            ctx.strokeStyle = SKELETON_COLORS[s] || SKELETON_COLORS.unknown;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-          }
+          const s = statuses?.[i] || "unknown";
+          ctx.strokeStyle = SKELETON_COLORS[s] || SKELETON_COLORS.unknown;
+          ctx.beginPath();
+          ctx.moveTo(sx(x1), sy(y1));
+          ctx.lineTo(sx(x2), sy(y2));
+          ctx.stroke();
         }
       }
 
-      // Joint dots
+      // Joint dots — 只绘制通过置信度检查的关键点
       for (let i = 0; i < userKeypoints.length; i++) {
+        if (!isValid(i)) continue;
         const [x, y] = userKeypoints[i];
-        if (x > 0 && y > 0) {
-          const s = statuses?.[i] || "unknown";
-          const color = SKELETON_COLORS[s] || SKELETON_COLORS.unknown;
-          ctx.fillStyle = color;
-          ctx.beginPath();
-          ctx.arc(x, y, 4, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = "#fff";
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
+        const s = statuses?.[i] || "unknown";
+        const color = SKELETON_COLORS[s] || SKELETON_COLORS.unknown;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(sx(x), sy(y), 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
 
-          // Label every keypoint with small text
-          ctx.fillStyle = "rgba(255,255,255,0.85)";
-          ctx.font = "9px sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText(KP_LABELS[i] || String(i), x, y - 8);
-        }
+        // Label every keypoint with small text
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.font = "9px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(KP_LABELS[i] || String(i), sx(x), sy(y) - 8);
       }
     }
-  }, [width, height, userKeypoints, statuses, showStandard, standardKeypoints]);
+  }, [width, height, scaleX, scaleY, userKeypoints, confidences, statuses, showStandard, standardKeypoints, videoRef]);
 
   return (
     <canvas
       ref={canvasRef}
       width={width}
       height={height}
-      style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
+      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}
     />
   );
 };

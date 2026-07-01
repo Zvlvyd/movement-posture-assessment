@@ -128,9 +128,28 @@ async def generate_assessment_report(assessment: dict) -> str:
         data = response.json()
         msg = data["choices"][0]["message"]
         content = msg.get("content", "")
-        # deepseek-v4-pro 思维链模型可能把内容放在 reasoning_content 中
-        if not content and msg.get("reasoning_content"):
-            content = msg["reasoning_content"]
+        reasoning = msg.get("reasoning_content", "")
+
+        # deepseek-reasoner 等思维链模型：最终答案应在 content 中
+        # reasoning_content 是模型的内部推理过程，不应直接作为输出
+        if not content and reasoning:
+            import logging
+            _log = logging.getLogger(__name__)
+            _log.warning(
+                "DeepSeek 返回空 content，仅有 reasoning_content（长度=%d），"
+                "尝试从推理过程末尾提取最终答案",
+                len(reasoning),
+            )
+            # 尝试从 reasoning 末尾提取看起来像报告的内容（最后一段通常是总结/最终输出）
+            # 找到最后一个明显的分段标记后的内容
+            for separator in ["\n\n##", "\n\n###", "\n\n---", "\n\n**总结**", "\n\n总体"]:
+                idx = reasoning.rfind(separator)
+                if idx > len(reasoning) // 2:
+                    content = reasoning[idx:].strip()
+                    break
+            if not content:
+                content = reasoning  # 最后手段
+
         if not content:
             raise RuntimeError(f"DeepSeek 返回空内容，原始响应: {json.dumps(data, ensure_ascii=False)[:500]}")
         return content

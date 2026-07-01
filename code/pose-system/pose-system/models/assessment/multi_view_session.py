@@ -51,15 +51,27 @@ class MultiViewSession:
 
 
 class MultiViewSessionStore:
-    """In-memory session store with TTL-based expiry."""
+    """In-memory session store with TTL-based expiry and capacity limit."""
 
     DEFAULT_TTL = 1800  # 30 minutes
+    MAX_SESSIONS = 100  # Prevent unbounded memory growth
 
     def __init__(self):
         self._sessions: Dict[str, MultiViewSession] = {}
 
     def create(self, user_id: int) -> MultiViewSession:
-        """Create a new session."""
+        """Create a new session. Evicts oldest expired sessions if at capacity."""
+        # Evict oldest sessions if at capacity
+        if len(self._sessions) >= self.MAX_SESSIONS:
+            self.cleanup_expired()
+        if len(self._sessions) >= self.MAX_SESSIONS:
+            # Evict the oldest session as a last resort
+            oldest_id = min(
+                self._sessions.keys(),
+                key=lambda sid: self._sessions[sid].created_at,
+            )
+            del self._sessions[oldest_id]
+
         session_id = str(uuid.uuid4())[:12]
         session = MultiViewSession(session_id=session_id, user_id=user_id)
         self._sessions[session_id] = session

@@ -2,14 +2,17 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card, Row, Col, Statistic, Descriptions, Tag, Table,
-  Spin, Empty, Tabs, Space, Button, Typography
+  Spin, Empty, Tabs, Space, Button, Typography, Popconfirm, message
 } from "antd";
 import {
   ArrowLeftOutlined, TrophyOutlined, ExperimentOutlined,
   MedicineBoxOutlined, HistoryOutlined, CheckCircleOutlined,
-  UserOutlined, CalendarOutlined
+  UserOutlined, CalendarOutlined, ThunderboltOutlined, DeleteOutlined
 } from "@ant-design/icons";
 import { coachApi } from "../services/api";
+import type { PlanV2, PlanItemV2 } from '../types';
+import ScoreBar from "../components/ScoreBar";
+import { riskColor } from "../utils/riskColor";
 
 // ── Types ──────────────────────────────────────────────────
 interface FMSRecord {
@@ -51,26 +54,12 @@ interface StudentProfile {
 }
 
 // ── Helpers ────────────────────────────────────────────────
-const riskColor: Record<string, string> = { low: "green", medium: "orange", high: "red" };
 const phaseLabel: Record<string, string> = {
   WARMUP: "热身", ACTIVATION: "激活", MAIN: "主训练", COOLDOWN: "冷身",
 };
 const statusLabel: Record<string, string> = {
   ACTIVE: "进行中", LOCKED: "已锁定", COMPLETED: "已完成",
 };
-
-const ScoreBar: React.FC<{ label: string; value: number }> = ({ label, value }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-    <span style={{ width: 50, fontSize: 12, color: "#888" }}>{label}</span>
-    <div style={{ flex: 1, height: 8, background: "#f0f0f0", borderRadius: 4 }}>
-      <div style={{
-        width: `${Math.min(value || 0, 100)}%`, height: "100%", borderRadius: 4,
-        background: (value || 0) >= 60 ? "#52c41a" : (value || 0) >= 40 ? "#faad14" : "#f5222d",
-      }} />
-    </div>
-    <span style={{ width: 36, fontSize: 13, fontWeight: 600, textAlign: "right" }}>{value ?? "-"}</span>
-  </div>
-);
 
 // ── Radar Chart (simple SVG) ───────────────────────────────
 const MiniRadar: React.FC<{ scores: Record<string, number> }> = ({ scores }) => {
@@ -120,15 +109,27 @@ export default function StudentDetailPage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [v2Plans, setV2Plans] = useState<PlanV2[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
 
   useEffect(() => {
     if (!studentId) return;
+    const sid = Number(studentId);
     setLoading(true);
-    coachApi.studentProfile(Number(studentId))
-      .then(setProfile)
-      .catch(() => setProfile(null))
-      .finally(() => setLoading(false));
+    Promise.all([
+      coachApi.studentProfile(sid).then(setProfile).catch(() => setProfile(null)),
+      coachApi.studentPlans(sid).then((data: any) => setV2Plans(Array.isArray(data) ? data : [])).catch(() => setV2Plans([])),
+    ]).finally(() => setLoading(false));
   }, [studentId]);
+
+  const handleDeletePlan = async (planId: number) => {
+    if (!studentId) return;
+    try {
+      await coachApi.deleteStudentPlan(Number(studentId), planId);
+      message.success('训练计划已删除');
+      setV2Plans(prev => prev.filter(p => p.id !== planId));
+    } catch { message.error('删除失败'); }
+  };
 
   if (loading) return <Spin size="large" style={{ display: "block", margin: "80px auto" }} />;
   if (!profile) return <Empty description="学员未找到" style={{ marginTop: 80 }} />;
@@ -329,6 +330,71 @@ export default function StudentDetailPage() {
                         { title: "次数", dataIndex: "reps", width: 60 },
                         { title: "时长(s)", dataIndex: "duration", width: 70 },
                         { title: "难度", dataIndex: "difficulty", width: 60 },
+                      ]}
+                    />
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          ),
+        },
+
+        // ── 训练计划 V2 ──
+        {
+          key: "plans_v2",
+          label: <span><ThunderboltOutlined /> 训练计划 V2 ({v2Plans.length})</span>,
+          children: v2Plans.length === 0 ? (
+            <Empty description="暂无v2训练计划" />
+          ) : (
+            <Row gutter={[16, 16]}>
+              {v2Plans.map(plan => (
+                <Col span={24} key={plan.id}>
+                  <Card size="small" title={
+                    <Space>
+                      <span>{plan.plan_name}</span>
+                      <Tag color={plan.status === 'active' ? 'blue' : plan.status === 'completed' ? 'green' : 'default'}>
+                        {plan.status === 'active' ? '进行中' : plan.status === 'completed' ? '已完成' : '草稿'}
+                      </Tag>
+                      <Tag>{plan.generation_method === 'deepseek' ? 'AI生成' : '本地引擎'}</Tag>
+                    </Space>
+                  } extra={
+                    <Space>
+                      <span style={{ color: '#888', fontSize: 12 }}>{plan.created_at?.slice(0, 10)}</span>
+                      <Popconfirm
+                        title="确认删除此训练计划？"
+                        onConfirm={() => handleDeletePlan(plan.id)}
+                        okText="删除"
+                        cancelText="取消"
+                      >
+                        <Button type="link" danger size="small" icon={<DeleteOutlined />}>删除</Button>
+                      </Popconfirm>
+                    </Space>
+                  }>
+                    {plan.overall_strategy && (
+                      <Typography.Paragraph ellipsis={{ rows: 2 }} type="secondary" style={{ marginBottom: 12 }}>
+                        {plan.overall_strategy}
+                      </Typography.Paragraph>
+                    )}
+                    <Table
+                      dataSource={plan.items || []}
+                      rowKey="id"
+                      size="small"
+                      pagination={false}
+                      columns={[
+                        { title: '动作', dataIndex: 'action_name', ellipsis: true },
+                        { title: '阶段', dataIndex: 'phase', width: 60, render: (v: string) => {
+                          const m: Record<string, string> = { warmup: '热身', main: '主体', cooldown: '冷身' };
+                          return <Tag>{m[v] || v}</Tag>;
+                        }},
+                        { title: '组数', dataIndex: 'sets', width: 50 },
+                        { title: '次数', dataIndex: 'reps', width: 50 },
+                        { title: '时长(s)', dataIndex: 'duration_seconds', width: 70 },
+                        { title: '难度', dataIndex: 'difficulty', width: 50 },
+                        { title: '强度', dataIndex: 'intensity', width: 60, render: (v: string) => {
+                          const colors: Record<string, string> = { LOW: 'green', MEDIUM: 'orange', HIGH: 'red' };
+                          return <Tag color={colors[v] || 'default'}>{v}</Tag>;
+                        }},
+                        { title: '备注', dataIndex: 'notes', ellipsis: true, render: (v: string) => v || '-' },
                       ]}
                     />
                   </Card>

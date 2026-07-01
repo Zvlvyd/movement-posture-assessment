@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Integer, String, Float, DateTime, ForeignKey, Text, Enum, Boolean, Table
 )
 from sqlalchemy.orm import relationship
-from datetime import datetime, date
+from datetime import datetime
 from backend.database.connection import Base
 import enum
 
@@ -45,6 +45,10 @@ class User(Base):
     gender = Column(String(10))
     created_at = Column(DateTime, default=datetime.utcnow)
     is_active = Column(Boolean, default=True)
+    token_version = Column(Integer, default=0, nullable=False)
+    last_login_at = Column(DateTime, nullable=True, comment="最近一次登录时间")
+    last_active_at = Column(DateTime, nullable=True, comment="最近一次活跃时间")
+    deleted_at = Column(DateTime, nullable=True, comment="软删除时间（NULL表示未删除）")
 
     fms_records = relationship('FMSRecord', back_populates='user')
     prescriptions = relationship('Prescription', back_populates='user')
@@ -53,6 +57,7 @@ class User(Base):
     cycle_config = relationship('UserCycleConfig', back_populates='user', uselist=False)
     system_logs = relationship('SystemLog', back_populates='user')
     assessment_records = relationship('AssessmentRecord', back_populates='user')
+    custom_actions = relationship('ActionLibrary', foreign_keys='ActionLibrary.created_by', back_populates='creator')
 
 class FMSRecord(Base):
     __tablename__ = 'fms_record'
@@ -139,11 +144,48 @@ class ActionLibrary(Base):
     name = Column(String(100), nullable=False)
     category = Column(String(50))
     difficulty = Column(Integer, default=1)
-    target_body_parts = Column(String(200))
+    target_body_parts = Column(Text)
     description = Column(Text)
     video_url = Column(String(500))
     thumbnail_url = Column(String(500))
+    steps = Column(Text, nullable=True, comment="JSON array of step strings")
+    cues = Column(Text, nullable=True, comment="JSON array of cue strings")
+    contraindications = Column(Text, nullable=True, comment="JSON object: dimension→min threshold")
+    family = Column(String(100), nullable=True, comment="动作家族标识如 pushup, squat")
+    family_name = Column(String(200), nullable=True, comment="动作家族中文名")
+    is_custom = Column(Boolean, default=False, comment="是否为教练自定义动作")
+    created_by = Column(Integer, ForeignKey('user.id'), nullable=True, comment="自定义动作创建者")
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="最后修改时间")
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    creator = relationship('User', foreign_keys=[created_by], back_populates='custom_actions')
+    media = relationship('ActionMedia', back_populates='action', cascade='all, delete-orphan')
+
+class ActionMedia(Base):
+    __tablename__ = 'action_media'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    action_id = Column(Integer, ForeignKey('action_library.id'), nullable=False, index=True)
+    media_type = Column(String(20), nullable=False, comment="image / video / thumbnail")
+    file_path = Column(String(500), nullable=False, comment="相对路径")
+    original_filename = Column(String(255), nullable=True)
+    file_size = Column(Integer, nullable=True, comment="bytes")
+    sort_order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    action = relationship('ActionLibrary', back_populates='media')
+
+
+class SystemConfig(Base):
+    __tablename__ = 'system_config'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    config_key = Column(String(100), unique=True, nullable=False, index=True)
+    config_value = Column(Text, nullable=True)
+    description = Column(String(255), nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_by = Column(Integer, ForeignKey('user.id'), nullable=True)
+
+    updater = relationship('User', foreign_keys=[updated_by])
+
 
 class ProblemTag(Base):
     __tablename__ = 'problem_tag'

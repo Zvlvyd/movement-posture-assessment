@@ -141,6 +141,24 @@ async def generate_ai_report(
     return {"report": report_text, "cached": False}
 
 
+@router.delete("/records/{record_id}")
+def delete_record(
+    record_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """删除指定评估记录"""
+    svc = AssessmentService(db)
+    try:
+        svc.delete_record(record_id, user.id)
+        return {"success": True, "message": "评估记录已删除"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("删除评估记录异常")
+        raise HTTPException(status_code=500, detail=f"删除失败: {str(e)}")
+
+
 @router.websocket("/ws")
 async def assessment_websocket(
     ws: WebSocket,

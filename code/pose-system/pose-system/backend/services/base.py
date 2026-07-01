@@ -19,7 +19,18 @@ from fastapi import WebSocket
 from sqlalchemy.orm import Session
 
 from models.angle_calculator import AngleCalculator
-from models.engine import model_manager
+from models.engine import model_manager, ModelManager
+
+# 默认模型管理器（yolov8s，精度高）
+_default_model_manager = model_manager
+# 快速模型管理器（yolov8n，延迟低，体态评估实时检测用）
+_model_manager_nano = None
+
+def _get_nano_model_manager():
+    global _model_manager_nano
+    if _model_manager_nano is None:
+        _model_manager_nano = ModelManager("yolov8n-pose.pt")
+    return _model_manager_nano
 
 
 class BaseWebSocketHandler:
@@ -35,9 +46,10 @@ class BaseWebSocketHandler:
                     # ... domain logic
     """
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, model_manager=None):
         self.db = db
         self.angle_calc = AngleCalculator()
+        self._model_manager = model_manager or _default_model_manager
 
     # ── Frame Processing ─────────────────────────────────
 
@@ -56,28 +68,29 @@ class BaseWebSocketHandler:
         except Exception:
             return None
 
-    def extract_keypoints(self, frame) -> tuple:
+    def extract_keypoints(self, frame, conf: float = 0.25) -> tuple:
         """Run YOLO on a frame → (keypoints_xy, confidences) or (None, None)."""
-        return model_manager.get_keypoints(frame)
+        return self._model_manager.get_keypoints(frame, conf=conf)
 
-    def extract_keypoints_from_b64(self, b64_str: str) -> tuple:
+    def extract_keypoints_from_b64(self, b64_str: str, conf: float = 0.25) -> tuple:
         """Decode base64 + YOLO → (keypoints_xy, confidences, frame)."""
         frame = self.decode_frame(b64_str)
         if frame is None:
             return None, None, None
-        kp_xy, kp_conf = model_manager.get_keypoints(frame)
+        kp_xy, kp_conf = self._model_manager.get_keypoints(frame, conf=conf)
         return kp_xy, kp_conf, frame
 
-    def extract_multi_keypoints(self, frame) -> List[dict]:
+    def extract_multi_keypoints(self, frame, conf: float = 0.25) -> List[dict]:
         """Run YOLO on a frame → list of person dicts (multi-person)."""
-        return model_manager.get_multi_keypoints(frame)
+        return self._model_manager.get_multi_keypoints(frame, conf=conf)
 
-    def extract_keypoints_from_msg(self, msg: dict, key: str = "data") -> tuple:
+    def extract_keypoints_from_msg(self, msg: dict, key: str = "data", conf: float = 0.25) -> tuple:
         """Extract keypoints from a WebSocket message dict.
 
         Args:
             msg: The parsed JSON message.
             key: The key containing the base64 image ("data" or "image").
+            conf: YOLO person detection confidence threshold.
 
         Returns:
             (keypoints_xy, confidences, frame) or (None, None, None).
@@ -85,7 +98,7 @@ class BaseWebSocketHandler:
         b64 = msg.get(key, "")
         if not b64:
             return None, None, None
-        return self.extract_keypoints_from_b64(b64)
+        return self.extract_keypoints_from_b64(b64, conf=conf)
 
     # ── Angle Computation ────────────────────────────────
 

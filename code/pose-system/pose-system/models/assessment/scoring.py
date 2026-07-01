@@ -229,16 +229,22 @@ class UnifiedScoringEngine:
         total_penalty = 0
         
         for finding in asymmetry_findings:
-            diff = getattr(finding, 'diff_pct', 0)
+            # Handle both dict and dataclass/object types
+            if isinstance(finding, dict):
+                diff = finding.get('diff_pct', 0)
+                joint = finding.get('joint', 'unknown')
+            else:
+                diff = getattr(finding, 'diff_pct', 0)
+                joint = getattr(finding, 'joint', 'unknown')
             if diff >= 35:
                 penalty = 30
-                details.append(f"{finding.joint}: 偏差{diff}% (严重) -{penalty}分")
+                details.append(f"{joint}: 偏差{diff}% (严重) -{penalty}分")
             elif diff >= 20:
                 penalty = 15
-                details.append(f"{finding.joint}: 偏差{diff}% (中度) -{penalty}分")
+                details.append(f"{joint}: 偏差{diff}% (中度) -{penalty}分")
             elif diff >= 10:
                 penalty = 8
-                details.append(f"{finding.joint}: 偏差{diff}% (轻度) -{penalty}分")
+                details.append(f"{joint}: 偏差{diff}% (轻度) -{penalty}分")
             else:
                 penalty = 0
             total_penalty += penalty

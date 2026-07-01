@@ -28,6 +28,7 @@ from .prescription_builder import (
     PrescriptionBuilder,
     PrescriptionPlan,
     PrescriptionPlanItem,
+    SkippedItem,
 )
 from .template_engine import TemplateEngine
 from .deepseek_prescription import DeepSeekPrescription, DeepSeekResult
@@ -48,6 +49,7 @@ __all__ = [
     "PrescriptionBuilder",
     "PrescriptionPlan",
     "PrescriptionPlanItem",
+    "SkippedItem",
     # Template & DeepSeek
     "TemplateEngine",
     "DeepSeekPrescription",

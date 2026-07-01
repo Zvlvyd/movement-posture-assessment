@@ -100,6 +100,7 @@ class PrescriptionV2Service:
         generation_method = "local"
         fallback_used = False
         error_msg = ""
+        raw_response = None
 
         if not force_local and self._deepseek_available():
             try:
@@ -109,6 +110,7 @@ class PrescriptionV2Service:
                 if result.success and result.plan:
                     plan_data = result.plan
                     generation_method = "deepseek"
+                    raw_response = result.raw_response
                 else:
                     logger.warning(f"DeepSeek 处方生成失败: {result.error_message}，回退本地引擎")
                     error_msg = result.error_message
@@ -129,7 +131,7 @@ class PrescriptionV2Service:
         db_plan = self._save_plan(
             db, user_id, assessment_record_id, fms_record_id,
             plan_data, generation_method,
-            raw_response=None,  # 仅 deepseek 方法时有值
+            raw_response=raw_response,
         )
 
         # 5. 构建响应
@@ -267,10 +269,13 @@ class PrescriptionV2Service:
     ) -> PrescriptionPlan:
         """保存处方计划到数据库。"""
         import json
+        from dataclasses import asdict
+
         plan_meta = json.dumps({
             "detected_problems": plan_data.detected_problems,
             "fms_summary": plan_data.fms_summary,
             "total_volume": plan_data.total_volume,
+            "skipped_items": [asdict(s) for s in (plan_data.skipped_items or [])],
         }, ensure_ascii=False)
 
         db_plan = PrescriptionPlan(

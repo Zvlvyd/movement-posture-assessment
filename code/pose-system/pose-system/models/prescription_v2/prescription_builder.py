@@ -44,6 +44,16 @@ class PrescriptionPlanItem:
 
 
 @dataclass
+class SkippedItem:
+    """AI 选中但被过滤掉的动作。"""
+    action_id: str
+    action_name: str = ""
+    phase: str = ""
+    reason: str = ""  # unknown_action | fms_contraindication | difficulty_exceeded
+    detail: str = ""  # 详细原因
+
+
+@dataclass
 class PrescriptionPlan:
     """完整训练处方计划。"""
     plan_name: str
@@ -56,6 +66,7 @@ class PrescriptionPlan:
     fms_summary: Dict = field(default_factory=dict)
     phases: Dict[str, List[PrescriptionPlanItem]] = field(default_factory=dict)
     total_volume: Dict[str, int] = field(default_factory=dict)
+    skipped_items: List[SkippedItem] = field(default_factory=list)
     created_at: str = ""
 
     def __post_init__(self):
@@ -313,7 +324,7 @@ class PrescriptionBuilder:
                         sets=vol.sets,
                         reps=vol.reps,
                         duration_seconds=vol.duration_seconds,
-                        order_index=len(phases[phase_name]),
+                        order_index=len(phases[phase_name]) + 1,
                         difficulty=action.difficulty,
                         intensity=action.intensity,
                         notes=vol.notes,
@@ -351,7 +362,7 @@ class PrescriptionBuilder:
                         sets=vol.sets,
                         reps=vol.reps,
                         duration_seconds=vol.duration_seconds,
-                        order_index=len(phases["main"]),
+                        order_index=len(phases["main"]) + 1,
                         difficulty=action.difficulty,
                         intensity=action.intensity,
                         notes="（自动补充覆盖）" + vol.notes,
