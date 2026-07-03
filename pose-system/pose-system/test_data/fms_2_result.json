@@ -1,0 +1,746 @@
+{
+  "video_info": {
+    "path": "test_data\\fms_2.mp4",
+    "width": 1588,
+    "height": 1080,
+    "fps": 30.0,
+    "total_frames": 101
+  },
+  "processing": {
+    "frames_processed": 33,
+    "frames_with_person": 33,
+    "model": "yolov8n-pose.pt",
+    "device": "cpu"
+  },
+  "summary": {
+    "overall_score": 67.8,
+    "risk_level": "中风险",
+    "dimension_scores": {
+      "upper_limb": 67.8
+    },
+    "details": {
+      "闭眼单腿站立": {
+        "score": null,
+        "status": "skipped"
+      },
+      "徒手过头深蹲": {
+        "score": null,
+        "status": "skipped"
+      },
+      "肩关节活动度": {
+        "score": 67.8,
+        "data": {
+          "hand_dist_px": 636.4,
+          "ratio": 0.98
+        },
+        "frames_evaluated": 6
+      },
+      "平板支撑": {
+        "score": null,
+        "status": "skipped"
+      },
+      "弓步蹲对称": {
+        "score": null,
+        "status": "skipped"
+      }
+    },
+    "total_frames": 33
+  },
+  "frame_results": [
+    {
+      "frame": 3,
+      "angles": {
+        "left_knee": 39.5,
+        "right_knee": 48.0,
+        "left_hip": 11.2,
+        "right_hip": 18.5,
+        "left_shoulder": 26.6,
+        "right_shoulder": 160.6,
+        "left_elbow": 79.8,
+        "right_elbow": 115.3,
+        "trunk_tilt": 2.6,
+        "neck_tilt": 29.4
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 6,
+      "angles": {
+        "left_knee": 132.0,
+        "right_knee": 125.9,
+        "left_hip": 164.0,
+        "right_hip": 155.0,
+        "left_shoulder": 22.6,
+        "right_shoulder": 24.5,
+        "left_elbow": 165.0,
+        "right_elbow": 177.0,
+        "trunk_tilt": 1.1,
+        "neck_tilt": 4.9
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 9,
+      "angles": {
+        "left_knee": 84.6,
+        "right_knee": 109.6,
+        "left_hip": 165.8,
+        "right_hip": 155.3,
+        "left_shoulder": 23.6,
+        "right_shoulder": 28.2,
+        "left_elbow": 167.4,
+        "right_elbow": 173.3,
+        "trunk_tilt": 1.8,
+        "neck_tilt": 3.8
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 12,
+      "angles": {
+        "left_knee": 76.1,
+        "right_knee": 108.3,
+        "left_hip": 157.8,
+        "right_hip": 155.1,
+        "left_shoulder": 26.7,
+        "right_shoulder": 35.4,
+        "left_elbow": 158.8,
+        "right_elbow": 123.8,
+        "trunk_tilt": 0.9,
+        "neck_tilt": 0.3
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 15,
+      "angles": {
+        "left_knee": 70.5,
+        "right_knee": 94.4,
+        "left_hip": 152.1,
+        "right_hip": 168.7,
+        "left_shoulder": 32.0,
+        "right_shoulder": 44.7,
+        "left_elbow": 150.4,
+        "right_elbow": 103.9,
+        "trunk_tilt": 0.4,
+        "neck_tilt": 3.0
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 18,
+      "angles": {
+        "left_knee": 26.5,
+        "right_knee": 54.5,
+        "left_hip": 104.6,
+        "right_hip": 38.5,
+        "left_shoulder": 43.5,
+        "right_shoulder": 71.8,
+        "left_elbow": 130.0,
+        "right_elbow": 92.5,
+        "trunk_tilt": 0.2,
+        "neck_tilt": 4.8
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 21,
+      "angles": {
+        "left_knee": 21.7,
+        "right_knee": 61.7,
+        "left_hip": 29.9,
+        "right_hip": 21.5,
+        "left_shoulder": 43.0,
+        "right_shoulder": 102.6,
+        "left_elbow": 116.9,
+        "right_elbow": 91.7,
+        "trunk_tilt": 1.5,
+        "neck_tilt": 6.3
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 24,
+      "angles": {
+        "left_knee": 25.0,
+        "right_knee": 50.7,
+        "left_hip": 32.8,
+        "right_hip": 32.0,
+        "left_shoulder": 52.2,
+        "right_shoulder": 140.1,
+        "left_elbow": 102.4,
+        "right_elbow": 126.0,
+        "trunk_tilt": 0.4,
+        "neck_tilt": 0.2
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 27,
+      "angles": {
+        "left_knee": 20.9,
+        "right_knee": 52.8,
+        "left_hip": 41.6,
+        "right_hip": 34.0,
+        "left_shoulder": 45.9,
+        "right_shoulder": 150.6,
+        "left_elbow": 95.4,
+        "right_elbow": 127.3,
+        "trunk_tilt": 0.2,
+        "neck_tilt": 2.9
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 30,
+      "angles": {
+        "left_knee": 46.5,
+        "right_knee": 77.6,
+        "left_hip": 18.5,
+        "right_hip": 14.4,
+        "left_shoulder": 36.6,
+        "right_shoulder": 157.2,
+        "left_elbow": 85.4,
+        "right_elbow": 127.2,
+        "trunk_tilt": 1.6,
+        "neck_tilt": 23.2
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 33,
+      "angles": {
+        "left_knee": 53.8,
+        "right_knee": 96.2,
+        "left_hip": 10.8,
+        "right_hip": 1.5,
+        "left_shoulder": 31.0,
+        "right_shoulder": 161.6,
+        "left_elbow": 72.5,
+        "right_elbow": 126.9,
+        "trunk_tilt": 2.2,
+        "neck_tilt": 29.3
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 36,
+      "angles": {
+        "left_knee": 45.4,
+        "right_knee": 60.7,
+        "left_hip": 4.0,
+        "right_hip": 7.8,
+        "left_shoulder": 24.8,
+        "right_shoulder": 157.9,
+        "left_elbow": 75.6,
+        "right_elbow": 115.9,
+        "trunk_tilt": 4.6,
+        "neck_tilt": 23.5
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 39,
+      "angles": {
+        "left_knee": 67.5,
+        "right_knee": 76.3,
+        "left_hip": 12.6,
+        "right_hip": 2.4,
+        "left_shoulder": 22.7,
+        "right_shoulder": 163.5,
+        "left_elbow": 71.8,
+        "right_elbow": 137.4,
+        "trunk_tilt": 3.6,
+        "neck_tilt": 19.5
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 42,
+      "angles": {
+        "left_knee": 54.0,
+        "right_knee": 53.6,
+        "left_hip": 6.6,
+        "right_hip": 3.7,
+        "left_shoulder": 25.5,
+        "right_shoulder": 173.6,
+        "left_elbow": 63.2,
+        "right_elbow": 152.1,
+        "trunk_tilt": 0.5,
+        "neck_tilt": 9.1
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 45,
+      "angles": {
+        "left_knee": 39.6,
+        "right_knee": 47.5,
+        "left_hip": 2.7,
+        "right_hip": 2.1,
+        "left_shoulder": 31.4,
+        "right_shoulder": 167.4,
+        "left_elbow": 57.6,
+        "right_elbow": 144.2,
+        "trunk_tilt": 1.8,
+        "neck_tilt": 12.8
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 48,
+      "angles": {
+        "left_knee": 40.2,
+        "right_knee": 41.2,
+        "left_hip": 12.4,
+        "right_hip": 18.6,
+        "left_shoulder": 33.2,
+        "right_shoulder": 117.1,
+        "left_elbow": 49.6,
+        "right_elbow": 153.0,
+        "trunk_tilt": 1.5,
+        "neck_tilt": 24.3
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 51,
+      "angles": {
+        "left_knee": 36.3,
+        "right_knee": 43.9,
+        "left_hip": 21.3,
+        "right_hip": 22.3,
+        "left_shoulder": 33.6,
+        "right_shoulder": 115.1,
+        "left_elbow": 48.1,
+        "right_elbow": 153.8,
+        "trunk_tilt": 2.3,
+        "neck_tilt": 26.2
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 54,
+      "angles": {
+        "left_knee": 38.4,
+        "right_knee": 46.2,
+        "left_hip": 24.3,
+        "right_hip": 24.7,
+        "left_shoulder": 33.4,
+        "right_shoulder": 115.0,
+        "left_elbow": 45.6,
+        "right_elbow": 152.6,
+        "trunk_tilt": 2.4,
+        "neck_tilt": 25.0
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 57,
+      "angles": {
+        "left_knee": 36.5,
+        "right_knee": 26.9,
+        "left_hip": 22.3,
+        "right_hip": 39.0,
+        "left_shoulder": 31.0,
+        "right_shoulder": 15.9,
+        "left_elbow": 43.1,
+        "right_elbow": 42.0,
+        "trunk_tilt": 0.6,
+        "neck_tilt": 24.5
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 60,
+      "angles": {
+        "left_knee": 38.9,
+        "right_knee": 30.0,
+        "left_hip": 20.8,
+        "right_hip": 35.0,
+        "left_shoulder": 30.4,
+        "right_shoulder": 18.5,
+        "left_elbow": 42.7,
+        "right_elbow": 51.0,
+        "trunk_tilt": 0.8,
+        "neck_tilt": 22.5
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 63,
+      "angles": {
+        "left_knee": 40.9,
+        "right_knee": 43.9,
+        "left_hip": 31.8,
+        "right_hip": 36.3,
+        "left_shoulder": 29.0,
+        "right_shoulder": 61.3,
+        "left_elbow": 43.4,
+        "right_elbow": 106.2,
+        "trunk_tilt": 3.7,
+        "neck_tilt": 27.6
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 66,
+      "angles": {
+        "left_knee": 38.2,
+        "right_knee": 31.5,
+        "left_hip": 20.4,
+        "right_hip": 33.3,
+        "left_shoulder": 30.6,
+        "right_shoulder": 19.2,
+        "left_elbow": 44.0,
+        "right_elbow": 50.8,
+        "trunk_tilt": 1.5,
+        "neck_tilt": 24.9
+      },
+      "tests": {
+        "2": {
+          "status": "ready",
+          "message": "等待背后触手"
+        }
+      }
+    },
+    {
+      "frame": 69,
+      "angles": {
+        "left_knee": 60.4,
+        "right_knee": 79.8,
+        "left_hip": 46.5,
+        "right_hip": 22.6,
+        "left_shoulder": 68.8,
+        "right_shoulder": 45.6,
+        "left_elbow": 45.5,
+        "right_elbow": 94.2,
+        "trunk_tilt": 1.9,
+        "neck_tilt": 18.3
+      },
+      "tests": {
+        "2": {
+          "status": "started",
+          "message": "检测到背后触手姿态"
+        }
+      }
+    },
+    {
+      "frame": 72,
+      "angles": {
+        "left_knee": 21.0,
+        "right_knee": 50.9,
+        "left_hip": 20.7,
+        "right_hip": 8.1,
+        "left_shoulder": 109.7,
+        "right_shoulder": 38.2,
+        "left_elbow": 94.3,
+        "right_elbow": 118.5,
+        "trunk_tilt": 2.6,
+        "neck_tilt": 1.2
+      },
+      "tests": {
+        "2": {
+          "status": "running",
+          "hand_dist_px": 854.7
+        }
+      }
+    },
+    {
+      "frame": 75,
+      "angles": {
+        "left_knee": 30.6,
+        "right_knee": 78.7,
+        "left_hip": 20.2,
+        "right_hip": 17.8,
+        "left_shoulder": 126.2,
+        "right_shoulder": 39.5,
+        "left_elbow": 98.7,
+        "right_elbow": 146.0,
+        "trunk_tilt": 0.1,
+        "neck_tilt": 8.8
+      },
+      "tests": {
+        "2": {
+          "status": "running",
+          "hand_dist_px": 812.7
+        }
+      }
+    },
+    {
+      "frame": 78,
+      "angles": {
+        "left_knee": 64.3,
+        "right_knee": 84.3,
+        "left_hip": 50.0,
+        "right_hip": 26.7,
+        "left_shoulder": 124.5,
+        "right_shoulder": 41.6,
+        "left_elbow": 106.1,
+        "right_elbow": 139.0,
+        "trunk_tilt": 1.2,
+        "neck_tilt": 18.1
+      },
+      "tests": {
+        "2": {
+          "status": "running",
+          "hand_dist_px": 755.8
+        }
+      }
+    },
+    {
+      "frame": 81,
+      "angles": {
+        "left_knee": 16.2,
+        "right_knee": 49.0,
+        "left_hip": 39.4,
+        "right_hip": 35.9,
+        "left_shoulder": 128.5,
+        "right_shoulder": 37.7,
+        "left_elbow": 123.1,
+        "right_elbow": 134.8,
+        "trunk_tilt": 1.5,
+        "neck_tilt": 21.1
+      },
+      "tests": {
+        "2": {
+          "status": "running",
+          "hand_dist_px": 678.9
+        }
+      }
+    },
+    {
+      "frame": 84,
+      "angles": {
+        "left_knee": 130.9,
+        "right_knee": 44.1,
+        "left_hip": 71.8,
+        "right_hip": 44.0,
+        "left_shoulder": 112.3,
+        "right_shoulder": 85.5,
+        "left_elbow": 99.3,
+        "right_elbow": 158.2,
+        "trunk_tilt": 1.2,
+        "neck_tilt": 15.1
+      },
+      "tests": {
+        "2": {
+          "status": "completed",
+          "hand_dist_ratio": 0.98,
+          "score": 67.8,
+          "message": "双手距比 0.98"
+        }
+      }
+    },
+    {
+      "frame": 87,
+      "angles": {
+        "left_knee": 107.1,
+        "right_knee": 118.6,
+        "left_hip": 69.6,
+        "right_hip": 68.9,
+        "left_shoulder": 36.4,
+        "right_shoulder": 98.1,
+        "left_elbow": 132.8,
+        "right_elbow": 148.9,
+        "trunk_tilt": 2.1,
+        "neck_tilt": 22.9
+      },
+      "tests": {
+        "2": {
+          "status": "done",
+          "score": 67.8
+        }
+      }
+    },
+    {
+      "frame": 90,
+      "angles": {
+        "left_knee": 122.6,
+        "right_knee": 88.9,
+        "left_hip": 83.6,
+        "right_hip": 67.4,
+        "left_shoulder": 48.2,
+        "right_shoulder": 31.5,
+        "left_elbow": 179.1,
+        "right_elbow": 38.5,
+        "trunk_tilt": 4.2,
+        "neck_tilt": 27.3
+      },
+      "tests": {
+        "2": {
+          "status": "done",
+          "score": 67.8
+        }
+      }
+    },
+    {
+      "frame": 93,
+      "angles": {
+        "left_knee": 77.0,
+        "right_knee": 34.1,
+        "left_hip": 84.3,
+        "right_hip": 56.8,
+        "left_shoulder": 85.8,
+        "right_shoulder": 32.6,
+        "left_elbow": 131.8,
+        "right_elbow": 89.2,
+        "trunk_tilt": 3.9,
+        "neck_tilt": 36.3
+      },
+      "tests": {
+        "2": {
+          "status": "done",
+          "score": 67.8
+        }
+      }
+    },
+    {
+      "frame": 96,
+      "angles": {
+        "left_knee": 82.3,
+        "right_knee": 16.6,
+        "left_hip": 77.4,
+        "right_hip": 53.9,
+        "left_shoulder": 65.9,
+        "right_shoulder": 34.0,
+        "left_elbow": 123.2,
+        "right_elbow": 48.4,
+        "trunk_tilt": 4.2,
+        "neck_tilt": 37.8
+      },
+      "tests": {
+        "2": {
+          "status": "done",
+          "score": 67.8
+        }
+      }
+    },
+    {
+      "frame": 99,
+      "angles": {
+        "left_knee": 81.7,
+        "right_knee": 13.0,
+        "left_hip": 76.5,
+        "right_hip": 49.5,
+        "left_shoulder": 66.7,
+        "right_shoulder": 29.4,
+        "left_elbow": 107.8,
+        "right_elbow": 54.7,
+        "trunk_tilt": 4.2,
+        "neck_tilt": 39.0
+      },
+      "tests": {
+        "2": {
+          "status": "done",
+          "score": 67.8
+        }
+      }
+    }
+  ]
+}

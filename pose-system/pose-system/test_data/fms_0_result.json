@@ -1,0 +1,1659 @@
+{
+  "video_info": {
+    "path": "test_data\\fms_0.mp4",
+    "width": 1588,
+    "height": 1080,
+    "fps": 30.0,
+    "total_frames": 229
+  },
+  "processing": {
+    "frames_processed": 76,
+    "frames_with_person": 76,
+    "model": "yolov8n-pose.pt",
+    "device": "cpu"
+  },
+  "summary": {
+    "overall_score": 2.2,
+    "risk_level": "极高风险",
+    "dimension_scores": {
+      "balance": 2.2
+    },
+    "details": {
+      "闭眼单腿站立": {
+        "score": 2.2,
+        "data": {
+          "duration_sec": 1.3
+        },
+        "frames_evaluated": 14
+      },
+      "徒手过头深蹲": {
+        "score": null,
+        "status": "skipped"
+      },
+      "肩关节活动度": {
+        "score": null,
+        "status": "skipped"
+      },
+      "平板支撑": {
+        "score": null,
+        "status": "skipped"
+      },
+      "弓步蹲对称": {
+        "score": null,
+        "status": "skipped"
+      }
+    },
+    "total_frames": 76
+  },
+  "frame_results": [
+    {
+      "frame": 3,
+      "angles": {
+        "left_knee": 171.1,
+        "right_knee": 174.9,
+        "left_hip": 169.5,
+        "right_hip": 173.7,
+        "left_shoulder": 18.3,
+        "right_shoulder": 30.4,
+        "left_elbow": 160.1,
+        "right_elbow": 49.1,
+        "trunk_tilt": 3.0,
+        "neck_tilt": 1.6
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 6,
+      "angles": {
+        "left_knee": 171.4,
+        "right_knee": 175.4,
+        "left_hip": 169.5,
+        "right_hip": 173.7,
+        "left_shoulder": 17.8,
+        "right_shoulder": 31.4,
+        "left_elbow": 160.6,
+        "right_elbow": 53.7,
+        "trunk_tilt": 3.1,
+        "neck_tilt": 1.8
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 9,
+      "angles": {
+        "left_knee": 171.4,
+        "right_knee": 175.2,
+        "left_hip": 169.4,
+        "right_hip": 173.7,
+        "left_shoulder": 17.9,
+        "right_shoulder": 31.2,
+        "left_elbow": 161.1,
+        "right_elbow": 57.1,
+        "trunk_tilt": 3.3,
+        "neck_tilt": 2.2
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 12,
+      "angles": {
+        "left_knee": 171.1,
+        "right_knee": 177.6,
+        "left_hip": 168.7,
+        "right_hip": 175.0,
+        "left_shoulder": 19.2,
+        "right_shoulder": 32.9,
+        "left_elbow": 158.4,
+        "right_elbow": 65.1,
+        "trunk_tilt": 3.4,
+        "neck_tilt": 3.1
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 15,
+      "angles": {
+        "left_knee": 171.3,
+        "right_knee": 177.8,
+        "left_hip": 168.8,
+        "right_hip": 175.0,
+        "left_shoulder": 19.1,
+        "right_shoulder": 33.8,
+        "left_elbow": 159.1,
+        "right_elbow": 74.0,
+        "trunk_tilt": 3.8,
+        "neck_tilt": 2.9
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 18,
+      "angles": {
+        "left_knee": 172.6,
+        "right_knee": 178.3,
+        "left_hip": 169.3,
+        "right_hip": 175.0,
+        "left_shoulder": 19.3,
+        "right_shoulder": 35.1,
+        "left_elbow": 159.3,
+        "right_elbow": 84.0,
+        "trunk_tilt": 3.9,
+        "neck_tilt": 3.1
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 21,
+      "angles": {
+        "left_knee": 173.3,
+        "right_knee": 178.1,
+        "left_hip": 170.3,
+        "right_hip": 174.5,
+        "left_shoulder": 19.5,
+        "right_shoulder": 35.2,
+        "left_elbow": 159.3,
+        "right_elbow": 90.8,
+        "trunk_tilt": 4.2,
+        "neck_tilt": 2.8
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 24,
+      "angles": {
+        "left_knee": 173.9,
+        "right_knee": 177.8,
+        "left_hip": 170.6,
+        "right_hip": 174.4,
+        "left_shoulder": 19.6,
+        "right_shoulder": 35.1,
+        "left_elbow": 159.2,
+        "right_elbow": 91.8,
+        "trunk_tilt": 4.1,
+        "neck_tilt": 3.0
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 27,
+      "angles": {
+        "left_knee": 174.0,
+        "right_knee": 176.9,
+        "left_hip": 171.0,
+        "right_hip": 174.2,
+        "left_shoulder": 19.6,
+        "right_shoulder": 34.8,
+        "left_elbow": 159.1,
+        "right_elbow": 93.7,
+        "trunk_tilt": 4.0,
+        "neck_tilt": 4.0
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 30,
+      "angles": {
+        "left_knee": 174.9,
+        "right_knee": 177.0,
+        "left_hip": 171.2,
+        "right_hip": 174.5,
+        "left_shoulder": 19.8,
+        "right_shoulder": 35.3,
+        "left_elbow": 158.5,
+        "right_elbow": 94.7,
+        "trunk_tilt": 3.7,
+        "neck_tilt": 4.7
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 33,
+      "angles": {
+        "left_knee": 175.1,
+        "right_knee": 177.1,
+        "left_hip": 171.4,
+        "right_hip": 174.6,
+        "left_shoulder": 20.1,
+        "right_shoulder": 34.3,
+        "left_elbow": 157.6,
+        "right_elbow": 97.3,
+        "trunk_tilt": 3.3,
+        "neck_tilt": 4.1
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 36,
+      "angles": {
+        "left_knee": 175.4,
+        "right_knee": 176.2,
+        "left_hip": 173.9,
+        "right_hip": 173.1,
+        "left_shoulder": 19.9,
+        "right_shoulder": 32.6,
+        "left_elbow": 156.3,
+        "right_elbow": 98.1,
+        "trunk_tilt": 2.9,
+        "neck_tilt": 2.5
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 39,
+      "angles": {
+        "left_knee": 175.4,
+        "right_knee": 176.8,
+        "left_hip": 174.2,
+        "right_hip": 174.0,
+        "left_shoulder": 19.1,
+        "right_shoulder": 32.9,
+        "left_elbow": 158.6,
+        "right_elbow": 92.6,
+        "trunk_tilt": 1.9,
+        "neck_tilt": 5.1
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 42,
+      "angles": {
+        "left_knee": 175.8,
+        "right_knee": 179.2,
+        "left_hip": 175.6,
+        "right_hip": 173.4,
+        "left_shoulder": 18.6,
+        "right_shoulder": 34.2,
+        "left_elbow": 160.8,
+        "right_elbow": 97.1,
+        "trunk_tilt": 0.8,
+        "neck_tilt": 3.9
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 45,
+      "angles": {
+        "left_knee": 175.0,
+        "right_knee": 178.6,
+        "left_hip": 176.3,
+        "right_hip": 172.9,
+        "left_shoulder": 17.8,
+        "right_shoulder": 33.9,
+        "left_elbow": 163.9,
+        "right_elbow": 92.3,
+        "trunk_tilt": 0.8,
+        "neck_tilt": 2.9
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 48,
+      "angles": {
+        "left_knee": 175.5,
+        "right_knee": 177.1,
+        "left_hip": 177.4,
+        "right_hip": 171.4,
+        "left_shoulder": 18.1,
+        "right_shoulder": 32.3,
+        "left_elbow": 164.7,
+        "right_elbow": 95.1,
+        "trunk_tilt": 0.4,
+        "neck_tilt": 1.4
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 51,
+      "angles": {
+        "left_knee": 175.8,
+        "right_knee": 175.5,
+        "left_hip": 177.6,
+        "right_hip": 170.7,
+        "left_shoulder": 19.2,
+        "right_shoulder": 32.2,
+        "left_elbow": 164.0,
+        "right_elbow": 96.5,
+        "trunk_tilt": 0.6,
+        "neck_tilt": 0.1
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 54,
+      "angles": {
+        "left_knee": 176.4,
+        "right_knee": 176.9,
+        "left_hip": 177.9,
+        "right_hip": 171.3,
+        "left_shoulder": 19.2,
+        "right_shoulder": 33.4,
+        "left_elbow": 167.5,
+        "right_elbow": 96.0,
+        "trunk_tilt": 1.0,
+        "neck_tilt": 0.6
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 57,
+      "angles": {
+        "left_knee": 177.2,
+        "right_knee": 176.3,
+        "left_hip": 178.3,
+        "right_hip": 171.7,
+        "left_shoulder": 20.4,
+        "right_shoulder": 34.6,
+        "left_elbow": 166.5,
+        "right_elbow": 94.9,
+        "trunk_tilt": 1.7,
+        "neck_tilt": 1.1
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 60,
+      "angles": {
+        "left_knee": 177.4,
+        "right_knee": 176.7,
+        "left_hip": 178.0,
+        "right_hip": 172.2,
+        "left_shoulder": 20.6,
+        "right_shoulder": 34.3,
+        "left_elbow": 166.0,
+        "right_elbow": 94.4,
+        "trunk_tilt": 1.8,
+        "neck_tilt": 0.6
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 63,
+      "angles": {
+        "left_knee": 177.7,
+        "right_knee": 177.5,
+        "left_hip": 177.6,
+        "right_hip": 173.1,
+        "left_shoulder": 20.3,
+        "right_shoulder": 33.9,
+        "left_elbow": 164.1,
+        "right_elbow": 95.3,
+        "trunk_tilt": 1.7,
+        "neck_tilt": 0.3
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 66,
+      "angles": {
+        "left_knee": 176.3,
+        "right_knee": 177.0,
+        "left_hip": 175.9,
+        "right_hip": 173.8,
+        "left_shoulder": 19.3,
+        "right_shoulder": 33.0,
+        "left_elbow": 165.3,
+        "right_elbow": 96.0,
+        "trunk_tilt": 1.6,
+        "neck_tilt": 2.7
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 69,
+      "angles": {
+        "left_knee": 175.9,
+        "right_knee": 177.5,
+        "left_hip": 175.7,
+        "right_hip": 174.1,
+        "left_shoulder": 17.6,
+        "right_shoulder": 34.3,
+        "left_elbow": 165.3,
+        "right_elbow": 93.6,
+        "trunk_tilt": 0.7,
+        "neck_tilt": 1.4
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 72,
+      "angles": {
+        "left_knee": 175.2,
+        "right_knee": 179.0,
+        "left_hip": 174.4,
+        "right_hip": 175.5,
+        "left_shoulder": 17.6,
+        "right_shoulder": 35.9,
+        "left_elbow": 162.7,
+        "right_elbow": 92.7,
+        "trunk_tilt": 0.4,
+        "neck_tilt": 2.5
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 75,
+      "angles": {
+        "left_knee": 175.3,
+        "right_knee": 178.0,
+        "left_hip": 174.3,
+        "right_hip": 174.9,
+        "left_shoulder": 17.6,
+        "right_shoulder": 35.5,
+        "left_elbow": 160.5,
+        "right_elbow": 99.2,
+        "trunk_tilt": 1.1,
+        "neck_tilt": 3.6
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 78,
+      "angles": {
+        "left_knee": 174.3,
+        "right_knee": 177.2,
+        "left_hip": 173.6,
+        "right_hip": 174.7,
+        "left_shoulder": 17.4,
+        "right_shoulder": 36.4,
+        "left_elbow": 162.5,
+        "right_elbow": 102.5,
+        "trunk_tilt": 1.7,
+        "neck_tilt": 4.8
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 81,
+      "angles": {
+        "left_knee": 174.7,
+        "right_knee": 177.6,
+        "left_hip": 172.8,
+        "right_hip": 175.4,
+        "left_shoulder": 17.0,
+        "right_shoulder": 36.3,
+        "left_elbow": 162.7,
+        "right_elbow": 103.5,
+        "trunk_tilt": 1.6,
+        "neck_tilt": 5.9
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 84,
+      "angles": {
+        "left_knee": 174.1,
+        "right_knee": 176.3,
+        "left_hip": 172.9,
+        "right_hip": 175.0,
+        "left_shoulder": 18.0,
+        "right_shoulder": 35.4,
+        "left_elbow": 160.2,
+        "right_elbow": 103.3,
+        "trunk_tilt": 2.8,
+        "neck_tilt": 4.5
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 87,
+      "angles": {
+        "left_knee": 173.5,
+        "right_knee": 176.0,
+        "left_hip": 172.9,
+        "right_hip": 174.7,
+        "left_shoulder": 18.4,
+        "right_shoulder": 34.9,
+        "left_elbow": 159.7,
+        "right_elbow": 102.5,
+        "trunk_tilt": 3.2,
+        "neck_tilt": 4.3
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 90,
+      "angles": {
+        "left_knee": 173.2,
+        "right_knee": 177.5,
+        "left_hip": 172.5,
+        "right_hip": 175.3,
+        "left_shoulder": 18.8,
+        "right_shoulder": 35.9,
+        "left_elbow": 159.7,
+        "right_elbow": 102.8,
+        "trunk_tilt": 3.6,
+        "neck_tilt": 5.3
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 93,
+      "angles": {
+        "left_knee": 172.7,
+        "right_knee": 177.8,
+        "left_hip": 172.6,
+        "right_hip": 175.4,
+        "left_shoulder": 19.3,
+        "right_shoulder": 36.2,
+        "left_elbow": 159.3,
+        "right_elbow": 105.9,
+        "trunk_tilt": 4.0,
+        "neck_tilt": 6.2
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 96,
+      "angles": {
+        "left_knee": 172.4,
+        "right_knee": 177.4,
+        "left_hip": 172.3,
+        "right_hip": 175.5,
+        "left_shoulder": 19.4,
+        "right_shoulder": 35.2,
+        "left_elbow": 159.6,
+        "right_elbow": 107.4,
+        "trunk_tilt": 4.2,
+        "neck_tilt": 5.9
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 99,
+      "angles": {
+        "left_knee": 171.0,
+        "right_knee": 178.3,
+        "left_hip": 172.2,
+        "right_hip": 175.8,
+        "left_shoulder": 19.6,
+        "right_shoulder": 35.3,
+        "left_elbow": 159.9,
+        "right_elbow": 108.2,
+        "trunk_tilt": 4.2,
+        "neck_tilt": 6.0
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 102,
+      "angles": {
+        "left_knee": 167.7,
+        "right_knee": 178.9,
+        "left_hip": 171.1,
+        "right_hip": 175.5,
+        "left_shoulder": 21.1,
+        "right_shoulder": 38.4,
+        "left_elbow": 157.3,
+        "right_elbow": 109.8,
+        "trunk_tilt": 4.9,
+        "neck_tilt": 5.3
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 105,
+      "angles": {
+        "left_knee": 167.2,
+        "right_knee": 178.2,
+        "left_hip": 171.3,
+        "right_hip": 175.5,
+        "left_shoulder": 21.4,
+        "right_shoulder": 38.6,
+        "left_elbow": 156.7,
+        "right_elbow": 112.5,
+        "trunk_tilt": 5.3,
+        "neck_tilt": 5.3
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 108,
+      "angles": {
+        "left_knee": 166.8,
+        "right_knee": 178.0,
+        "left_hip": 171.4,
+        "right_hip": 175.5,
+        "left_shoulder": 21.7,
+        "right_shoulder": 38.6,
+        "left_elbow": 156.2,
+        "right_elbow": 113.1,
+        "trunk_tilt": 5.2,
+        "neck_tilt": 5.5
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 111,
+      "angles": {
+        "left_knee": 167.2,
+        "right_knee": 178.3,
+        "left_hip": 171.7,
+        "right_hip": 175.9,
+        "left_shoulder": 21.4,
+        "right_shoulder": 39.2,
+        "left_elbow": 156.7,
+        "right_elbow": 110.6,
+        "trunk_tilt": 5.0,
+        "neck_tilt": 4.7
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 114,
+      "angles": {
+        "left_knee": 167.4,
+        "right_knee": 178.4,
+        "left_hip": 171.8,
+        "right_hip": 175.9,
+        "left_shoulder": 21.3,
+        "right_shoulder": 39.5,
+        "left_elbow": 157.3,
+        "right_elbow": 109.5,
+        "trunk_tilt": 4.9,
+        "neck_tilt": 4.2
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 117,
+      "angles": {
+        "left_knee": 167.9,
+        "right_knee": 179.8,
+        "left_hip": 171.8,
+        "right_hip": 175.7,
+        "left_shoulder": 20.5,
+        "right_shoulder": 39.7,
+        "left_elbow": 157.8,
+        "right_elbow": 105.5,
+        "trunk_tilt": 4.8,
+        "neck_tilt": 2.3
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 120,
+      "angles": {
+        "left_knee": 167.6,
+        "right_knee": 179.8,
+        "left_hip": 172.0,
+        "right_hip": 175.3,
+        "left_shoulder": 20.3,
+        "right_shoulder": 40.2,
+        "left_elbow": 158.0,
+        "right_elbow": 105.0,
+        "trunk_tilt": 4.9,
+        "neck_tilt": 1.4
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 123,
+      "angles": {
+        "left_knee": 167.0,
+        "right_knee": 179.9,
+        "left_hip": 171.9,
+        "right_hip": 175.2,
+        "left_shoulder": 20.4,
+        "right_shoulder": 40.1,
+        "left_elbow": 158.3,
+        "right_elbow": 105.2,
+        "trunk_tilt": 5.1,
+        "neck_tilt": 1.3
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 126,
+      "angles": {
+        "left_knee": 166.5,
+        "right_knee": 179.5,
+        "left_hip": 172.2,
+        "right_hip": 175.1,
+        "left_shoulder": 20.6,
+        "right_shoulder": 40.1,
+        "left_elbow": 158.0,
+        "right_elbow": 103.8,
+        "trunk_tilt": 5.3,
+        "neck_tilt": 2.3
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 129,
+      "angles": {
+        "left_knee": 166.3,
+        "right_knee": 178.9,
+        "left_hip": 172.4,
+        "right_hip": 175.1,
+        "left_shoulder": 20.5,
+        "right_shoulder": 39.8,
+        "left_elbow": 158.4,
+        "right_elbow": 101.9,
+        "trunk_tilt": 5.2,
+        "neck_tilt": 3.0
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 132,
+      "angles": {
+        "left_knee": 165.5,
+        "right_knee": 178.8,
+        "left_hip": 172.4,
+        "right_hip": 175.4,
+        "left_shoulder": 20.3,
+        "right_shoulder": 39.3,
+        "left_elbow": 158.4,
+        "right_elbow": 99.8,
+        "trunk_tilt": 5.1,
+        "neck_tilt": 4.1
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 135,
+      "angles": {
+        "left_knee": 164.7,
+        "right_knee": 179.5,
+        "left_hip": 172.6,
+        "right_hip": 175.2,
+        "left_shoulder": 20.8,
+        "right_shoulder": 38.9,
+        "left_elbow": 157.2,
+        "right_elbow": 101.3,
+        "trunk_tilt": 5.1,
+        "neck_tilt": 4.1
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 138,
+      "angles": {
+        "left_knee": 164.0,
+        "right_knee": 179.6,
+        "left_hip": 172.6,
+        "right_hip": 175.3,
+        "left_shoulder": 20.7,
+        "right_shoulder": 38.5,
+        "left_elbow": 157.0,
+        "right_elbow": 102.8,
+        "trunk_tilt": 5.1,
+        "neck_tilt": 2.8
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 141,
+      "angles": {
+        "left_knee": 164.7,
+        "right_knee": 179.1,
+        "left_hip": 172.0,
+        "right_hip": 176.1,
+        "left_shoulder": 20.5,
+        "right_shoulder": 39.0,
+        "left_elbow": 156.9,
+        "right_elbow": 102.1,
+        "trunk_tilt": 4.6,
+        "neck_tilt": 2.0
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 144,
+      "angles": {
+        "left_knee": 165.7,
+        "right_knee": 179.9,
+        "left_hip": 171.5,
+        "right_hip": 176.7,
+        "left_shoulder": 19.9,
+        "right_shoulder": 39.5,
+        "left_elbow": 157.5,
+        "right_elbow": 102.3,
+        "trunk_tilt": 3.8,
+        "neck_tilt": 1.9
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 147,
+      "angles": {
+        "left_knee": 165.6,
+        "right_knee": 180.0,
+        "left_hip": 171.3,
+        "right_hip": 176.6,
+        "left_shoulder": 19.9,
+        "right_shoulder": 39.6,
+        "left_elbow": 157.9,
+        "right_elbow": 102.5,
+        "trunk_tilt": 3.8,
+        "neck_tilt": 1.0
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 150,
+      "angles": {
+        "left_knee": 165.2,
+        "right_knee": 179.6,
+        "left_hip": 171.2,
+        "right_hip": 176.7,
+        "left_shoulder": 20.1,
+        "right_shoulder": 39.6,
+        "left_elbow": 157.7,
+        "right_elbow": 102.8,
+        "trunk_tilt": 3.8,
+        "neck_tilt": 0.9
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 153,
+      "angles": {
+        "left_knee": 164.2,
+        "right_knee": 178.8,
+        "left_hip": 171.0,
+        "right_hip": 176.8,
+        "left_shoulder": 20.2,
+        "right_shoulder": 40.1,
+        "left_elbow": 158.3,
+        "right_elbow": 102.4,
+        "trunk_tilt": 3.9,
+        "neck_tilt": 1.0
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 156,
+      "angles": {
+        "left_knee": 163.8,
+        "right_knee": 177.8,
+        "left_hip": 171.3,
+        "right_hip": 177.0,
+        "left_shoulder": 19.7,
+        "right_shoulder": 41.1,
+        "left_elbow": 159.7,
+        "right_elbow": 102.7,
+        "trunk_tilt": 3.9,
+        "neck_tilt": 1.1
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 159,
+      "angles": {
+        "left_knee": 163.8,
+        "right_knee": 178.0,
+        "left_hip": 171.6,
+        "right_hip": 176.7,
+        "left_shoulder": 19.6,
+        "right_shoulder": 43.1,
+        "left_elbow": 158.4,
+        "right_elbow": 103.0,
+        "trunk_tilt": 3.9,
+        "neck_tilt": 0.8
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 162,
+      "angles": {
+        "left_knee": 164.5,
+        "right_knee": 177.8,
+        "left_hip": 170.9,
+        "right_hip": 177.4,
+        "left_shoulder": 20.1,
+        "right_shoulder": 44.9,
+        "left_elbow": 157.4,
+        "right_elbow": 105.6,
+        "trunk_tilt": 3.3,
+        "neck_tilt": 0.5
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 165,
+      "angles": {
+        "left_knee": 165.9,
+        "right_knee": 179.0,
+        "left_hip": 170.7,
+        "right_hip": 177.5,
+        "left_shoulder": 19.9,
+        "right_shoulder": 45.3,
+        "left_elbow": 157.9,
+        "right_elbow": 103.1,
+        "trunk_tilt": 3.1,
+        "neck_tilt": 0.8
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 168,
+      "angles": {
+        "left_knee": 163.5,
+        "right_knee": 179.9,
+        "left_hip": 170.9,
+        "right_hip": 176.7,
+        "left_shoulder": 19.2,
+        "right_shoulder": 41.0,
+        "left_elbow": 159.5,
+        "right_elbow": 83.4,
+        "trunk_tilt": 3.5,
+        "neck_tilt": 0.6
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 171,
+      "angles": {
+        "left_knee": 163.3,
+        "right_knee": 179.4,
+        "left_hip": 171.6,
+        "right_hip": 176.1,
+        "left_shoulder": 19.3,
+        "right_shoulder": 38.9,
+        "left_elbow": 159.2,
+        "right_elbow": 74.0,
+        "trunk_tilt": 4.0,
+        "neck_tilt": 0.6
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 174,
+      "angles": {
+        "left_knee": 163.6,
+        "right_knee": 179.5,
+        "left_hip": 171.9,
+        "right_hip": 176.0,
+        "left_shoulder": 19.7,
+        "right_shoulder": 38.3,
+        "left_elbow": 158.8,
+        "right_elbow": 76.3,
+        "trunk_tilt": 4.2,
+        "neck_tilt": 0.7
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 177,
+      "angles": {
+        "left_knee": 164.1,
+        "right_knee": 179.9,
+        "left_hip": 171.9,
+        "right_hip": 176.0,
+        "left_shoulder": 20.1,
+        "right_shoulder": 38.9,
+        "left_elbow": 158.0,
+        "right_elbow": 84.3,
+        "trunk_tilt": 4.3,
+        "neck_tilt": 1.0
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 180,
+      "angles": {
+        "left_knee": 164.0,
+        "right_knee": 179.8,
+        "left_hip": 171.9,
+        "right_hip": 175.9,
+        "left_shoulder": 20.3,
+        "right_shoulder": 39.0,
+        "left_elbow": 157.2,
+        "right_elbow": 88.2,
+        "trunk_tilt": 4.4,
+        "neck_tilt": 1.0
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 183,
+      "angles": {
+        "left_knee": 163.9,
+        "right_knee": 178.7,
+        "left_hip": 172.2,
+        "right_hip": 175.3,
+        "left_shoulder": 20.3,
+        "right_shoulder": 39.0,
+        "left_elbow": 156.7,
+        "right_elbow": 84.1,
+        "trunk_tilt": 4.6,
+        "neck_tilt": 0.9
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 186,
+      "angles": {
+        "left_knee": 161.8,
+        "right_knee": 177.5,
+        "left_hip": 172.1,
+        "right_hip": 174.6,
+        "left_shoulder": 20.1,
+        "right_shoulder": 36.1,
+        "left_elbow": 156.8,
+        "right_elbow": 69.6,
+        "trunk_tilt": 5.1,
+        "neck_tilt": 0.6
+      },
+      "tests": {
+        "0": {
+          "status": "ready",
+          "message": "等待单腿站立"
+        }
+      }
+    },
+    {
+      "frame": 189,
+      "angles": {
+        "left_knee": 161.8,
+        "right_knee": 177.3,
+        "left_hip": 172.4,
+        "right_hip": 174.1,
+        "left_shoulder": 20.1,
+        "right_shoulder": 35.7,
+        "left_elbow": 156.7,
+        "right_elbow": 68.3,
+        "trunk_tilt": 5.5,
+        "neck_tilt": 0.2
+      },
+      "tests": {
+        "0": {
+          "status": "started",
+          "message": "单腿站立开始计时"
+        }
+      }
+    },
+    {
+      "frame": 192,
+      "angles": {
+        "left_knee": 161.6,
+        "right_knee": 177.2,
+        "left_hip": 173.0,
+        "right_hip": 173.9,
+        "left_shoulder": 20.1,
+        "right_shoulder": 36.1,
+        "left_elbow": 156.7,
+        "right_elbow": 72.6,
+        "trunk_tilt": 5.7,
+        "neck_tilt": 0.5
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 0.1,
+          "ankle_diff": 75.2
+        }
+      }
+    },
+    {
+      "frame": 195,
+      "angles": {
+        "left_knee": 162.6,
+        "right_knee": 178.9,
+        "left_hip": 172.9,
+        "right_hip": 174.5,
+        "left_shoulder": 21.3,
+        "right_shoulder": 39.7,
+        "left_elbow": 154.5,
+        "right_elbow": 97.4,
+        "trunk_tilt": 5.5,
+        "neck_tilt": 1.2
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 0.2,
+          "ankle_diff": 78.5
+        }
+      }
+    },
+    {
+      "frame": 198,
+      "angles": {
+        "left_knee": 163.6,
+        "right_knee": 179.9,
+        "left_hip": 172.9,
+        "right_hip": 174.6,
+        "left_shoulder": 21.9,
+        "right_shoulder": 38.5,
+        "left_elbow": 152.6,
+        "right_elbow": 111.8,
+        "trunk_tilt": 5.6,
+        "neck_tilt": 1.6
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 0.3,
+          "ankle_diff": 78.1
+        }
+      }
+    },
+    {
+      "frame": 201,
+      "angles": {
+        "left_knee": 163.5,
+        "right_knee": 179.2,
+        "left_hip": 173.4,
+        "right_hip": 174.5,
+        "left_shoulder": 22.1,
+        "right_shoulder": 37.5,
+        "left_elbow": 152.6,
+        "right_elbow": 115.0,
+        "trunk_tilt": 6.0,
+        "neck_tilt": 1.4
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 0.4,
+          "ankle_diff": 80.4
+        }
+      }
+    },
+    {
+      "frame": 204,
+      "angles": {
+        "left_knee": 164.1,
+        "right_knee": 179.0,
+        "left_hip": 173.6,
+        "right_hip": 174.5,
+        "left_shoulder": 21.8,
+        "right_shoulder": 37.6,
+        "left_elbow": 152.9,
+        "right_elbow": 114.7,
+        "trunk_tilt": 6.0,
+        "neck_tilt": 1.9
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 0.5,
+          "ankle_diff": 80.9
+        }
+      }
+    },
+    {
+      "frame": 207,
+      "angles": {
+        "left_knee": 163.8,
+        "right_knee": 179.5,
+        "left_hip": 173.9,
+        "right_hip": 174.1,
+        "left_shoulder": 22.0,
+        "right_shoulder": 36.6,
+        "left_elbow": 152.0,
+        "right_elbow": 113.1,
+        "trunk_tilt": 6.4,
+        "neck_tilt": 2.4
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 0.6,
+          "ankle_diff": 80.2
+        }
+      }
+    },
+    {
+      "frame": 210,
+      "angles": {
+        "left_knee": 163.9,
+        "right_knee": 179.4,
+        "left_hip": 173.8,
+        "right_hip": 174.2,
+        "left_shoulder": 22.2,
+        "right_shoulder": 36.6,
+        "left_elbow": 151.6,
+        "right_elbow": 113.6,
+        "trunk_tilt": 6.3,
+        "neck_tilt": 2.4
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 0.7,
+          "ankle_diff": 79.3
+        }
+      }
+    },
+    {
+      "frame": 213,
+      "angles": {
+        "left_knee": 163.9,
+        "right_knee": 179.7,
+        "left_hip": 173.6,
+        "right_hip": 174.2,
+        "left_shoulder": 22.2,
+        "right_shoulder": 37.4,
+        "left_elbow": 151.8,
+        "right_elbow": 107.1,
+        "trunk_tilt": 6.3,
+        "neck_tilt": 2.5
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 0.8,
+          "ankle_diff": 77.9
+        }
+      }
+    },
+    {
+      "frame": 216,
+      "angles": {
+        "left_knee": 163.7,
+        "right_knee": 179.5,
+        "left_hip": 173.2,
+        "right_hip": 174.4,
+        "left_shoulder": 22.2,
+        "right_shoulder": 38.0,
+        "left_elbow": 151.6,
+        "right_elbow": 106.2,
+        "trunk_tilt": 6.0,
+        "neck_tilt": 2.6
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 0.9,
+          "ankle_diff": 77.7
+        }
+      }
+    },
+    {
+      "frame": 219,
+      "angles": {
+        "left_knee": 163.6,
+        "right_knee": 179.3,
+        "left_hip": 173.1,
+        "right_hip": 174.4,
+        "left_shoulder": 22.1,
+        "right_shoulder": 38.4,
+        "left_elbow": 152.2,
+        "right_elbow": 104.8,
+        "trunk_tilt": 6.0,
+        "neck_tilt": 2.0
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 1.0,
+          "ankle_diff": 78.2
+        }
+      }
+    },
+    {
+      "frame": 222,
+      "angles": {
+        "left_knee": 160.6,
+        "right_knee": 178.3,
+        "left_hip": 172.5,
+        "right_hip": 174.6,
+        "left_shoulder": 22.1,
+        "right_shoulder": 38.0,
+        "left_elbow": 152.6,
+        "right_elbow": 86.9,
+        "trunk_tilt": 6.2,
+        "neck_tilt": 2.3
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 1.1,
+          "ankle_diff": 79.3
+        }
+      }
+    },
+    {
+      "frame": 225,
+      "angles": {
+        "left_knee": 157.8,
+        "right_knee": 179.0,
+        "left_hip": 172.5,
+        "right_hip": 174.2,
+        "left_shoulder": 21.2,
+        "right_shoulder": 36.8,
+        "left_elbow": 153.0,
+        "right_elbow": 70.2,
+        "trunk_tilt": 6.5,
+        "neck_tilt": 2.5
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 1.2,
+          "ankle_diff": 82.9
+        }
+      }
+    },
+    {
+      "frame": 228,
+      "angles": {
+        "left_knee": 158.0,
+        "right_knee": 178.8,
+        "left_hip": 172.1,
+        "right_hip": 174.5,
+        "left_shoulder": 20.9,
+        "right_shoulder": 36.4,
+        "left_elbow": 153.8,
+        "right_elbow": 66.6,
+        "trunk_tilt": 6.4,
+        "neck_tilt": 3.4
+      },
+      "tests": {
+        "0": {
+          "status": "running",
+          "duration_sec": 1.3,
+          "ankle_diff": 82.4
+        }
+      }
+    }
+  ]
+}

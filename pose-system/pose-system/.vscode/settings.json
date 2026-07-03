@@ -1,0 +1,17 @@
+{
+    "python.pythonPath": "C:\\Users\\ALW\\.conda\\envs\\dl\\python.exe",
+    "python.defaultInterpreterPath": "C:\\Users\\ALW\\.conda\\envs\\dl\\python.exe",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "args": ["-Command", "conda activate dl"]
+        }
+    },
+    "code-runner.executorMap": {
+        "python": "C:\\Users\\ALW\\.conda\\envs\\dl\\python.exe"
+    },
+    "code-runner.runInTerminal": true
+}

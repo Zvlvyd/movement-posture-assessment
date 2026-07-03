@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Run App",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "python": "C:\\Users\\ALW\\.conda\\envs\\dl\\python.exe",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Python: App with Args",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/app.py",
+            "python": "C:\\Users\\ALW\\.conda\\envs\\dl\\python.exe",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "args": ["--input", "图片.jpg", "--output", "output.jpg"]
+        },
+        {
+            "name": "Python: Webcam",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/app.py",
+            "python": "C:\\Users\\ALW\\.conda\\envs\\dl\\python.exe",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "args": ["--webcam", "--camera", "0"]
+        }
+    ]
+}

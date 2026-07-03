@@ -1,0 +1,77 @@
+{
+  "髂腰肌": {
+    "en": "iliopsoas",
+    "image": "knowledge/muscles/iliopsoas.png",
+    "desc": "连接腰椎与股骨的深层屈髋肌，久坐易缩短，是骨盆前倾的主要成因之一"
+  },
+  "股直肌": {
+    "en": "rectus_femoris",
+    "image": "knowledge/muscles/rectus_femoris.gif",
+    "desc": "股四头肌的一部分，跨越髋关节和膝关节，缩短时加重骨盆前倾"
+  },
+  "臀大肌": {
+    "en": "gluteus_maximus",
+    "image": "knowledge/muscles/gluteus_maximus.gif",
+    "desc": "最大的臀部肌肉，负责伸髋和外旋，骨盆前倾时常处于拉长抑制状态"
+  },
+  "腹横肌": {
+    "en": "transversus_abdominis",
+    "image": "knowledge/muscles/transversus_abdominis.jpg",
+    "desc": "最深层的腹部肌肉，是核心稳定的基础，骨盆前倾时激活不足"
+  },
+  "腘绳肌": {
+    "en": "hamstrings",
+    "image": "knowledge/muscles/hamstrings.gif",
+    "desc": "大腿后侧肌群（股二头肌、半腱肌、半膜肌），负责屈膝和伸髋"
+  },
+  "股四头肌": {
+    "en": "quadriceps_femoris",
+    "image": "knowledge/muscles/quadriceps_femoris.gif",
+    "desc": "大腿前侧肌群，负责伸膝，离心控制薄弱是膝超伸的重要原因"
+  },
+  "臀中肌": {
+    "en": "gluteus_medius",
+    "image": "knowledge/muscles/gluteus_medius.png",
+    "desc": "臀部外侧肌肉，负责髋外展和骨盆稳定，薄弱时引起骨盆侧倾"
+  },
+  "胸锁乳突肌": {
+    "en": "sternocleidomastoid",
+    "image": "knowledge/muscles/sternocleidomastoid.png",
+    "desc": "颈部表浅肌肉，头前倾时过度激活，是颈部紧张和头痛的常见来源"
+  },
+  "胸小肌": {
+    "en": "pectoralis_minor",
+    "image": "knowledge/muscles/pectoralis_minor.png",
+    "desc": "胸部深层肌肉，缩短时将肩胛骨向前下方拉，导致圆肩和头前倾"
+  },
+  "深层颈屈肌": {
+    "en": "longus_colli",
+    "image": "knowledge/muscles/longus_colli.png",
+    "desc": "颈椎前方深层肌群（颈长肌、头长肌），是维持颈椎中立位的核心肌群"
+  },
+  "下斜方肌": {
+    "en": "trapezius",
+    "image": "knowledge/muscles/trapezius.png",
+    "desc": "斜方肌下部纤维，负责肩胛骨下旋和稳定，头前倾和圆肩时常薄弱"
+  },
+  "菱形肌": {
+    "en": "rhomboid_major",
+    "image": "knowledge/muscles/rhomboid_major.png",
+    "desc": "连接脊柱与肩胛骨内侧缘，负责肩胛骨后缩，圆肩时被过度拉伸"
+  },
+  "前锯肌": {
+    "en": "serratus_anterior",
+    "image": "knowledge/muscles/serratus_anterior.jpg",
+    "desc": "肋骨侧面的锯齿状肌肉，负责肩胛骨前突和上旋，薄弱时肩胛骨翘起"
+  },
+  "斜方肌上束": {
+    "en": "trapezius",
+    "image": "knowledge/muscles/trapezius.png",
+    "desc": "斜方肌上部纤维，负责耸肩和头部侧倾，肩膀不对称时偏高侧常紧张"
+  },
+  "腰方肌": {
+    "en": "quadratus_lumborum",
+    "image": "knowledge/muscles/quadratus_lumborum.png",
+    "desc": "腰椎两侧的深层肌肉，负责躯干侧屈和骨盆上提，骨盆侧倾时偏高侧紧张"
+  }
+}

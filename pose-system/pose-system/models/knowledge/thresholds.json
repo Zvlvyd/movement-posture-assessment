@@ -1,0 +1,56 @@
+{
+  "head_forward_deg": {
+    "mild": 15,
+    "moderate": 20,
+    "severe": 30,
+    "direction": "higher_worse",
+    "label": "头前倾角",
+    "unit": "°",
+    "normal_desc": "< 15°"
+  },
+  "shoulder_height_diff_px": {
+    "mild": 10,
+    "moderate": 20,
+    "severe": 35,
+    "direction": "higher_worse",
+    "label": "肩膀高度差",
+    "unit": "px",
+    "normal_desc": "< 10 px"
+  },
+  "hip_height_diff_px": {
+    "mild": 10,
+    "moderate": 20,
+    "severe": 35,
+    "direction": "higher_worse",
+    "label": "髋部高度差",
+    "unit": "px",
+    "normal_desc": "< 10 px"
+  },
+  "spine_lateral_deviation_px": {
+    "mild": 15,
+    "moderate": 25,
+    "severe": 40,
+    "direction": "higher_worse",
+    "label": "脊柱侧向偏移",
+    "unit": "px",
+    "normal_desc": "< 15 px"
+  },
+  "knee_hyperextension_deg": {
+    "mild": -5,
+    "moderate": -10,
+    "severe": -15,
+    "direction": "lower_worse",
+    "label": "膝超伸角度",
+    "unit": "°",
+    "normal_desc": "> -5°"
+  },
+  "pelvic_forward_offset_px": {
+    "mild": 20,
+    "moderate": 35,
+    "severe": 50,
+    "direction": "higher_worse",
+    "label": "骨盆前移偏移",
+    "unit": "px",
+    "normal_desc": "< 20 px"
+  }
+}

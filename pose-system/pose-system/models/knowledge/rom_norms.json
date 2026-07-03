@@ -1,0 +1,240 @@
+{
+  "cervical_rotation_left": {
+    "min": 60,
+    "max": 90,
+    "unit": "°",
+    "label": "颈椎左旋",
+    "direction": "larger_better"
+  },
+  "cervical_rotation_right": {
+    "min": 60,
+    "max": 90,
+    "unit": "°",
+    "label": "颈椎右旋",
+    "direction": "larger_better"
+  },
+  "cervical_lateral_left": {
+    "min": 35,
+    "max": 45,
+    "unit": "°",
+    "label": "颈椎左侧屈",
+    "direction": "larger_better"
+  },
+  "cervical_lateral_right": {
+    "min": 35,
+    "max": 45,
+    "unit": "°",
+    "label": "颈椎右侧屈",
+    "direction": "larger_better"
+  },
+  "left_shoulder_flexion": {
+    "min": 150,
+    "max": 180,
+    "unit": "°",
+    "label": "左肩屈曲",
+    "direction": "larger_better"
+  },
+  "right_shoulder_flexion": {
+    "min": 150,
+    "max": 180,
+    "unit": "°",
+    "label": "右肩屈曲",
+    "direction": "larger_better"
+  },
+  "left_elbow_extension": {
+    "min": 0,
+    "max": 10,
+    "unit": "°",
+    "label": "左肘伸展",
+    "direction": "smaller_better"
+  },
+  "right_elbow_extension": {
+    "min": 0,
+    "max": 10,
+    "unit": "°",
+    "label": "右肘伸展",
+    "direction": "smaller_better"
+  },
+  "spine_flexion": {
+    "min": 60,
+    "max": 100,
+    "unit": "°",
+    "label": "脊柱屈曲",
+    "direction": "larger_better"
+  },
+  "left_hip_flexion_bend": {
+    "min": 70,
+    "max": 110,
+    "unit": "°",
+    "label": "左髋屈曲(体前屈)",
+    "direction": "larger_better"
+  },
+  "right_hip_flexion_bend": {
+    "min": 70,
+    "max": 110,
+    "unit": "°",
+    "label": "右髋屈曲(体前屈)",
+    "direction": "larger_better"
+  },
+  "left_knee_flexion": {
+    "min": 120,
+    "max": 155,
+    "unit": "°",
+    "label": "左膝屈曲",
+    "direction": "larger_better"
+  },
+  "right_knee_flexion": {
+    "min": 120,
+    "max": 155,
+    "unit": "°",
+    "label": "右膝屈曲",
+    "direction": "larger_better"
+  },
+  "left_hip_flexion_squat": {
+    "min": 90,
+    "max": 130,
+    "unit": "°",
+    "label": "左髋屈曲(深蹲)",
+    "direction": "larger_better"
+  },
+  "right_hip_flexion_squat": {
+    "min": 90,
+    "max": 130,
+    "unit": "°",
+    "label": "右髋屈曲(深蹲)",
+    "direction": "larger_better"
+  },
+  "left_hip_flexion_kneeup": {
+    "min": 100,
+    "max": 130,
+    "unit": "°",
+    "label": "左髋屈曲(抬膝)",
+    "direction": "larger_better"
+  },
+  "right_hip_flexion_kneeup": {
+    "min": 100,
+    "max": 130,
+    "unit": "°",
+    "label": "右髋屈曲(抬膝)",
+    "direction": "larger_better"
+  },
+  "left_knee": {
+    "min": 120,
+    "max": 155,
+    "unit": "°",
+    "label": "左膝活动度",
+    "direction": "larger_better"
+  },
+  "right_knee": {
+    "min": 120,
+    "max": 155,
+    "unit": "°",
+    "label": "右膝活动度",
+    "direction": "larger_better"
+  },
+  "left_hip": {
+    "min": 90,
+    "max": 130,
+    "unit": "°",
+    "label": "左髋活动度",
+    "direction": "larger_better"
+  },
+  "right_hip": {
+    "min": 90,
+    "max": 130,
+    "unit": "°",
+    "label": "右髋活动度",
+    "direction": "larger_better"
+  },
+  "left_shoulder": {
+    "min": 150,
+    "max": 180,
+    "unit": "°",
+    "label": "左肩活动度",
+    "direction": "larger_better"
+  },
+  "right_shoulder": {
+    "min": 150,
+    "max": 180,
+    "unit": "°",
+    "label": "右肩活动度",
+    "direction": "larger_better"
+  },
+  "left_elbow": {
+    "min": 0,
+    "max": 10,
+    "unit": "°",
+    "label": "左肘伸展角",
+    "direction": "smaller_better"
+  },
+  "right_elbow": {
+    "min": 0,
+    "max": 10,
+    "unit": "°",
+    "label": "右肘伸展角",
+    "direction": "smaller_better"
+  },
+  "trunk_tilt": {
+    "min": 60,
+    "max": 100,
+    "unit": "°",
+    "label": "躯干倾斜角",
+    "direction": "larger_better"
+  },
+  "neck_tilt": {
+    "min": 0,
+    "max": 15,
+    "unit": "°",
+    "label": "颈部倾斜角",
+    "direction": "smaller_better"
+  },
+  "head_tilt": {
+    "min": 0,
+    "max": 10,
+    "unit": "°",
+    "label": "头部倾斜角",
+    "direction": "smaller_better"
+  },
+  "head_forward_deg": {
+    "min": 0,
+    "max": 15,
+    "unit": "°",
+    "label": "头前倾角",
+    "direction": "smaller_better"
+  },
+  "shoulder_height_diff_px": {
+    "min": 0,
+    "max": 10,
+    "unit": "px",
+    "label": "肩高度差",
+    "direction": "smaller_better"
+  },
+  "hip_height_diff_px": {
+    "min": 0,
+    "max": 10,
+    "unit": "px",
+    "label": "髋高度差",
+    "direction": "smaller_better"
+  },
+  "spine_lateral_deviation_px": {
+    "min": 0,
+    "max": 15,
+    "unit": "px",
+    "label": "脊柱侧偏",
+    "direction": "smaller_better"
+  },
+  "knee_hyperextension_deg": {
+    "min": -5,
+    "max": 0,
+    "unit": "°",
+    "label": "膝超伸角",
+    "direction": "larger_better"
+  },
+  "pelvic_forward_offset_px": {
+    "min": 0,
+    "max": 20,
+    "unit": "px",
+    "label": "骨盆前移",
+    "direction": "smaller_better"
+  }
+}

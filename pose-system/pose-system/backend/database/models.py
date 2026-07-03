@@ -1,0 +1,299 @@
+from sqlalchemy import (
+    Column, Integer, String, Float, DateTime, ForeignKey, Text, Enum, Boolean, Table
+)
+from sqlalchemy.orm import relationship
+from datetime import datetime
+from backend.database.connection import Base
+import enum
+
+class UserRole(str, enum.Enum):
+    TRAINEE = 'trainee'
+    COACH = 'coach'
+    ADMIN = 'admin'
+
+class PrescriptionStatus(str, enum.Enum):
+    LOCKED = 'locked'
+    ACTIVE = 'active'
+    COMPLETED = 'completed'
+
+class ActionPhase(str, enum.Enum):
+    WARMUP = 'warmup'
+    ACTIVATION = 'activation'
+    MAIN = 'main'
+    COOLDOWN = 'cooldown'
+
+class RiskLevel(str, enum.Enum):
+    LOW = 'low'
+    MEDIUM = 'medium'
+    HIGH = 'high'
+
+# 班级-学员关联表
+class_group_student = Table(
+    'class_group_student', Base.metadata,
+    Column('class_group_id', Integer, ForeignKey('class_group.id'), primary_key=True),
+    Column('user_id', Integer, ForeignKey('user.id'), primary_key=True)
+)
+
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    role = Column(Enum(UserRole), default=UserRole.TRAINEE, nullable=False)
+    phone = Column(String(20))
+    avatar = Column(String(500))
+    gender = Column(String(10))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    is_active = Column(Boolean, default=True)
+    token_version = Column(Integer, default=0, nullable=False)
+    last_login_at = Column(DateTime, nullable=True, comment="最近一次登录时间")
+    last_active_at = Column(DateTime, nullable=True, comment="最近一次活跃时间")
+    deleted_at = Column(DateTime, nullable=True, comment="软删除时间（NULL表示未删除）")
+
+    fms_records = relationship('FMSRecord', back_populates='user')
+    prescriptions = relationship('Prescription', back_populates='user')
+    check_in_cards = relationship('CheckInCard', back_populates='user')
+    badges = relationship('Badge', back_populates='user')
+    cycle_config = relationship('UserCycleConfig', back_populates='user', uselist=False)
+    system_logs = relationship('SystemLog', back_populates='user')
+    assessment_records = relationship('AssessmentRecord', back_populates='user')
+    custom_actions = relationship('ActionLibrary', foreign_keys='ActionLibrary.created_by', back_populates='creator')
+
+class FMSRecord(Base):
+    __tablename__ = 'fms_record'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    test_date = Column(DateTime, default=datetime.utcnow)
+    balance_score = Column(Float)
+    flexibility_score = Column(Float)
+    upper_limb_score = Column(Float)
+    core_score = Column(Float)
+    symmetry_score = Column(Float)
+    overall_score = Column(Float)
+    risk_level = Column(Enum(RiskLevel), default=RiskLevel.LOW)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship('User', back_populates='fms_records')
+    prescriptions = relationship('Prescription', back_populates='fms_record')
+
+class AssessmentRecord(Base):
+    __tablename__ = 'assessment_record'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    test_date = Column(DateTime, default=datetime.utcnow)
+    balance_score = Column(Float)
+    flexibility_score = Column(Float)
+    upper_limb_score = Column(Float)
+    core_score = Column(Float)
+    symmetry_score = Column(Float)
+    overall_score = Column(Float)
+    risk_level = Column(Enum(RiskLevel), default=RiskLevel.LOW)
+    posture_data = Column(Text)    # JSON: PostureAnalyzer output
+    movement_data = Column(Text)   # JSON: ROM tracking results
+    rom_data = Column(Text)        # JSON: raw ROM measurements
+    muscle_findings = Column(Text) # JSON: tight/weak muscle analysis
+    report_data = Column(Text)     # JSON: full report
+    created_at = Column(DateTime, default=datetime.utcnow)
+    # Multi-view assessment columns
+    photo_front_path = Column(String(500), nullable=True)
+    photo_back_path = Column(String(500), nullable=True)
+    photo_side_path = Column(String(500), nullable=True)
+    multi_view_data = Column(Text, nullable=True)
+    velocity_data = Column(Text, nullable=True)
+    fusion_data = Column(Text, nullable=True)
+    assessment_type = Column(String(50), default='standard')
+    session_id = Column(String(100), nullable=True, index=True)
+
+    user = relationship('User', back_populates='assessment_records')
+    prescriptions_new = relationship('Prescription', back_populates='assessment_record')
+
+class Prescription(Base):
+    __tablename__ = 'prescription'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    fms_record_id = Column(Integer, ForeignKey('fms_record.id'), nullable=False)
+    phase = Column(Integer, default=1)
+    status = Column(Enum(PrescriptionStatus), default=PrescriptionStatus.ACTIVE)
+    difficulty = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    unlocked_at = Column(DateTime)
+
+    user = relationship('User', back_populates='prescriptions')
+    fms_record = relationship('FMSRecord', back_populates='prescriptions')
+    assessment_record_id = Column(Integer, ForeignKey('assessment_record.id'), nullable=True)
+    assessment_record = relationship('AssessmentRecord', back_populates='prescriptions_new')
+    items = relationship('PrescriptionItem', back_populates='prescription', cascade='all, delete-orphan')
+
+class PrescriptionItem(Base):
+    __tablename__ = 'prescription_item'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    prescription_id = Column(Integer, ForeignKey('prescription.id'), nullable=False)
+    action_id = Column(Integer, ForeignKey('action_library.id'), nullable=False)
+    phase = Column(Enum(ActionPhase), nullable=False)
+    sets = Column(Integer, default=1)
+    reps = Column(Integer, default=10)
+    duration = Column(Integer, default=0)
+    order_index = Column(Integer, default=0)
+
+    prescription = relationship('Prescription', back_populates='items')
+    action = relationship('ActionLibrary')
+
+class ActionLibrary(Base):
+    __tablename__ = 'action_library'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    category = Column(String(50))
+    difficulty = Column(Integer, default=1)
+    target_body_parts = Column(Text)
+    description = Column(Text)
+    video_url = Column(String(500))
+    thumbnail_url = Column(String(500))
+    steps = Column(Text, nullable=True, comment="JSON array of step strings")
+    cues = Column(Text, nullable=True, comment="JSON array of cue strings")
+    contraindications = Column(Text, nullable=True, comment="JSON object: dimension→min threshold")
+    family = Column(String(100), nullable=True, comment="动作家族标识如 pushup, squat")
+    family_name = Column(String(200), nullable=True, comment="动作家族中文名")
+    is_custom = Column(Boolean, default=False, comment="是否为教练自定义动作")
+    created_by = Column(Integer, ForeignKey('user.id'), nullable=True, comment="自定义动作创建者")
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="最后修改时间")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    is_visible = Column(Boolean, default=True, comment="是否可见；False=隐藏/软删除")
+
+    creator = relationship('User', foreign_keys=[created_by], back_populates='custom_actions')
+    media = relationship('ActionMedia', back_populates='action', cascade='all, delete-orphan')
+
+class ActionMedia(Base):
+    __tablename__ = 'action_media'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    action_id = Column(Integer, ForeignKey('action_library.id'), nullable=False, index=True)
+    media_type = Column(String(20), nullable=False, comment="image / video / thumbnail")
+    file_path = Column(String(500), nullable=False, comment="相对路径")
+    original_filename = Column(String(255), nullable=True)
+    file_size = Column(Integer, nullable=True, comment="bytes")
+    sort_order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    action = relationship('ActionLibrary', back_populates='media')
+
+
+class SystemConfig(Base):
+    __tablename__ = 'system_config'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    config_key = Column(String(100), unique=True, nullable=False, index=True)
+    config_value = Column(Text, nullable=True)
+    description = Column(String(255), nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_by = Column(Integer, ForeignKey('user.id'), nullable=True)
+
+    updater = relationship('User', foreign_keys=[updated_by])
+
+
+class ProblemTag(Base):
+    __tablename__ = 'problem_tag'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(Text)
+    severity = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class TagActionMapping(Base):
+    __tablename__ = 'tag_action_mapping'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    tag_id = Column(Integer, ForeignKey('problem_tag.id'), nullable=False)
+    action_id = Column(Integer, ForeignKey('action_library.id'), nullable=False)
+    relevance_score = Column(Float, default=1.0)
+
+    tag = relationship('ProblemTag')
+    action = relationship('ActionLibrary')
+
+class CheckInCard(Base):
+    __tablename__ = 'check_in_card'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    date = Column(DateTime, default=datetime.utcnow)
+    streak_days = Column(Integer, default=1)
+    completed_actions = Column(Integer, default=0)
+    total_duration = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship('User', back_populates='check_in_cards')
+
+class Badge(Base):
+    __tablename__ = 'badge'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    badge_type = Column(String(50), nullable=False)
+    name = Column(String(100), nullable=False)
+    description = Column(String(200))
+    earned_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship('User', back_populates='badges')
+
+class UserCycleConfig(Base):
+    __tablename__ = 'user_cycle_config'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'), unique=True, nullable=False)
+    cycle_length = Column(Integer, default=28)
+    last_period_date = Column(DateTime)
+    intensity_coefficient = Column(Float, default=1.0)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship('User', back_populates='cycle_config')
+
+class ClassGroup(Base):
+    __tablename__ = 'class_group'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    coach_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    name = Column(String(100), nullable=False)
+    description = Column(Text)
+    invite_code = Column(String(10), unique=True, nullable=True, index=True, comment="班级邀请码")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship('User', foreign_keys=[coach_id])
+    students = relationship('User', secondary=class_group_student)
+
+class SystemLog(Base):
+    __tablename__ = 'system_log'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    action = Column(String(100), nullable=False)
+    detail = Column(Text)
+    ip_address = Column(String(50))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship('User', back_populates='system_logs')
+
+class PlanChangeRequest(Base):
+    """计划变更请求 — 学员修改计划后提交给教练审批"""
+    __tablename__ = 'plan_change_request'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    plan_id = Column(Integer, ForeignKey('prescription_plan.id'), nullable=False, comment="关联的V2训练计划")
+    student_id = Column(Integer, ForeignKey('user.id'), nullable=False, comment="发起修改的学员")
+    coach_id = Column(Integer, ForeignKey('user.id'), nullable=True, comment="负责审批的教练")
+    status = Column(String(20), default='pending', comment="pending/approved/rejected/adjusted")
+    original_snapshot = Column(Text, comment="JSON: 修改前的计划项快照")
+    proposed_items = Column(Text, comment="JSON: 学员提交的修改后计划项")
+    coach_items = Column(Text, nullable=True, comment="JSON: 教练调整后的计划项")
+    coach_notes = Column(Text, comment="教练留言")
+    student_notes = Column(Text, comment="学员留言")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    student = relationship('User', foreign_keys=[student_id])
+    coach = relationship('User', foreign_keys=[coach_id])
+
+
+class Message(Base):
+    """用户间消息 — 用于学员与教练的非实时通讯"""
+    __tablename__ = 'message'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    sender_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    receiver_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    content = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
+    related_type = Column(String(20), nullable=True, comment="关联类型: change_request")
+    related_id = Column(Integer, nullable=True, comment="关联记录ID")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    sender = relationship('User', foreign_keys=[sender_id])
+    receiver = relationship('User', foreign_keys=[receiver_id])

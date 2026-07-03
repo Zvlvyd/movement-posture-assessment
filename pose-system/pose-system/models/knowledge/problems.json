@@ -1,0 +1,52 @@
+{
+  "head_forward_posture": {
+    "name": "头前倾",
+    "metric": "head_forward_deg",
+    "cause": "长期低头看手机/电脑，颈前肌群缩短，深层颈屈肌薄弱",
+    "tight_muscles": ["胸锁乳突肌", "胸小肌"],
+    "weak_muscles": ["深层颈屈肌", "下斜方肌", "菱形肌"]
+  },
+  "pelvic_anterior_tilt": {
+    "name": "骨盆前倾",
+    "metric": "pelvic_forward_offset_px",
+    "cause": "久坐导致髂腰肌缩短，臀大肌和腹横肌激活不足",
+    "tight_muscles": ["髂腰肌", "股直肌"],
+    "weak_muscles": ["臀大肌", "腹横肌", "腘绳肌"]
+  },
+  "knee_hyperextension": {
+    "name": "膝关节超伸",
+    "metric": "knee_hyperextension_deg",
+    "cause": "股四头肌离心控制差，臀肌对膝关节稳定支撑不足，站立习惯性锁膝",
+    "tight_muscles": ["腘绳肌"],
+    "weak_muscles": ["股四头肌", "臀中肌", "臀大肌"]
+  },
+  "shoulder_imbalance": {
+    "name": "肩膀不对称",
+    "metric": "shoulder_height_diff_px",
+    "cause": "惯用手过度使用，斜方肌上束紧张，下斜方肌和前锯肌薄弱",
+    "tight_muscles": ["斜方肌上束"],
+    "weak_muscles": ["下斜方肌", "前锯肌"]
+  },
+  "possible_scoliosis": {
+    "name": "脊柱侧向偏移",
+    "metric": "spine_lateral_deviation_px",
+    "cause": "体表照片初步检出，需专业评估确认是否存在脊柱侧弯",
+    "tight_muscles": [],
+    "weak_muscles": [],
+    "note": "此问题不提供训练动作，建议就医评估"
+  },
+  "pelvic_lateral_tilt": {
+    "name": "骨盆侧倾",
+    "metric": "hip_height_diff_px",
+    "cause": "臀中肌两侧力量不均衡，习惯性单腿承重",
+    "tight_muscles": ["腰方肌"],
+    "weak_muscles": ["臀中肌"]
+  },
+  "pelvic_posterior_tilt": {
+    "name": "骨盆后倾",
+    "metric": "pelvic_forward_offset_px",
+    "cause": "久坐导致腘绳肌和臀大肌缩短，髋屈肌和竖脊肌激活不足",
+    "tight_muscles": ["腘绳肌", "臀大肌"],
+    "weak_muscles": ["髂腰肌", "股直肌", "竖脊肌"]
+  }
+}

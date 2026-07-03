@@ -1,0 +1,36 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+
+# Node
+node_modules/
+dist/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+
+# Uploads / temp
+uploads/*
+!uploads/.gitkeep
+
+# Large model files (>50MB)
+*.pt
+
+# Videos
+*.mp4
