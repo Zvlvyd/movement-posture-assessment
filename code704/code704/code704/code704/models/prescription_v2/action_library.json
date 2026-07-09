@@ -1,0 +1,2708 @@
+{
+  "meta": {
+    "version": "1.0",
+    "name": "徒手健身标准动作库",
+    "description": "基于囚徒健身/徒手体操体系的渐进式动作库，用于体态纠正训练处方生成。每个动作家族包含难度递进的变体，纯徒手无需器械。",
+    "total_actions": 55,
+    "design_principles": [
+      "纯徒手，不依赖任何器械（门框/墙壁/椅子为日常环境可用支撑物）",
+      "每个动作家族 3-6 个难度递进变体",
+      "拉伸动作统一使用 duration_seconds 计量",
+      "力量动作使用 sets × reps 计量",
+      "所有难度/强度基于健康成年人基准，由 FMS 分数动态调整"
+    ]
+  },
+  "actions": [
+    {
+      "id": "pu_001",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "family_name_en": "Pushup",
+      "name": "墙壁俯卧撑",
+      "name_en": "Wall Pushup",
+      "category": "上肢推",
+      "subcategory": "水平推",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": "pu_003",
+      "target_body_parts": [
+        "胸大肌",
+        "肱三头肌",
+        "前锯肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 10,
+        "min_core_score": 20,
+        "min_upper_limb_score": 20,
+        "min_symmetry_score": 10
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.1,
+        "shoulder_imbalance": 0.4,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.1,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "main",
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 15,
+      "default_duration_seconds": 0,
+      "description": "面对墙壁站立，双手推墙。最温和的推力入门动作，适合肩关节不稳定或上肢力量极弱者。",
+      "steps": [
+        "面对墙壁站立，距墙约一臂距离",
+        "双手与肩同宽平贴墙面",
+        "缓慢屈肘身体前倾，鼻尖接近墙面",
+        "匀速推回起始位置"
+      ],
+      "cues": [
+        "身体保持直线",
+        "核心轻收",
+        "动作缓慢有控制",
+        "肘部45°外展"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "pu_002",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "family_name_en": "Pushup",
+      "name": "上斜俯卧撑",
+      "name_en": "Incline Pushup",
+      "category": "上肢推",
+      "subcategory": "水平推",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": "pu_003",
+      "target_body_parts": [
+        "胸大肌",
+        "肱三头肌",
+        "前锯肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 15,
+        "min_flexibility_score": 15,
+        "min_core_score": 25,
+        "min_upper_limb_score": 25,
+        "min_symmetry_score": 15
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.1,
+        "shoulder_imbalance": 0.5,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.1,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "main",
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 12,
+      "default_duration_seconds": 0,
+      "description": "双手撑在稳固的桌面或椅面上做俯卧撑，角度约45°。适合从墙壁俯卧撑过渡到地面俯卧撑。",
+      "steps": [
+        "双手撑在稳固的桌面或椅面边缘，略宽于肩",
+        "双腿后撤，身体呈一条直线",
+        "缓慢屈肘下降，胸部接近支撑面",
+        "推回起始位置"
+      ],
+      "cues": [
+        "身体始终一条直线",
+        "不要塌腰",
+        "缓慢下降快速推起"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "pu_003",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "family_name_en": "Pushup",
+      "name": "膝盖俯卧撑",
+      "name_en": "Knee Pushup",
+      "category": "上肢推",
+      "subcategory": "水平推",
+      "difficulty": 2,
+      "intensity": "MEDIUM",
+      "is_regression_of": "pu_004",
+      "target_body_parts": [
+        "胸大肌",
+        "肱三头肌",
+        "前锯肌",
+        "腹直肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 20,
+        "min_flexibility_score": 20,
+        "min_core_score": 30,
+        "min_upper_limb_score": 30,
+        "min_symmetry_score": 20
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.2,
+        "shoulder_imbalance": 0.6,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.2,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "膝盖着地做俯卧撑，减少约50%身体重量。核心要求低于标准俯卧撑，是通向完整俯卧撑的关键过渡。",
+      "steps": [
+        "双手略宽于肩撑地",
+        "膝盖着地，身体从膝盖到肩呈直线",
+        "缓慢屈肘下降",
+        "推回起始位置"
+      ],
+      "cues": [
+        "核心收紧",
+        "身体从膝到肩呈直线",
+        "肘部45°外展",
+        "不要耸肩"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "pu_004",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "family_name_en": "Pushup",
+      "name": "标准俯卧撑",
+      "name_en": "Standard Pushup",
+      "category": "上肢推",
+      "subcategory": "水平推",
+      "difficulty": 3,
+      "intensity": "MEDIUM",
+      "is_regression_of": "pu_005",
+      "target_body_parts": [
+        "胸大肌",
+        "肱三头肌",
+        "前锯肌",
+        "腹直肌",
+        "三角肌前束"
+      ],
+      "contraindications": {
+        "min_balance_score": 25,
+        "min_flexibility_score": 25,
+        "min_core_score": 40,
+        "min_upper_limb_score": 40,
+        "min_symmetry_score": 25
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.3,
+        "shoulder_imbalance": 0.7,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.3,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "经典徒手推力动作，强化胸、肩、三头肌及核心稳定性。前锯肌激活有助于改善肩胛骨位置。",
+      "steps": [
+        "双手略宽于肩撑地，手指朝前",
+        "双腿并拢，脚尖着地，身体从头到脚呈直线",
+        "缓慢屈肘下降，胸部接近地面",
+        "推回起始位置，肘部不完全锁死"
+      ],
+      "cues": [
+        "核心全程锁紧",
+        "臀部不要翘起或下沉",
+        "肩胛骨在底部轻微回缩",
+        "视线看地面保持颈部中立"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "pu_005",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "family_name_en": "Pushup",
+      "name": "窄距俯卧撑",
+      "name_en": "Close-grip Pushup",
+      "category": "上肢推",
+      "subcategory": "水平推",
+      "difficulty": 4,
+      "intensity": "HIGH",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "胸大肌内侧",
+        "肱三头肌",
+        "三角肌前束",
+        "前锯肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 30,
+        "min_flexibility_score": 30,
+        "min_core_score": 45,
+        "min_upper_limb_score": 50,
+        "min_symmetry_score": 30
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.2,
+        "shoulder_imbalance": 0.8,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.2,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 8,
+      "default_duration_seconds": 0,
+      "description": "双手靠近（拇指食指形成菱形）的俯卧撑，大幅增加肱三头肌和胸内侧负荷。对肩胛稳定性要求更高。",
+      "steps": [
+        "双手并拢撑地，拇指和食指相触形成菱形",
+        "身体呈标准平板",
+        "缓慢下降，肘部贴紧身体两侧",
+        "推回起始位置"
+      ],
+      "cues": [
+        "肘部紧贴身体",
+        "下降时感受三头肌拉伸",
+        "核心比标准俯卧撑更需收紧"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "pu_006",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "family_name_en": "Pushup",
+      "name": "单腿俯卧撑",
+      "name_en": "Single-leg Pushup",
+      "category": "上肢推",
+      "subcategory": "水平推",
+      "difficulty": 4,
+      "intensity": "HIGH",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "胸大肌",
+        "肱三头肌",
+        "前锯肌",
+        "腹斜肌",
+        "臀中肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 35,
+        "min_flexibility_score": 25,
+        "min_core_score": 50,
+        "min_upper_limb_score": 45,
+        "min_symmetry_score": 35
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.2,
+        "shoulder_imbalance": 0.7,
+        "pelvic_lateral_tilt": 0.6,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.1,
+        "pelvic_anterior_tilt": 0.4,
+        "pelvic_posterior_tilt": 0.2
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 6,
+      "default_duration_seconds": 0,
+      "description": "标准俯卧撑基础上单腿抬起，大幅增加核心抗旋转要求，同时激活对侧臀中肌。",
+      "steps": [
+        "标准俯卧撑起始位置",
+        "抬起一条腿，脚尖离地约10-15cm",
+        "保持身体直线，缓慢做俯卧撑",
+        "每侧完成指定次数后换腿"
+      ],
+      "cues": [
+        "抬起的腿保持伸直",
+        "臀部不能旋转",
+        "核心全程绷紧抵抗侧旋"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "sq_001",
+      "family": "squat",
+      "family_name": "深蹲",
+      "family_name_en": "Squat",
+      "name": "扶椅深蹲",
+      "name_en": "Assisted Squat",
+      "category": "下肢蹲",
+      "subcategory": "双腿蹲",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": "sq_003",
+      "target_body_parts": [
+        "股四头肌",
+        "臀大肌",
+        "腘绳肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 25,
+        "min_flexibility_score": 20,
+        "min_core_score": 25,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 20
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.3,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.5,
+        "pelvic_anterior_tilt": 0.6,
+        "pelvic_posterior_tilt": 0.3
+      },
+      "phases": [
+        "main",
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 12,
+      "default_duration_seconds": 0,
+      "description": "双手扶椅背辅助平衡和部分支撑，适合膝关节不稳或平衡能力较弱的入门者。",
+      "steps": [
+        "面对椅背站立，双手轻扶椅背",
+        "双脚与肩同宽，脚尖略朝外",
+        "缓慢下蹲，臀部向后坐",
+        "大腿与地面平行或更高时起身"
+      ],
+      "cues": [
+        "膝盖方向与脚尖一致",
+        "背挺直",
+        "重心在脚中后部",
+        "手只辅助不主力拉"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "sq_002",
+      "family": "squat",
+      "family_name": "深蹲",
+      "family_name_en": "Squat",
+      "name": "箱式深蹲",
+      "name_en": "Box Squat",
+      "category": "下肢蹲",
+      "subcategory": "双腿蹲",
+      "difficulty": 2,
+      "intensity": "LOW",
+      "is_regression_of": "sq_003",
+      "target_body_parts": [
+        "股四头肌",
+        "臀大肌",
+        "腘绳肌",
+        "髋屈肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 30,
+        "min_flexibility_score": 25,
+        "min_core_score": 30,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 25
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.4,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.7,
+        "pelvic_anterior_tilt": 0.7,
+        "pelvic_posterior_tilt": 0.4
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 12,
+      "default_duration_seconds": 0,
+      "description": "身后放椅子，下蹲至臀部轻触椅面即起。控制深度，消除底部反弹惯性，学习正确的髋主导下蹲模式。",
+      "steps": [
+        "身后放稳固的椅子，双脚与肩同宽",
+        "缓慢下蹲，臀部向后推",
+        "臀部轻触椅面（不坐下休息）",
+        "立即发力站起"
+      ],
+      "cues": [
+        "臀部主动向后找椅子",
+        "触碰即起不停留",
+        "膝盖不外翻",
+        "上半身前倾角度自然"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "sq_003",
+      "family": "squat",
+      "family_name": "深蹲",
+      "family_name_en": "Squat",
+      "name": "标准深蹲",
+      "name_en": "Bodyweight Squat",
+      "category": "下肢蹲",
+      "subcategory": "双腿蹲",
+      "difficulty": 2,
+      "intensity": "MEDIUM",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "股四头肌",
+        "臀大肌",
+        "腘绳肌",
+        "核心"
+      ],
+      "contraindications": {
+        "min_balance_score": 35,
+        "min_flexibility_score": 30,
+        "min_core_score": 35,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 30
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.1,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.5,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.8,
+        "pelvic_anterior_tilt": 0.8,
+        "pelvic_posterior_tilt": 0.5
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 15,
+      "default_duration_seconds": 0,
+      "description": "最基础的下肢力量动作。强化股四头肌、臀大肌，改善髋膝踝联动模式，是判断下肢功能的核心动作。",
+      "steps": [
+        "双脚与肩同宽，脚尖略朝外",
+        "双手前平举或交叉抱胸",
+        "吸气，臀部向后向下坐",
+        "大腿低于平行或达到最大幅度时起身呼气"
+      ],
+      "cues": [
+        "膝盖方向与脚尖一致",
+        "背部挺直不弓背",
+        "重心全脚掌均匀分布",
+        "下蹲时感受臀肌拉伸"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "sq_004",
+      "family": "squat",
+      "family_name": "深蹲",
+      "family_name_en": "Squat",
+      "name": "窄距深蹲",
+      "name_en": "Close-stance Squat",
+      "category": "下肢蹲",
+      "subcategory": "双腿蹲",
+      "difficulty": 3,
+      "intensity": "MEDIUM",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "股四头肌",
+        "臀大肌",
+        "踝关节活动度"
+      ],
+      "contraindications": {
+        "min_balance_score": 40,
+        "min_flexibility_score": 40,
+        "min_core_score": 40,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 35
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.6,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.7,
+        "pelvic_anterior_tilt": 0.6,
+        "pelvic_posterior_tilt": 0.5
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 12,
+      "default_duration_seconds": 0,
+      "description": "双脚并拢深蹲，增加股四头肌刺激和踝关节活动度要求。需要更好的平衡和灵活性。",
+      "steps": [
+        "双脚并拢站立",
+        "双手前平举维持平衡",
+        "缓慢下蹲，膝盖自然前移",
+        "蹲至最大幅度后起身"
+      ],
+      "cues": [
+        "脚跟不能离地",
+        "膝盖不过度前移",
+        "保持上半身直立",
+        "下降速度慢于起身"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "sq_005",
+      "family": "squat",
+      "family_name": "深蹲",
+      "family_name_en": "Squat",
+      "name": "弓步蹲",
+      "name_en": "Lunge",
+      "category": "下肢蹲",
+      "subcategory": "单腿蹲",
+      "difficulty": 3,
+      "intensity": "MEDIUM",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "股四头肌",
+        "臀大肌",
+        "腘绳肌",
+        "臀中肌",
+        "核心"
+      ],
+      "contraindications": {
+        "min_balance_score": 40,
+        "min_flexibility_score": 30,
+        "min_core_score": 40,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 35
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.1,
+        "shoulder_imbalance": 0.2,
+        "pelvic_lateral_tilt": 0.8,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.6,
+        "pelvic_anterior_tilt": 0.7,
+        "pelvic_posterior_tilt": 0.6
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "分腿蹲姿，强化单侧下肢力量与稳定性。对臀中肌和核心抗旋转要求较高，是纠正骨盆侧倾的重要动作。",
+      "steps": [
+        "双脚前后分腿站立，前脚平踏，后脚前掌着地",
+        "垂直下蹲，后膝接近地面但不触地",
+        "前腿发力起身回到起始位置",
+        "完成一侧全部次数后换腿"
+      ],
+      "cues": [
+        "上半身保持直立",
+        "前膝不超过脚尖过多",
+        "骨盆保持水平不倾斜",
+        "后膝轻触地面即起"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "sq_006",
+      "family": "squat",
+      "family_name": "深蹲",
+      "family_name_en": "Squat",
+      "name": "保加利亚分腿蹲",
+      "name_en": "Bulgarian Split Squat",
+      "category": "下肢蹲",
+      "subcategory": "单腿蹲",
+      "difficulty": 4,
+      "intensity": "HIGH",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "股四头肌",
+        "臀大肌",
+        "臀中肌",
+        "腘绳肌",
+        "髋屈肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 50,
+        "min_flexibility_score": 40,
+        "min_core_score": 45,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 40
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.1,
+        "shoulder_imbalance": 0.2,
+        "pelvic_lateral_tilt": 0.9,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.5,
+        "pelvic_anterior_tilt": 0.7,
+        "pelvic_posterior_tilt": 0.7
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 8,
+      "default_duration_seconds": 0,
+      "description": "后脚搭在椅子或床沿上做单腿蹲。极大强化前侧腿力量和稳定性，同时拉伸后侧腿髋屈肌。是纠正骨盆问题的王牌动作。",
+      "steps": [
+        "背对稳固的椅子，一脚搭在椅面上（鞋带面朝下）",
+        "前脚向前迈出足够距离",
+        "垂直下蹲至前大腿接近水平",
+        "前腿发力站起"
+      ],
+      "cues": [
+        "身体直立不前倾",
+        "骨盆保持水平",
+        "前脚全脚掌踩实",
+        "下降时感受后腿髋前侧拉伸"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "hh_001",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "family_name_en": "Hip Hinge",
+      "name": "臀桥",
+      "name_en": "Glute Bridge",
+      "category": "下肢拉",
+      "subcategory": "髋主导",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": "hh_003",
+      "target_body_parts": [
+        "臀大肌",
+        "腘绳肌",
+        "核心"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 15,
+        "min_core_score": 20,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 10
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.2,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.6,
+        "pelvic_anterior_tilt": 0.9,
+        "pelvic_posterior_tilt": 0.3
+      },
+      "phases": [
+        "main",
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 15,
+      "default_duration_seconds": 0,
+      "description": "仰卧屈膝抬臀，最基础的臀肌激活动作。骨盆后倾位收紧臀肌，是纠正骨盆前倾的入门必练。",
+      "steps": [
+        "仰卧，双膝弯曲，双脚平踏地面与髋同宽",
+        "呼气，收紧臀部将髋向上推",
+        "在顶点夹臀保持1-2秒",
+        "吸气缓慢下放"
+      ],
+      "cues": [
+        "用臀部发力而非腰部",
+        "肋骨下沉，不过度挺腰",
+        "脚跟着力",
+        "顶点感受臀肌收缩"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "hh_002",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "family_name_en": "Hip Hinge",
+      "name": "单腿臀桥",
+      "name_en": "Single-leg Glute Bridge",
+      "category": "下肢拉",
+      "subcategory": "髋主导",
+      "difficulty": 2,
+      "intensity": "MEDIUM",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "臀大肌",
+        "腘绳肌",
+        "臀中肌",
+        "核心"
+      ],
+      "contraindications": {
+        "min_balance_score": 20,
+        "min_flexibility_score": 15,
+        "min_core_score": 30,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 25
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.7,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.6,
+        "pelvic_anterior_tilt": 0.8,
+        "pelvic_posterior_tilt": 0.4
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "单腿支撑的臀桥，增加对侧臀中肌和核心抗旋转需求。能暴露左右臀肌力量差异。",
+      "steps": [
+        "仰卧，一腿屈膝踩地，另一腿伸直抬起",
+        "呼气，单侧臀部发力推起",
+        "在顶点保持骨盆水平不侧倾",
+        "缓慢下放，全程保持抬起的腿稳定"
+      ],
+      "cues": [
+        "骨盆不能歪向支撑侧",
+        "发力集中在支撑侧臀部",
+        "抬起的腿放松不借力",
+        "左右次数必须一致"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "hh_003",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "family_name_en": "Hip Hinge",
+      "name": "肩桥",
+      "name_en": "Shoulder Bridge",
+      "category": "下肢拉",
+      "subcategory": "髋主导",
+      "difficulty": 2,
+      "intensity": "MEDIUM",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "臀大肌",
+        "腘绳肌",
+        "竖脊肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 15,
+        "min_flexibility_score": 20,
+        "min_core_score": 25,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 15
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.2,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.7,
+        "pelvic_anterior_tilt": 0.7,
+        "pelvic_posterior_tilt": 0.5
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 12,
+      "default_duration_seconds": 0,
+      "description": "肩胛骨垫高（可用折叠毛巾）做臀桥，增加髋关节活动范围，更强调腘绳肌参与。",
+      "steps": [
+        "仰卧，肩胛骨下方垫折叠毛巾或薄垫",
+        "双膝弯曲，双脚平踏",
+        "呼气推起至身体从肩到膝呈直线",
+        "缓慢下放"
+      ],
+      "cues": [
+        "颈部放松",
+        "发力点集中在臀部和腘绳肌",
+        "腰椎不超伸"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "ul_001",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "family_name_en": "Upper Body Pull",
+      "name": "俯卧Y字举",
+      "name_en": "Prone Y-Raise",
+      "category": "上肢拉",
+      "subcategory": "肩胛稳定",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "下斜方肌",
+        "菱形肌",
+        "肩袖"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 10,
+        "min_core_score": 15,
+        "min_upper_limb_score": 20,
+        "min_symmetry_score": 10
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.8,
+        "shoulder_imbalance": 0.7,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 12,
+      "default_duration_seconds": 0,
+      "description": "俯卧，双臂前伸呈Y形上抬。激活下斜方肌，改善圆肩和头前倾姿态。",
+      "steps": [
+        "俯卧，额头下方可垫毛巾",
+        "双臂向前上方伸直，与身体呈Y形（约120°），拇指朝上",
+        "缓慢抬起双臂，感受肩胛骨之间收紧",
+        "在顶点保持1-2秒，缓慢下放"
+      ],
+      "cues": [
+        "抬臂时肩胛骨向脊柱靠拢",
+        "不耸肩",
+        "颈部放松",
+        "幅度不大但控制精细"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "ul_002",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "family_name_en": "Upper Body Pull",
+      "name": "俯卧T字举",
+      "name_en": "Prone T-Raise",
+      "category": "上肢拉",
+      "subcategory": "肩胛稳定",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "菱形肌",
+        "三角肌后束",
+        "肩袖"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 10,
+        "min_core_score": 15,
+        "min_upper_limb_score": 20,
+        "min_symmetry_score": 10
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.7,
+        "shoulder_imbalance": 0.8,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.4,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 12,
+      "default_duration_seconds": 0,
+      "description": "俯卧，双臂侧平举呈T形上抬。强化菱形肌和三角肌后束，纠正含胸驼背。",
+      "steps": [
+        "俯卧，额头下方可垫毛巾",
+        "双臂侧平举，与身体呈T形（90°），拇指朝上",
+        "缓慢抬起双臂",
+        "在顶点保持1-2秒后缓慢下放"
+      ],
+      "cues": [
+        "肩胛骨向中间夹",
+        "手背朝上或拇指朝上",
+        "不使用腰部力量"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "ul_003",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "family_name_en": "Upper Body Pull",
+      "name": "俯卧W字举",
+      "name_en": "Prone W-Raise",
+      "category": "上肢拉",
+      "subcategory": "肩胛稳定",
+      "difficulty": 2,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "肩袖",
+        "菱形肌",
+        "下斜方肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 15,
+        "min_core_score": 15,
+        "min_upper_limb_score": 25,
+        "min_symmetry_score": 15
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.8,
+        "shoulder_imbalance": 0.9,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "俯卧，肘部弯曲呈W形，肩胛骨回缩+肩袖外旋。针对肩胛骨位置不良和肩关节不稳的高效纠正动作。",
+      "steps": [
+        "俯卧，手臂弯曲，肘部贴近身体两侧，双手与肩同高",
+        "双手与前臂形成一个W形",
+        "肩胛骨夹紧，同时双手向上旋转（外旋）",
+        "缓慢回到起始位置"
+      ],
+      "cues": [
+        "肘部始终贴近身体",
+        "肩胛骨主动发力",
+        "动作幅度小而精确",
+        "感受肩后侧发力"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "ul_004",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "family_name_en": "Upper Body Pull",
+      "name": "地板天使",
+      "name_en": "Floor Angel",
+      "category": "上肢拉",
+      "subcategory": "肩胛活动",
+      "difficulty": 3,
+      "intensity": "MEDIUM",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "肩袖",
+        "下斜方肌",
+        "菱形肌",
+        "胸椎活动度"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 30,
+        "min_core_score": 20,
+        "min_upper_limb_score": 35,
+        "min_symmetry_score": 25
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.9,
+        "shoulder_imbalance": 0.8,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup",
+        "cooldown"
+      ],
+      "default_sets": 2,
+      "default_reps": 8,
+      "default_duration_seconds": 0,
+      "description": "仰卧在地面模仿靠墙天使动作。地面提供反馈，确保下背部贴地、肋骨下沉，是纠正头前倾和圆肩的标志性动作。",
+      "steps": [
+        "仰卧，膝盖弯曲，下背部轻贴地面",
+        "双臂侧举，肘部弯曲90°，手背和手腕背面贴地",
+        "缓慢将手臂沿地面向上滑动（肩屈）",
+        "全程保持手腕和手背接触地面",
+        "到最大幅度后缓慢原路返回"
+      ],
+      "cues": [
+        "下背部始终轻贴地面（骨盆后倾位）",
+        "肋骨下沉不外翻",
+        "速度极慢",
+        "能活动的范围可能很小，正常现象"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "ul_005",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "family_name_en": "Upper Body Pull",
+      "name": "反向平板",
+      "name_en": "Reverse Plank",
+      "category": "上肢拉",
+      "subcategory": "后链稳定",
+      "difficulty": 3,
+      "intensity": "MEDIUM",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "三角肌后束",
+        "菱形肌",
+        "竖脊肌",
+        "臀大肌",
+        "腘绳肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 25,
+        "min_flexibility_score": 30,
+        "min_core_score": 35,
+        "min_upper_limb_score": 40,
+        "min_symmetry_score": 25
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.6,
+        "shoulder_imbalance": 0.7,
+        "pelvic_lateral_tilt": 0.2,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.3,
+        "pelvic_anterior_tilt": 0.5,
+        "pelvic_posterior_tilt": 0.6
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_duration_seconds": 30,
+      "default_reps": 0,
+      "description": "面朝上的平板支撑变体。同时强化后链（背部、臀、腘绳肌）和肩胛稳定性，是前侧链主导训练的绝佳拮抗。",
+      "steps": [
+        "坐姿，双腿伸直，双手在臀部后方撑地，指尖朝前或朝后",
+        "臀部抬离地面",
+        "身体从肩到脚呈一条直线",
+        "保持此姿势"
+      ],
+      "cues": [
+        "胸部打开上挺",
+        "肩胛骨回缩",
+        "臀部不下沉",
+        "颈部中立"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "ce_001",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "family_name_en": "Core Anti-Extension",
+      "name": "死虫式",
+      "name_en": "Dead Bug",
+      "category": "核心",
+      "subcategory": "抗伸展",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": "ce_002",
+      "target_body_parts": [
+        "腹横肌",
+        "腹直肌",
+        "盆底肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 10,
+        "min_core_score": 15,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 10
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.1,
+        "shoulder_imbalance": 0.1,
+        "pelvic_lateral_tilt": 0.2,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.1,
+        "pelvic_anterior_tilt": 0.8,
+        "pelvic_posterior_tilt": 0.3
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "仰卧交替伸展对侧手脚，学习在四肢活动中保持脊柱和骨盆稳定。骨盆前倾纠正的核心入门动作。",
+      "steps": [
+        "仰卧，双臂上举指向天花板，双腿屈膝屈髋90°",
+        "下背部轻贴地面（骨盆微后倾）",
+        "缓慢伸展对侧手臂和腿（右手+左腿），接近地面但不触地",
+        "回到起始位置，换另一侧"
+      ],
+      "cues": [
+        "下背部始终贴地",
+        "动作像慢动作电影",
+        "腹部始终有张力",
+        "不要憋气"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "ce_002",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "family_name_en": "Core Anti-Extension",
+      "name": "鸟狗式",
+      "name_en": "Bird Dog",
+      "category": "核心",
+      "subcategory": "抗伸展+抗旋转",
+      "difficulty": 2,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "竖脊肌",
+        "腹横肌",
+        "臀大肌",
+        "肩胛稳定肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 25,
+        "min_flexibility_score": 15,
+        "min_core_score": 25,
+        "min_upper_limb_score": 20,
+        "min_symmetry_score": 20
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.2,
+        "shoulder_imbalance": 0.4,
+        "pelvic_lateral_tilt": 0.5,
+        "possible_scoliosis": 0.5,
+        "knee_hyperextension": 0.3,
+        "pelvic_anterior_tilt": 0.7,
+        "pelvic_posterior_tilt": 0.5
+      },
+      "phases": [
+        "main",
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 8,
+      "default_duration_seconds": 0,
+      "description": "四足跪姿交替伸展对侧手脚。训练脊柱在中立位下的动态稳定，同时激活臀部与肩胛。是纠正多种体态问题的全能基础动作。",
+      "steps": [
+        "四足跪姿，手腕在肩下，膝盖在髋下",
+        "脊柱中立，头与脊柱成直线",
+        "缓慢伸展对侧手臂和腿（右手+左腿）",
+        "在伸展顶点保持1-2秒",
+        "缓慢收回，换侧"
+      ],
+      "cues": [
+        "骨盆不能旋转",
+        "伸展腿不要高于髋",
+        "腹部维持张力",
+        "想象背上放了一杯水不能洒"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "ce_003",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "family_name_en": "Core Anti-Extension",
+      "name": "膝盖平板支撑",
+      "name_en": "Knee Plank",
+      "category": "核心",
+      "subcategory": "抗伸展",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": "ce_004",
+      "target_body_parts": [
+        "腹直肌",
+        "腹横肌",
+        "前锯肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 15,
+        "min_flexibility_score": 10,
+        "min_core_score": 20,
+        "min_upper_limb_score": 20,
+        "min_symmetry_score": 10
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.2,
+        "shoulder_imbalance": 0.3,
+        "pelvic_lateral_tilt": 0.1,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.1,
+        "pelvic_anterior_tilt": 0.6,
+        "pelvic_posterior_tilt": 0.2
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 2,
+      "default_duration_seconds": 20,
+      "default_reps": 0,
+      "description": "膝盖着地的平板支撑，减轻约50%核心负荷。入门级核心抗伸展训练。",
+      "steps": [
+        "前臂撑地，肘在肩下",
+        "膝盖着地",
+        "身体从膝到肩呈直线",
+        "保持此姿势均匀呼吸"
+      ],
+      "cues": [
+        "腹部收紧如挨一拳",
+        "不要塌腰",
+        "臀部不要翘起",
+        "均匀呼吸不憋气"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "ce_004",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "family_name_en": "Core Anti-Extension",
+      "name": "标准平板支撑",
+      "name_en": "Standard Plank",
+      "category": "核心",
+      "subcategory": "抗伸展",
+      "difficulty": 2,
+      "intensity": "MEDIUM",
+      "is_regression_of": "ce_005",
+      "target_body_parts": [
+        "腹直肌",
+        "腹横肌",
+        "前锯肌",
+        "肩胛稳定肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 20,
+        "min_flexibility_score": 10,
+        "min_core_score": 30,
+        "min_upper_limb_score": 30,
+        "min_symmetry_score": 15
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.3,
+        "shoulder_imbalance": 0.4,
+        "pelvic_lateral_tilt": 0.2,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.2,
+        "pelvic_anterior_tilt": 0.7,
+        "pelvic_posterior_tilt": 0.3
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 2,
+      "default_duration_seconds": 30,
+      "default_reps": 0,
+      "description": "经典核心训练动作，全身静态抗伸展。强化腹横肌和前锯肌，改善核心稳定性和体态控制。",
+      "steps": [
+        "前臂撑地，肘在肩正下方",
+        "脚尖着地，身体从头到脚呈一条直线",
+        "保持此姿势均匀呼吸"
+      ],
+      "cues": [
+        "腹部收紧要能抵抗轻轻拍打",
+        "臀部与肩同高",
+        "视线看地面保持颈部中立",
+        "不是比谁撑得久而是比谁姿态正确"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "ce_006",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "family_name_en": "Core Anti-Extension",
+      "name": "登山者（慢速控制）",
+      "name_en": "Slow Mountain Climber",
+      "category": "核心",
+      "subcategory": "抗伸展+动态",
+      "difficulty": 4,
+      "intensity": "HIGH",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "腹直肌",
+        "腹横肌",
+        "髋屈肌",
+        "前锯肌",
+        "肩胛稳定肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 30,
+        "min_flexibility_score": 25,
+        "min_core_score": 45,
+        "min_upper_limb_score": 40,
+        "min_symmetry_score": 30
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.2,
+        "shoulder_imbalance": 0.4,
+        "pelvic_lateral_tilt": 0.4,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.2,
+        "pelvic_anterior_tilt": 0.6,
+        "pelvic_posterior_tilt": 0.5
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 12,
+      "default_duration_seconds": 0,
+      "description": "平板支撑姿势下缓慢交替提膝。强调慢速控制而非心肺爆发，训练动态核心稳定。区别于传统快速登山者。",
+      "steps": [
+        "标准手臂支撑平板（手掌撑地）",
+        "缓慢将一侧膝盖向胸部方向提起",
+        "在最高点短暂保持",
+        "缓慢还原，换另一侧"
+      ],
+      "cues": [
+        "骨盆保持稳定不上下晃动",
+        "3秒收3秒放",
+        "核心全程紧绷",
+        "肩胛骨撑稳"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "cl_004",
+      "family": "core_lateral",
+      "family_name": "核心抗侧屈",
+      "family_name_en": "Core Anti-Lateral Flexion",
+      "name": "侧平板旋转",
+      "name_en": "Side Plank Thread",
+      "category": "核心",
+      "subcategory": "抗旋转+活动度",
+      "difficulty": 4,
+      "intensity": "HIGH",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "腹斜肌",
+        "腹横肌",
+        "胸椎活动度",
+        "肩胛稳定肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 35,
+        "min_flexibility_score": 30,
+        "min_core_score": 45,
+        "min_upper_limb_score": 40,
+        "min_symmetry_score": 35
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.3,
+        "shoulder_imbalance": 0.5,
+        "pelvic_lateral_tilt": 0.7,
+        "possible_scoliosis": 0.6,
+        "knee_hyperextension": 0.2,
+        "pelvic_anterior_tilt": 0.3,
+        "pelvic_posterior_tilt": 0.2
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 6,
+      "default_duration_seconds": 0,
+      "description": "侧平板基础上上方手臂穿行旋转，同时训练核心抗旋转与胸椎活动度。融合稳定与灵活性。",
+      "steps": [
+        "标准侧平板起始，上方手臂指向天花板",
+        "缓慢将上方手臂穿过身体下方（向背后方向旋转）",
+        "眼神跟随手臂，感受胸椎旋转",
+        "缓慢回到起始"
+      ],
+      "cues": [
+        "旋转来自胸椎而非腰椎",
+        "髋部保持稳定不跟随旋转",
+        "动作缓慢控制",
+        "感受侧腹肌拉伸与收紧"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "nc_003",
+      "family": "neck_correction",
+      "family_name": "颈部矫正",
+      "family_name_en": "Neck Correction",
+      "name": "靠墙天使",
+      "name_en": "Wall Angel",
+      "category": "颈部矫正",
+      "subcategory": "胸椎活动度",
+      "difficulty": 2,
+      "intensity": "MEDIUM",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "下斜方肌",
+        "菱形肌",
+        "肩袖",
+        "胸椎"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 25,
+        "min_core_score": 15,
+        "min_upper_limb_score": 30,
+        "min_symmetry_score": 20
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.9,
+        "shoulder_imbalance": 0.7,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.1,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 2,
+      "default_reps": 8,
+      "default_duration_seconds": 0,
+      "description": "背靠墙做手臂天使滑动。同时训练胸椎伸展、肩胛回缩和肩外旋，是头前倾+圆肩的经典纠正组合。",
+      "steps": [
+        "背靠墙站立，脚跟距墙约10cm",
+        "后脑勺、上背、臀部轻贴墙",
+        "手臂侧举，肘腕贴墙（或尽量接近）",
+        "缓慢将手臂沿墙向上滑动",
+        "到最高点后缓慢下移"
+      ],
+      "cues": [
+        "下背部与墙之间可能有自然空隙，正常",
+        "肋骨下沉，不挺腰",
+        "手臂无法全程贴墙没关系，感受肩胛运动即可"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "st_001",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "family_name_en": "Stretch",
+      "name": "猫牛式",
+      "name_en": "Cat-Cow Stretch",
+      "category": "拉伸",
+      "subcategory": "脊柱活动",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "target_body_parts": [
+        "脊柱",
+        "胸椎",
+        "腰椎"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 0,
+        "min_core_score": 0,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.5,
+        "shoulder_imbalance": 0.2,
+        "pelvic_lateral_tilt": 0.1,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.3,
+        "pelvic_posterior_tilt": 0.4
+      },
+      "phases": [
+        "warmup",
+        "cooldown"
+      ],
+      "default_sets": 2,
+      "default_duration_seconds": 30,
+      "default_reps": 8,
+      "description": "四足跪姿交替做脊柱屈曲和伸展。温和活动整个脊柱，改善胸椎和腰椎灵活性。",
+      "steps": [
+        "四足跪姿，手腕在肩下，膝盖在髋下",
+        "吸气，抬头挺胸，腹部下沉（牛式）",
+        "呼气，弓背收腹，下巴靠胸（猫式）",
+        "缓慢在两者之间切换"
+      ],
+      "cues": [
+        "动作缓慢流畅",
+        "配合呼吸节奏",
+        "感受每一节脊柱的逐节运动"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "st_004",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "family_name_en": "Stretch",
+      "name": "门框胸拉伸",
+      "name_en": "Doorframe Chest Stretch",
+      "category": "拉伸",
+      "subcategory": "胸部拉伸",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "target_body_parts": [
+        "胸大肌",
+        "胸小肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 10,
+        "min_core_score": 0,
+        "min_upper_limb_score": 15,
+        "min_symmetry_score": 5
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.9,
+        "shoulder_imbalance": 0.7,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.1,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup",
+        "cooldown"
+      ],
+      "default_sets": 2,
+      "default_duration_seconds": 30,
+      "default_reps": 0,
+      "description": "利用门框拉伸胸大肌和胸小肌。直接对抗“低头族”和久坐导致的胸部紧缩，是头前倾纠正的必需拉伸。",
+      "steps": [
+        "站在门框处，手臂侧举屈肘90°",
+        "前臂和手掌贴门框",
+        "缓慢将身体向前移动",
+        "感受胸肌和前肩拉伸，保持"
+      ],
+      "cues": [
+        "不要强迫疼痛",
+        "保持身体正直不前倾",
+        "可在两个角度做（手高/手低）覆盖胸肌上下束"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "st_010",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "family_name_en": "Stretch",
+      "name": "站姿体侧屈",
+      "name_en": "Standing Side Bend",
+      "category": "拉伸",
+      "subcategory": "侧链拉伸",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "target_body_parts": [
+        "腰方肌",
+        "背阔肌",
+        "腹斜肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 15,
+        "min_flexibility_score": 10,
+        "min_core_score": 10,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 10
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.1,
+        "shoulder_imbalance": 0.4,
+        "pelvic_lateral_tilt": 0.9,
+        "possible_scoliosis": 0.4,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.2,
+        "pelvic_posterior_tilt": 0.1
+      },
+      "phases": [
+        "warmup",
+        "cooldown"
+      ],
+      "default_sets": 2,
+      "default_duration_seconds": 25,
+      "default_reps": 0,
+      "description": "站立向一侧弯曲身体，拉伸腰方肌和背阔肌。直接针对骨盆侧倾的紧张侧腰方肌。",
+      "steps": [
+        "站立，双脚与肩同宽",
+        "一手上举过头",
+        "身体向对侧弯曲",
+        "感受侧腰拉伸"
+      ],
+      "cues": [
+        "身体不前后扭转",
+        "骨盆保持不动",
+        "两侧都要做",
+        "不要弹震"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "bl_001",
+      "family": "balance",
+      "family_name": "平衡",
+      "family_name_en": "Balance",
+      "name": "双腿闭眼站立",
+      "name_en": "Eyes-closed Standing",
+      "category": "平衡",
+      "subcategory": "静态平衡",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "target_body_parts": [
+        "踝关节本体感觉",
+        "前庭系统"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 0,
+        "min_core_score": 5,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.3,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.3,
+        "pelvic_anterior_tilt": 0.1,
+        "pelvic_posterior_tilt": 0.1
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 2,
+      "default_duration_seconds": 30,
+      "default_reps": 0,
+      "description": "双脚并拢闭眼站立，减少视觉依赖，训练前庭和本体感觉。平衡训练最基础入门。",
+      "steps": [
+        "双脚并拢站立",
+        "闭眼",
+        "尽量保持稳定不动",
+        "如果失去平衡则睁眼重新开始"
+      ],
+      "cues": [
+        "感受脚底压力分布",
+        "身体小幅晃动是正常的",
+        "旁边有支撑物以防摔倒"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "bl_002",
+      "family": "balance",
+      "family_name": "平衡",
+      "family_name_en": "Balance",
+      "name": "单腿站立",
+      "name_en": "Single-leg Stance",
+      "category": "平衡",
+      "subcategory": "静态平衡",
+      "difficulty": 2,
+      "intensity": "LOW",
+      "target_body_parts": [
+        "踝关节稳定肌",
+        "臀中肌",
+        "核心"
+      ],
+      "contraindications": {
+        "min_balance_score": 25,
+        "min_flexibility_score": 0,
+        "min_core_score": 15,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 20
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.1,
+        "pelvic_lateral_tilt": 0.7,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.5,
+        "pelvic_anterior_tilt": 0.3,
+        "pelvic_posterior_tilt": 0.2
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_duration_seconds": 20,
+      "default_reps": 0,
+      "description": "单腿站立保持平衡。激活踝关节稳定和臀中肌，训练骨盆水平控制。",
+      "steps": [
+        "单腿站立",
+        "对侧脚抬离地面，可贴在支撑腿内侧",
+        "双手叉腰或自然下垂",
+        "保持姿势，视线看前方固定点"
+      ],
+      "cues": [
+        "支撑腿膝盖微屈",
+        "骨盆保持水平",
+        "脚掌抓地感受三点支撑",
+        "两侧时间必须一致"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "bl_003",
+      "family": "balance",
+      "family_name": "平衡",
+      "family_name_en": "Balance",
+      "name": "闭眼单腿站立",
+      "name_en": "Eyes-closed Single-leg Stance",
+      "category": "平衡",
+      "subcategory": "静态平衡",
+      "difficulty": 3,
+      "intensity": "MEDIUM",
+      "is_progression_of": "bl_002",
+      "target_body_parts": [
+        "踝关节本体感觉",
+        "臀中肌",
+        "核心",
+        "前庭系统"
+      ],
+      "contraindications": {
+        "min_balance_score": 40,
+        "min_flexibility_score": 0,
+        "min_core_score": 25,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 30
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.8,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.5,
+        "pelvic_anterior_tilt": 0.2,
+        "pelvic_posterior_tilt": 0.2
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_duration_seconds": 15,
+      "default_reps": 0,
+      "description": "闭眼单腿站立。剥离视觉补偿，纯粹依赖本体感觉和前庭系统。暴露出视觉代偿掩盖的平衡缺陷。",
+      "steps": [
+        "单腿站立",
+        "稳定身体后缓慢闭眼",
+        "尽量保持平衡",
+        "睁眼后换腿"
+      ],
+      "cues": [
+        "旁边必须有支撑物安全保护",
+        "感到要倒立即睁眼",
+        "两侧都要做",
+        "不追求时长而追求质量"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "mo_001",
+      "family": "mobility",
+      "family_name": "活动度",
+      "family_name_en": "Mobility",
+      "name": "踝关节环绕",
+      "name_en": "Ankle Circles",
+      "category": "活动度",
+      "subcategory": "关节活动",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "target_body_parts": [
+        "踝关节"
+      ],
+      "contraindications": {
+        "min_balance_score": 10,
+        "min_flexibility_score": 0,
+        "min_core_score": 0,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.2,
+        "possible_scoliosis": 0.0,
+        "knee_hyperextension": 0.3,
+        "pelvic_anterior_tilt": 0.2,
+        "pelvic_posterior_tilt": 0.1
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 2,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "坐姿或站姿，抬起一脚做踝关节环绕。改善踝关节活动范围，为深蹲等下肢训练做准备。",
+      "steps": [
+        "坐姿或扶墙站立，抬起一侧脚",
+        "脚踝做顺时针环绕",
+        "再逆时针环绕",
+        "换脚"
+      ],
+      "cues": [
+        "动作幅度最大化",
+        "小腿不动只转脚踝",
+        "环绕而非抖动"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "mo_002",
+      "family": "mobility",
+      "family_name": "活动度",
+      "family_name_en": "Mobility",
+      "name": "髋关节环绕",
+      "name_en": "Hip Circles",
+      "category": "活动度",
+      "subcategory": "关节活动",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "target_body_parts": [
+        "髋关节"
+      ],
+      "contraindications": {
+        "min_balance_score": 20,
+        "min_flexibility_score": 10,
+        "min_core_score": 10,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 10
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.4,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.2,
+        "pelvic_anterior_tilt": 0.4,
+        "pelvic_posterior_tilt": 0.4
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 2,
+      "default_reps": 8,
+      "default_duration_seconds": 0,
+      "description": "站立抬膝做髋关节大幅环绕。提升髋关节活动范围，为深蹲和髋铰链动作预热。",
+      "steps": [
+        "扶墙站立保持平衡",
+        "一侧腿屈膝抬起",
+        "膝盖向外打开再向前画圈",
+        "完成数次后反向环绕"
+      ],
+      "cues": [
+        "站立腿膝盖微屈",
+        "环绕时上半身尽量稳定",
+        "动作缓慢控制"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "mo_003",
+      "family": "mobility",
+      "family_name": "活动度",
+      "family_name_en": "Mobility",
+      "name": "肩部环绕",
+      "name_en": "Shoulder Circles",
+      "category": "活动度",
+      "subcategory": "关节活动",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "target_body_parts": [
+        "肩关节",
+        "肩袖",
+        "斜方肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 10,
+        "min_core_score": 0,
+        "min_upper_limb_score": 15,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.5,
+        "shoulder_imbalance": 0.6,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 2,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "站立或坐姿做大圈肩环绕。激活肩关节滑液，预热肩袖肌群，为所有上肢训练做准备。",
+      "steps": [
+        "站立，双臂自然下垂",
+        "双肩同时向前做大幅环绕",
+        "环绕数次后向后方环绕",
+        "逐步加大环绕幅度"
+      ],
+      "cues": [
+        "手臂完全放松",
+        "感受肩胛骨的伴随运动",
+        "逐渐增加幅度而非突然最大"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "mo_005",
+      "family": "mobility",
+      "family_name": "活动度",
+      "family_name_en": "Mobility",
+      "name": "最伟大拉伸",
+      "name_en": "World's Greatest Stretch",
+      "category": "活动度",
+      "subcategory": "全身动态拉伸",
+      "difficulty": 2,
+      "intensity": "MEDIUM",
+      "target_body_parts": [
+        "髋屈肌",
+        "腘绳肌",
+        "胸椎",
+        "腹股沟"
+      ],
+      "contraindications": {
+        "min_balance_score": 30,
+        "min_flexibility_score": 25,
+        "min_core_score": 25,
+        "min_upper_limb_score": 20,
+        "min_symmetry_score": 20
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.4,
+        "shoulder_imbalance": 0.3,
+        "pelvic_lateral_tilt": 0.4,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.3,
+        "pelvic_anterior_tilt": 0.7,
+        "pelvic_posterior_tilt": 0.5
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 2,
+      "default_reps": 5,
+      "default_duration_seconds": 0,
+      "description": "弓步+旋转+伸展的复合动态拉伸。一个动作同时打开髋、胸椎、腹股沟和腘绳肌，是最全面的热身动作。",
+      "steps": [
+        "弓步起始，前脚平踏",
+        "前脚同侧手撑地（在前脚内侧）",
+        "对侧手向上旋转打开，眼睛跟随手掌",
+        "感受胸椎旋转和髋前侧拉伸",
+        "回到起始，换侧"
+      ],
+      "cues": [
+        "前脚踩实",
+        "旋转时保持弓步稳定",
+        "动作流畅配合呼吸",
+        "不追求速度"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "mo_008",
+      "family": "mobility",
+      "family_name": "活动度",
+      "family_name_en": "Mobility",
+      "name": "直腿下放（仰卧）",
+      "name_en": "Supine Straight-leg Lowering",
+      "category": "活动度",
+      "subcategory": "核心控制+腘绳肌",
+      "difficulty": 2,
+      "intensity": "MEDIUM",
+      "target_body_parts": [
+        "腹横肌",
+        "髋屈肌",
+        "腘绳肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 20,
+        "min_core_score": 30,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 10
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.2,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.3,
+        "pelvic_anterior_tilt": 0.8,
+        "pelvic_posterior_tilt": 0.4
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 8,
+      "default_duration_seconds": 0,
+      "description": "仰卧双腿上举后缓慢下放一条腿。训练在下肢运动中保持骨盆稳定（核心抗伸展），是骨盆前倾纠正的关键控制训练。",
+      "steps": [
+        "仰卧，双腿伸直上举至90°（或屈膝减轻难度）",
+        "下背部轻贴地面",
+        "缓慢将一条腿下放，接近地面但不触地",
+        "腹部保持收紧，回到起始位置换腿"
+      ],
+      "cues": [
+        "下背部一旦离地即停止下放",
+        "动作极慢",
+        "不是练腿力而是练核心控制"
+      ],
+      "display_type": "image",
+      "display_url": ""
+    },
+    {
+      "id": "hh_006",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "family_name_en": "Hip Hinge",
+      "name": "硬拉",
+      "name_en": "Deadlift",
+      "category": "下肢拉",
+      "subcategory": "髋主导",
+      "difficulty": 3,
+      "intensity": "HIGH",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "臀大肌",
+        "腘绳肌",
+        "竖脊肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 30,
+        "min_flexibility_score": 30,
+        "min_core_score": 40,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 30
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.1,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.2,
+        "possible_scoliosis": 0.0,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.7,
+        "pelvic_posterior_tilt": 0.6
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "双脚与髋同宽，保持背部挺直，髋部后推发力拉起",
+      "steps": [
+        "1.双脚与髋同宽站立",
+        "2.屈髋俯身",
+        "3.背部挺直站起",
+        "4.控制下放"
+      ],
+      "cues": [
+        "保持背部挺直",
+        "髋部主导发力"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "hh_007",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "family_name_en": "Hip Hinge",
+      "name": "罗马尼亚硬拉",
+      "name_en": "Romanian Deadlift",
+      "category": "下肢拉",
+      "subcategory": "髋主导",
+      "difficulty": 3,
+      "intensity": "HIGH",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "腘绳肌",
+        "臀大肌",
+        "竖脊肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 30,
+        "min_flexibility_score": 35,
+        "min_core_score": 40,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 30
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.1,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.2,
+        "possible_scoliosis": 0.0,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.7,
+        "pelvic_posterior_tilt": 0.8
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "双腿直立微屈膝，髋部后推，杠铃沿腿前侧下放",
+      "steps": [
+        "1.双脚与髋同宽微屈膝",
+        "2.髋部后推",
+        "3.杠铃沿大腿下放",
+        "4.髋部前推回位"
+      ],
+      "cues": [
+        "膝盖微屈保持",
+        "髋部主导后移"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "bl_005",
+      "family": "balance",
+      "family_name": "平衡",
+      "family_name_en": "Balance",
+      "name": "前后脚掌重心转换",
+      "name_en": "Heel Toe Rock",
+      "category": "平衡",
+      "subcategory": "重心控制",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "踝关节",
+        "足底固有肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 0,
+        "min_core_score": 0,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.0,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 10,
+      "default_duration_seconds": 0,
+      "description": "站立位，缓慢将重心从脚跟转移到脚尖再返回",
+      "steps": [
+        "1.自然站立",
+        "2.重心前移至脚尖",
+        "3.重心后移至脚跟",
+        "4.重复转移"
+      ],
+      "cues": [
+        "动作缓慢有控制",
+        "保持身体平衡"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "st_011",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "family_name_en": "Stretch",
+      "name": "髋部打开",
+      "name_en": "Hip Opener",
+      "category": "拉伸",
+      "subcategory": "髋部",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "髋内收肌",
+        "髋关节"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 0,
+        "min_core_score": 0,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.3,
+        "possible_scoliosis": 0.0,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.2,
+        "pelvic_posterior_tilt": 0.2
+      },
+      "phases": [
+        "warmup",
+        "cooldown"
+      ],
+      "default_sets": 2,
+      "default_reps": 10,
+      "default_duration_seconds": 30,
+      "description": "坐姿，双腿屈膝向外打开（蝴蝶式），双手放膝上轻压",
+      "steps": [
+        "1.坐姿脚底相对",
+        "2.双膝向外打开",
+        "3.感受内侧拉伸",
+        "4.保持30秒放松"
+      ],
+      "cues": [
+        "膝盖向外打开",
+        "配合呼吸放松"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "jj_001",
+      "family": "jumping_jack",
+      "family_name": "开合跳",
+      "family_name_en": "Jumping Jack",
+      "name": "开合跳",
+      "name_en": "Jumping Jack",
+      "category": "热身",
+      "subcategory": "全身",
+      "difficulty": 1,
+      "intensity": "MEDIUM",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "全身",
+        "心肺"
+      ],
+      "contraindications": {
+        "min_balance_score": 30,
+        "min_flexibility_score": 0,
+        "min_core_score": 25,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.0,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 3,
+      "default_reps": 20,
+      "default_duration_seconds": 0,
+      "description": "双脚并拢站立，跳起分腿举手，落地并腿放手，保持节奏重复",
+      "steps": [
+        "1.双脚并拢站立",
+        "2.跳起分腿举手",
+        "3.落地并腿放手",
+        "4.保持节奏重复"
+      ],
+      "cues": [
+        "核心收紧",
+        "落地轻柔"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "sq_007",
+      "family": "squat",
+      "family_name": "深蹲",
+      "family_name_en": "Squat",
+      "name": "深弓步",
+      "name_en": "Deep Lunge",
+      "category": "下肢蹲",
+      "subcategory": "单腿蹲",
+      "difficulty": 3,
+      "intensity": "HIGH",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "股四头肌",
+        "臀大肌",
+        "髋屈肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 40,
+        "min_flexibility_score": 35,
+        "min_core_score": 35,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 35
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.0,
+        "pelvic_lateral_tilt": 0.4,
+        "possible_scoliosis": 0.2,
+        "knee_hyperextension": 0.5,
+        "pelvic_anterior_tilt": 0.5,
+        "pelvic_posterior_tilt": 0.3
+      },
+      "phases": [
+        "main"
+      ],
+      "default_sets": 3,
+      "default_reps": 8,
+      "default_duration_seconds": 0,
+      "description": "向前迈一大步，前腿膝盖弯曲大于90度，后腿膝盖接近地面",
+      "steps": [
+        "1.双脚并拢站立",
+        "2.向前迈一大步",
+        "3.下降至前膝大于90度",
+        "4.前腿发力推回"
+      ],
+      "cues": [
+        "前膝不超脚尖",
+        "躯干直立"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "st_012",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "family_name_en": "Stretch",
+      "name": "小狗伸展式",
+      "name_en": "Extended Puppy Pose",
+      "category": "拉伸",
+      "subcategory": "肩背",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "背阔肌",
+        "胸椎",
+        "肩关节"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 0,
+        "min_core_score": 0,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.0,
+        "shoulder_imbalance": 0.5,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.0,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "cooldown"
+      ],
+      "default_sets": 2,
+      "default_reps": 5,
+      "default_duration_seconds": 30,
+      "description": "四足跪姿，双手向前延伸，胸部下沉向地面",
+      "steps": [
+        "1.四足跪姿",
+        "2.双手向前延伸",
+        "3.胸部下沉",
+        "4.保持30-60秒"
+      ],
+      "cues": [
+        "臀部保持在膝盖上方",
+        "配合深呼吸"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "st_013",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "family_name_en": "Stretch",
+      "name": "胸部打开",
+      "name_en": "Chest Opener",
+      "category": "拉伸",
+      "subcategory": "胸部",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "胸大肌",
+        "胸小肌",
+        "三角肌前束"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 0,
+        "min_core_score": 0,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.5,
+        "shoulder_imbalance": 0.6,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.1,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup",
+        "cooldown"
+      ],
+      "default_sets": 2,
+      "default_reps": 10,
+      "default_duration_seconds": 20,
+      "description": "站立位，双手在背后交握，手臂向后上方抬起",
+      "steps": [
+        "1.站立双手背后交握",
+        "2.手臂向后上抬",
+        "3.挺胸感受拉伸",
+        "4.保持20-30秒"
+      ],
+      "cues": [
+        "肩胛骨收紧",
+        "不要耸肩"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "mo_009",
+      "family": "warmup",
+      "family_name": "热身",
+      "family_name_en": "Warmup",
+      "name": "侧卧胸椎旋转",
+      "name_en": "Side-Lying Thoracic Rotation",
+      "category": "拉伸",
+      "subcategory": "胸椎",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "胸椎",
+        "背阔肌",
+        "腹斜肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 0,
+        "min_core_score": 0,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.3,
+        "shoulder_imbalance": 0.4,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.3,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup"
+      ],
+      "default_sets": 2,
+      "default_reps": 8,
+      "default_duration_seconds": 0,
+      "description": "侧卧屈膝，双手前伸，上方手臂向对侧打开旋转",
+      "steps": [
+        "1.侧卧屈膝",
+        "2.上方手臂打开旋转",
+        "3.头部跟随手臂",
+        "4.缓慢回位"
+      ],
+      "cues": [
+        "骨盆稳定",
+        "眼随手走"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    },
+    {
+      "id": "st_014",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "family_name_en": "Stretch",
+      "name": "肩部拉伸",
+      "name_en": "Shoulder Stretch",
+      "category": "拉伸",
+      "subcategory": "肩部",
+      "difficulty": 1,
+      "intensity": "LOW",
+      "is_regression_of": null,
+      "target_body_parts": [
+        "三角肌后束",
+        "冈下肌",
+        "菱形肌"
+      ],
+      "contraindications": {
+        "min_balance_score": 0,
+        "min_flexibility_score": 0,
+        "min_core_score": 0,
+        "min_upper_limb_score": 0,
+        "min_symmetry_score": 0
+      },
+      "problem_mapping": {
+        "head_forward_posture": 0.3,
+        "shoulder_imbalance": 0.6,
+        "pelvic_lateral_tilt": 0.0,
+        "possible_scoliosis": 0.0,
+        "knee_hyperextension": 0.0,
+        "pelvic_anterior_tilt": 0.0,
+        "pelvic_posterior_tilt": 0.0
+      },
+      "phases": [
+        "warmup",
+        "cooldown"
+      ],
+      "default_sets": 2,
+      "default_reps": 8,
+      "default_duration_seconds": 20,
+      "description": "一侧手臂横过胸前，另一手辅助拉向身体",
+      "steps": [
+        "1.坐姿或站姿",
+        "2.手臂横过胸前",
+        "3.辅助拉近身体",
+        "4.保持20-30秒换边"
+      ],
+      "cues": [
+        "肩膀放松下沉",
+        "配合深呼吸"
+      ],
+      "display_type": "video",
+      "display_url": ""
+    }
+  ],
+  "phase_guidelines": {
+    "warmup": {
+      "description": "热身激活阶段：提高体温、激活关节、唤醒目标肌群",
+      "typical_duration_minutes": 8,
+      "action_count": "4-5个动作",
+      "intensity_range": [
+        "LOW",
+        "MEDIUM"
+      ],
+      "phases_suitable": [
+        "warmup"
+      ]
+    },
+    "main": {
+      "description": "主训练阶段：针对体态问题进行纠正性训练",
+      "typical_duration_minutes": 15,
+      "action_count": "4-6个动作",
+      "intensity_range": [
+        "MEDIUM",
+        "HIGH"
+      ],
+      "phases_suitable": [
+        "main"
+      ]
+    },
+    "cooldown": {
+      "description": "整理阶段：静态拉伸、放松紧张肌群、促进恢复",
+      "typical_duration_minutes": 5,
+      "action_count": "2-4个动作",
+      "intensity_range": [
+        "LOW"
+      ],
+      "phases_suitable": [
+        "cooldown"
+      ]
+    }
+  },
+  "fms_dimension_defaults": {
+    "balance": {
+      "description": "平衡能力",
+      "typical_min_for_standing": 25,
+      "typical_min_for_dynamic": 40
+    },
+    "flexibility": {
+      "description": "柔韧性",
+      "typical_min_for_stretch": 10,
+      "typical_min_for_squat": 30
+    },
+    "core": {
+      "description": "核心稳定性",
+      "typical_min_for_plank": 30,
+      "typical_min_for_dynamic": 40
+    },
+    "upper_limb": {
+      "description": "上肢能力",
+      "typical_min_for_push": 30,
+      "typical_min_for_pull": 25
+    },
+    "symmetry": {
+      "description": "对称性",
+      "typical_min_for_bilateral": 20,
+      "typical_min_for_unilateral": 30
+    }
+  }
+}

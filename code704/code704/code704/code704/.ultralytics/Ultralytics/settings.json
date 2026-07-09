@@ -1,0 +1,21 @@
+{
+  "settings_version": "0.0.6",
+  "datasets_dir": "D:\\APPData\\code703\\datasets",
+  "weights_dir": "weights",
+  "runs_dir": "runs",
+  "uuid": "2a904e93081ac52c27187a2abf6b6c7d0296b9837add176b1c7589151d7a7bfa",
+  "sync": false,
+  "api_key": "",
+  "openai_api_key": "",
+  "clearml": true,
+  "comet": true,
+  "dvc": true,
+  "hub": false,
+  "mlflow": true,
+  "neptune": true,
+  "raytune": true,
+  "tensorboard": false,
+  "wandb": false,
+  "vscode_msg": true,
+  "openvino_msg": true
+}

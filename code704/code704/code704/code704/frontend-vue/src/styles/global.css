@@ -1,0 +1,11 @@
+.section-card {
+  border-radius: 12px !important;
+}
+
+.n-card {
+  transition: all 0.3s ease;
+}
+
+.n-card:hover {
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}

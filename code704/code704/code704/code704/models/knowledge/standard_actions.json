@@ -1,0 +1,3082 @@
+{
+  "_meta": {
+    "version": "2.0",
+    "description": "标准动作角度库 — 用于实时姿态对比学习。动作名称与 action_library.json 保持一致，分类体系统一。",
+    "total_actions": 49,
+    "category_system": {
+      "上肢推": "水平推/垂直推动作（俯卧撑、肩部推举等）",
+      "上肢拉": "肩胛稳定/后链稳定动作（Y/T/W字举、反向平板等）",
+      "下肢蹲": "膝关节主导的下肢动作（深蹲、弓步蹲等）",
+      "下肢拉": "髋关节主导的下肢动作（臀桥、硬拉等）",
+      "核心抗伸展": "前侧核心稳定动作（平板支撑、死虫式、鸟狗式等）",
+      "核心抗侧屈": "侧向核心稳定动作（侧平板等）",
+      "颈部矫正": "头前倾/圆肩纠正动作（收下巴、靠墙天使等）",
+      "拉伸": "柔韧性与放松动作（猫牛式等）"
+    }
+  },
+  "actions": {
+    "标准深蹲": {
+      "name": "标准深蹲",
+      "family": "squat",
+      "family_name": "深蹲",
+      "category": "下肢蹲",
+      "description": "双脚与肩同宽，双手前平举保持平衡，缓慢下蹲至大腿与地面平行，保持膝盖不超脚尖，然后站起",
+      "video_url": "/media/videos/squat_left_standard.mp4",
+      "views": [
+        "正面",
+        "侧面",
+        "背面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面对齐标准：双膝与脚尖同向，无内扣或外翻",
+          "target_angles": {
+            "left_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "left_hip": {
+              "min": 70,
+              "max": 110,
+              "optimal": 90
+            },
+            "right_hip": {
+              "min": 70,
+              "max": 110,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝盖不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "right_knee",
+              "rule": "膝盖不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干不过度前倾",
+              "threshold": 45,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        },
+        "侧面": {
+          "description": "侧面标准：膝关节弯曲约90°，躯干保持中立",
+          "target_angles": {
+            "left_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "left_hip": {
+              "min": 70,
+              "max": 110,
+              "optimal": 90
+            },
+            "trunk_tilt": {
+              "min": 10,
+              "max": 45,
+              "optimal": 30
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝盖不超脚尖",
+              "threshold": 100,
+              "unit": "°",
+              "direction": "max"
+            },
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干保持中立",
+              "threshold": 45,
+              "unit": "°",
+              "direction": "max"
+            },
+            {
+              "joint": "left_hip",
+              "rule": "大腿与地面平行",
+              "threshold": 90,
+              "unit": "°",
+              "direction": "target"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "膝盖内扣",
+          "feedback": "膝盖内扣{value}°，请向外打开与脚尖同向",
+          "joint": "knee",
+          "threshold": 10
+        },
+        {
+          "name": "躯干过度前倾",
+          "feedback": "躯干前倾{value}°，超过安全角度，请挺直背部",
+          "joint": "trunk_tilt",
+          "threshold": 45
+        },
+        {
+          "name": "脚跟离地",
+          "feedback": "检测到重心前移，请保持脚跟着地",
+          "joint": "ankle",
+          "threshold": 5
+        },
+        {
+          "name": "下蹲深度不足",
+          "feedback": "下蹲深度不足，膝关节仅弯曲{value}°，目标90°",
+          "joint": "knee",
+          "threshold": 100
+        }
+      ]
+    },
+    "弓步蹲": {
+      "name": "弓步蹲",
+      "family": "squat",
+      "family_name": "深蹲",
+      "category": "下肢蹲",
+      "description": "前后分腿站立，前腿下蹲至膝关节约90°，后腿膝关节接近地面，保持躯干直立",
+      "video_url": "/media/videos/lunge_left_standard.mp4",
+      "views": [
+        "正面",
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面对齐标准：膝关节与脚尖同向，骨盆不侧倾",
+          "target_angles": {
+            "left_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "left_hip": {
+              "min": 80,
+              "max": 120,
+              "optimal": 100
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "前膝不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "right_knee",
+              "rule": "后膝不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        },
+        "侧面": {
+          "description": "侧面标准：前膝不超过脚尖，躯干直立",
+          "target_angles": {
+            "left_knee": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            },
+            "right_knee": {
+              "min": 70,
+              "max": 90,
+              "optimal": 80
+            },
+            "trunk_tilt": {
+              "min": 0,
+              "max": 15,
+              "optimal": 5
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "前膝不超过脚尖",
+              "threshold": 95,
+              "unit": "°",
+              "direction": "max"
+            },
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干保持直立",
+              "threshold": 15,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "前膝超脚尖",
+          "feedback": "前膝超出脚尖{value}°，请将重心放在脚跟",
+          "joint": "knee",
+          "threshold": 95
+        },
+        {
+          "name": "躯干前倾",
+          "feedback": "躯干前倾{value}°，请保持上半身直立",
+          "joint": "trunk_tilt",
+          "threshold": 15
+        },
+        {
+          "name": "骨盆侧倾",
+          "feedback": "骨盆侧倾{value}°，请保持骨盆水平",
+          "joint": "hip",
+          "threshold": 10
+        }
+      ]
+    },
+    "标准俯卧撑": {
+      "name": "标准俯卧撑",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "category": "上肢推",
+      "description": "双手略宽于肩，身体成一直线，屈肘下降至胸部接近地面，然后推起",
+      "video_url": "/media/videos/standardpush-standard.mp4",
+      "views": [
+        "侧面",
+        "正面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：身体成直线，核心收紧不塌腰（水平姿势 trunk_tilt≈90°）",
+          "target_angles": {
+            "left_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "left_shoulder": {
+              "min": 45,
+              "max": 70,
+              "optimal": 55
+            },
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_elbow",
+              "rule": "肘关节弯曲约90°",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "trunk_tilt",
+              "rule": "身体保持直线（偏离水平±5°）",
+              "threshold": 5,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "塌腰",
+          "feedback": "核心松弛，腰部下塌{value}°，请收紧腹部和臀部",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "肘部外展过大",
+          "feedback": "肘部外展过大{value}°，请将肘部靠近身体",
+          "joint": "elbow",
+          "threshold": 45
+        },
+        {
+          "name": "深度不足",
+          "feedback": "下降深度不足，肘关节仅弯曲{value}°，目标90°",
+          "joint": "elbow",
+          "threshold": 110
+        }
+      ]
+    },
+    "标准平板支撑": {
+      "name": "标准平板支撑",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "category": "核心抗伸展",
+      "description": "俯卧，前臂撑地，肘在肩正下方，身体成一直线，保持核心收紧",
+      "video_url": "/media/videos/plank_standard.mp4",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：肩-髋-膝-踝成一直线，躯干与地面平行（trunk_tilt≈90°）",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            },
+            "left_hip": {
+              "min": 145,
+              "max": 185,
+              "optimal": 170
+            },
+            "right_hip": {
+              "min": 145,
+              "max": 185,
+              "optimal": 170
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "身体保持直线（偏离水平±5°）",
+              "threshold": 5,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "left_hip",
+              "rule": "不塌腰不撅臀",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "塌腰",
+          "feedback": "腰部下塌，偏离水平{value}°，请收紧核心肌群",
+          "joint": "trunk_tilt",
+          "threshold": 5
+        },
+        {
+          "name": "臀部过高",
+          "feedback": "臀部抬起过高{value}°，请降低至身体成直线",
+          "joint": "hip",
+          "threshold": 170
+        }
+      ]
+    },
+    "肩部推举": {
+      "name": "肩部推举",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "category": "上肢推",
+      "description": "站姿或坐姿，双手持重物（或自重）从肩部高度向上推举至头顶上方，肘关节伸直",
+      "video_url": "/media/videos/shoulder_press__standard.mp4",
+      "views": [
+        "正面",
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面对齐：双臂对称上举，无侧倾",
+          "target_angles": {
+            "left_shoulder": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            },
+            "right_shoulder": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            },
+            "left_elbow": {
+              "min": 160,
+              "max": 180,
+              "optimal": 175
+            },
+            "right_elbow": {
+              "min": 160,
+              "max": 180,
+              "optimal": 175
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂充分上举",
+              "threshold": 150,
+              "unit": "°",
+              "direction": "min"
+            },
+            {
+              "joint": "right_shoulder",
+              "rule": "手臂充分上举",
+              "threshold": 150,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        },
+        "侧面": {
+          "description": "侧面标准：手臂在耳侧上举，不过度弓腰",
+          "target_angles": {
+            "left_shoulder": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            },
+            "trunk_tilt": {
+              "min": 0,
+              "max": 10,
+              "optimal": 0
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂不过度前移",
+              "threshold": 150,
+              "unit": "°",
+              "direction": "min"
+            },
+            {
+              "joint": "trunk_tilt",
+              "rule": "不弓腰代偿",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "弓腰代偿",
+          "feedback": "腰部过度弓起{value}°，请收紧核心，避免代偿",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "手臂不对称",
+          "feedback": "左右手臂不对称，差异{value}°，请保持双臂同步",
+          "joint": "shoulder",
+          "threshold": 10
+        },
+        {
+          "name": "推举幅度不足",
+          "feedback": "推举幅度不足，肩关节仅{value}°，目标170°以上",
+          "joint": "shoulder",
+          "threshold": 150
+        }
+      ]
+    },
+    "臀桥": {
+      "name": "臀桥",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "category": "下肢拉",
+      "description": "仰卧屈膝抬臀，最基础的臀肌激活动作。骨盆后倾位收紧臀肌，是纠正骨盆前倾的入门必练。",
+      "video_url": "/media/videos/glute_bridge_standard.mp4",
+      "views": [
+        "侧面",
+        "正面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：仰卧屈膝抬臀，肩-髋-膝成一直线。髋角~138°(躺平)→~165°(顶峰)→~138°(放下)",
+          "target_angles": {
+            "left_hip": {
+              "min": 135,
+              "max": 168,
+              "optimal": 152
+            },
+            "right_hip": {
+              "min": 135,
+              "max": 168,
+              "optimal": 152
+            },
+            "left_knee": {
+              "min": 40,
+              "max": 90,
+              "optimal": 65
+            },
+            "trunk_tilt": {
+              "min": 88,
+              "max": 105,
+              "optimal": 97
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_hip",
+              "rule": "髋部充分伸展（顶峰髋角>160°）",
+              "threshold": 160,
+              "unit": "°",
+              "direction": "min"
+            },
+            {
+              "joint": "trunk_tilt",
+              "rule": "不过度挺腰",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        },
+        "正面": {
+          "description": "正面标准：骨盆水平，膝盖对准脚尖",
+          "target_angles": {
+            "left_knee": {
+              "min": 70,
+              "max": 100,
+              "optimal": 85
+            },
+            "right_knee": {
+              "min": 70,
+              "max": 100,
+              "optimal": 85
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝盖不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "right_knee",
+              "rule": "膝盖不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "腰部代偿",
+          "feedback": "腰部过度发力{value}°，请用臀部主导推起",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "髋部伸展不足",
+          "feedback": "髋部仅伸展{value}°，请将臀部推至与肩膝成直线",
+          "joint": "hip",
+          "threshold": 170
+        },
+        {
+          "name": "膝盖内扣",
+          "feedback": "膝盖内扣{value}°，请对准脚尖方向",
+          "joint": "knee",
+          "threshold": 10
+        }
+      ]
+    },
+    "单腿臀桥": {
+      "name": "单腿臀桥",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "category": "下肢拉",
+      "description": "单腿支撑的臀桥，增加对侧臀中肌和核心抗旋转需求。能暴露左右臀肌力量差异。",
+      "video_url": "/media/videos/single_leg_glute_bridge_standard.mp4",
+      "views": [
+        "侧面",
+        "正面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：仰卧单腿抬臀，支撑侧髋部充分伸展，骨盆水平不侧倾（桥式 trunk_tilt≈55°）",
+          "target_angles": {
+            "left_hip": {
+              "min": 170,
+              "max": 180,
+              "optimal": 175
+            },
+            "right_hip": {
+              "min": 170,
+              "max": 180,
+              "optimal": 175
+            },
+            "trunk_tilt": {
+              "min": 40,
+              "max": 70,
+              "optimal": 55
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_hip",
+              "rule": "支撑侧髋充分伸展",
+              "threshold": 170,
+              "unit": "°",
+              "direction": "min"
+            },
+            {
+              "joint": "trunk_tilt",
+              "rule": "身体不旋转",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "骨盆侧倾",
+          "feedback": "骨盆向支撑侧倾斜{value}°，请保持水平",
+          "joint": "hip",
+          "threshold": 10
+        },
+        {
+          "name": "腰部代偿",
+          "feedback": "腰部过度发力{value}°，请专注于臀部收缩",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "髋部下沉",
+          "feedback": "髋部下沉{value}°，推起高度不足",
+          "joint": "hip",
+          "threshold": 170
+        }
+      ]
+    },
+    "鸟狗式": {
+      "name": "鸟狗式",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "category": "核心抗伸展",
+      "description": "四足跪姿交替伸展对侧手脚。训练脊柱在中立位下的动态稳定，同时激活臀部与肩胛。是纠正多种体态问题的全能基础动作。",
+      "video_url": "/media/videos/bird_dog_standard.mp4",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：四足跪姿，脊柱中立位保持，伸展时骨盆不旋转（水平姿势 trunk_tilt≈90°）",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "left_hip": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            },
+            "right_hip": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            },
+            "left_shoulder": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "脊柱保持中立直线（偏离水平±10°）",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "left_hip",
+              "rule": "伸展腿不过度抬高",
+              "threshold": 180,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "骨盆旋转",
+          "feedback": "骨盆旋转{value}°，请保持水平稳定",
+          "joint": "hip",
+          "threshold": 15
+        },
+        {
+          "name": "塌腰",
+          "feedback": "腰部下沉{value}°，请收紧腹部维持脊柱中立",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "伸展过度",
+          "feedback": "腿抬过高{value}°，请控制在髋部高度以下",
+          "joint": "hip",
+          "threshold": 180
+        }
+      ]
+    },
+    "死虫式": {
+      "name": "死虫式",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "category": "核心抗伸展",
+      "description": "仰卧交替伸展对侧手脚，学习在四肢活动中保持脊柱和骨盆稳定。骨盆前倾纠正的核心入门动作。",
+      "video_url": "/media/videos/dead_bug_standard.mp4",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：仰卧姿势，下背部始终贴地，四肢交替伸展。髋角在伸腿时降低至~130°、屈腿时回升至~170°（trunk_tilt≈96°）",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 88,
+              "max": 105,
+              "optimal": 96
+            },
+            "left_hip": {
+              "min": 125,
+              "max": 150,
+              "optimal": 138
+            },
+            "right_hip": {
+              "min": 125,
+              "max": 150,
+              "optimal": 138
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "下背部始终贴地（偏离水平±8°）",
+              "threshold": 8,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "left_hip",
+              "rule": "伸腿时髋角降低、屈腿时回升（幅度~40°）",
+              "threshold": 25,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "腰部拱起",
+          "feedback": "腰椎离开地面{value}°，请收腹使下背部贴地",
+          "joint": "trunk_tilt",
+          "threshold": 5
+        },
+        {
+          "name": "动作过快",
+          "feedback": "请将动作放慢，如慢动作电影般控制",
+          "joint": "hip",
+          "threshold": 0
+        },
+        {
+          "name": "憋气",
+          "feedback": "请保持自然呼吸，不要憋气",
+          "joint": "core",
+          "threshold": 0
+        }
+      ]
+    },
+    "保加利亚分腿蹲": {
+      "name": "保加利亚分腿蹲",
+      "family": "squat",
+      "family_name": "深蹲",
+      "category": "下肢蹲",
+      "description": "后脚搭在椅子或床沿上做单腿蹲。极大强化前侧腿力量和稳定性，同时拉伸后侧腿髋屈肌。是纠正骨盆问题的王牌动作。",
+      "video_url": "/media/videos/bulgarian_split_squat_standard.mp4",
+      "views": [
+        "侧面",
+        "正面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：躯干直立，前膝不过脚尖，后腿髋前侧有拉伸感",
+          "target_angles": {
+            "left_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "trunk_tilt": {
+              "min": 0,
+              "max": 15,
+              "optimal": 5
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "前膝弯曲约90°",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干保持直立",
+              "threshold": 15,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        },
+        "正面": {
+          "description": "正面标准：骨盆水平，前脚全脚掌踩实",
+          "target_angles": {
+            "left_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "left_hip": {
+              "min": 80,
+              "max": 120,
+              "optimal": 100
+            },
+            "right_hip": {
+              "min": 80,
+              "max": 120,
+              "optimal": 100
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝盖不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "躯干前倾",
+          "feedback": "躯干前倾{value}°，请保持上半身直立",
+          "joint": "trunk_tilt",
+          "threshold": 15
+        },
+        {
+          "name": "前膝超脚尖",
+          "feedback": "前膝超出脚尖{value}°，请将重心放在脚跟",
+          "joint": "knee",
+          "threshold": 100
+        },
+        {
+          "name": "骨盆侧倾",
+          "feedback": "骨盆侧倾{value}°，请保持骨盆水平",
+          "joint": "hip",
+          "threshold": 10
+        }
+      ]
+    },
+    "靠墙天使": {
+      "name": "靠墙天使",
+      "family": "neck_correction",
+      "family_name": "颈部矫正",
+      "category": "颈部矫正",
+      "description": "背靠墙做手臂天使滑动。同时训练胸椎伸展、肩胛回缩和肩外旋，是头前倾+圆肩的经典纠正组合。",
+      "video_url": "/media/videos/wall_angels_standard.mp4",
+      "views": [
+        "背面"
+      ],
+      "standard_keypoints": {
+        "背面": {
+          "description": "背面标准：后脑勺、上背、臀部贴墙，手臂沿墙上下滑动",
+          "target_angles": {
+            "left_shoulder": {
+              "min": 80,
+              "max": 170,
+              "optimal": 160
+            },
+            "right_shoulder": {
+              "min": 80,
+              "max": 170,
+              "optimal": 160
+            },
+            "left_elbow": {
+              "min": 70,
+              "max": 110,
+              "optimal": 90
+            },
+            "right_elbow": {
+              "min": 70,
+              "max": 110,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_elbow",
+              "rule": "肘部尽可能贴墙",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂沿墙充分滑动",
+              "threshold": 80,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "腰部拱起",
+          "feedback": "腰部过度拱起，肋骨外翻，请收腹使背部贴墙",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "手臂离墙",
+          "feedback": "手臂离开墙面{value}°，请尽量保持接触",
+          "joint": "elbow",
+          "threshold": 30
+        },
+        {
+          "name": "耸肩代偿",
+          "feedback": "检测到耸肩，请沉肩用肩胛骨发力",
+          "joint": "shoulder",
+          "threshold": 10
+        }
+      ]
+    },
+    "猫牛式": {
+      "name": "猫牛式",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "category": "拉伸",
+      "description": "四足跪姿交替做脊柱屈曲和伸展。温和活动整个脊柱，改善胸椎和腰椎灵活性。",
+      "video_url": "/media/videos/cat_cow_stretch_standard.mp4",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：四足跪姿，脊柱缓慢逐节交替屈伸。猫式髋角~110°（拱背），牛式髋角~140°（塌腰），配合呼吸",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 55,
+              "max": 85,
+              "optimal": 70
+            },
+            "left_hip": {
+              "min": 105,
+              "max": 145,
+              "optimal": 125
+            },
+            "right_hip": {
+              "min": 105,
+              "max": 145,
+              "optimal": 125
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干倾斜保持稳定",
+              "threshold": 15,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "left_hip",
+              "rule": "猫式拱背(髋角↓) / 牛式塌腰(髋角↑) 交替",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "range"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "动作过快",
+          "feedback": "动作过快，请缓慢逐节活动脊柱",
+          "joint": "trunk_tilt",
+          "threshold": 0
+        },
+        {
+          "name": "呼吸不配合",
+          "feedback": "请配合呼吸：吸气伸展（牛式），呼气屈曲（猫式）",
+          "joint": "core",
+          "threshold": 0
+        }
+      ]
+    },
+    "登山者（慢速控制）": {
+      "name": "登山者（慢速控制）",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "category": "核心抗伸展",
+      "description": "平板支撑姿势下缓慢交替提膝。强调慢速控制而非心肺爆发，训练动态核心稳定。",
+      "video_url": "/media/videos/slow_controlled_mountain_climber_standard.mp4",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：平板支撑姿势，身体保持直线，缓慢交替提膝，骨盆稳定（trunk_tilt≈90°）",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "left_hip": {
+              "min": 60,
+              "max": 120,
+              "optimal": 90
+            },
+            "right_hip": {
+              "min": 60,
+              "max": 120,
+              "optimal": 90
+            },
+            "left_knee": {
+              "min": 60,
+              "max": 120,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "身体保持平板直线（偏离水平±10°）",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "left_hip",
+              "rule": "骨盆不上下晃动",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "骨盆晃动",
+          "feedback": "骨盆上下晃动{value}°，请收紧核心保持稳定",
+          "joint": "hip",
+          "threshold": 20
+        },
+        {
+          "name": "塌腰",
+          "feedback": "腰部下沉{value}°，请收紧腹部",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "动作过快",
+          "feedback": "请用3秒收3秒放的慢速控制节奏",
+          "joint": "core",
+          "threshold": 0
+        }
+      ]
+    },
+    "反向平板": {
+      "name": "反向平板",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "category": "上肢拉",
+      "description": "面朝上的平板支撑变体。同时强化后链（背部、臀、腘绳肌）和肩胛稳定性，是前侧链主导训练的绝佳拮抗。",
+      "video_url": "/media/videos/reverse_plank_standard.mp4",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：身体从肩到脚呈直线，胸部打开上挺（水平姿势 trunk_tilt≈90°）",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            },
+            "left_shoulder": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_shoulder": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "left_hip": {
+              "min": 170,
+              "max": 180,
+              "optimal": 180
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "身体保持直线（偏离水平±5°）",
+              "threshold": 5,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "left_hip",
+              "rule": "臀部不下沉",
+              "threshold": 170,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "臀部下沉",
+          "feedback": "臀部下沉{value}°，请收紧臀肌和核心",
+          "joint": "hip",
+          "threshold": 170
+        },
+        {
+          "name": "胸部塌陷",
+          "feedback": "胸部塌陷，请打开胸腔上挺",
+          "joint": "shoulder",
+          "threshold": 80
+        },
+        {
+          "name": "颈部过度后仰",
+          "feedback": "请保持颈部中立，视线看天花板",
+          "joint": "neck_tilt",
+          "threshold": 20
+        }
+      ]
+    },
+    "门框胸拉伸": {
+      "name": "门框胸拉伸",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "category": "拉伸",
+      "description": "站于门框处，双臂屈肘90°扶门框，身体前倾感受胸部拉伸",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面标准：双肩外展约90°，身体前倾拉伸胸肌",
+          "target_angles": {
+            "left_shoulder": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_shoulder": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "肩关节外展约90°",
+              "threshold": 15,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "耸肩",
+          "feedback": "双肩上耸，请放松下沉",
+          "joint": "shoulder",
+          "threshold": 5
+        },
+        {
+          "name": "手臂位置错误",
+          "feedback": "手臂外展{value}°，请调整至约90°",
+          "joint": "shoulder",
+          "threshold": 20
+        }
+      ],
+      "video_url": "/media/videos/doorway_chest_stretch_standard.mp4"
+    },
+    "肩部环绕": {
+      "name": "肩部环绕",
+      "family": "warmup",
+      "family_name": "热身",
+      "category": "热身",
+      "description": "站姿或坐姿，双肩向前/向后画圈环绕，改善肩关节活动度",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面标准：肩关节交替运动，躯干稳定不借力",
+          "target_angles": {
+            "left_shoulder": {
+              "min": 20,
+              "max": 160,
+              "optimal": 90
+            },
+            "right_shoulder": {
+              "min": 20,
+              "max": 160,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "肩关节环绕活动",
+              "threshold": 50,
+              "unit": "°",
+              "direction": "range"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "躯干借力",
+          "feedback": "躯干晃动借力，请收紧核心保持稳定",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "活动范围不足",
+          "feedback": "肩关节活动范围{value}°偏小",
+          "joint": "shoulder",
+          "threshold": 40
+        }
+      ],
+      "video_url": "/media/videos/shoulder_circles_standard.mp4"
+    },
+    "墙壁俯卧撑": {
+      "name": "墙壁俯卧撑",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "category": "上肢推",
+      "description": "面对墙壁站立，双手扶墙与肩同宽，屈肘身体前倾靠近墙壁后推回",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：身体成直线，屈肘约90°躯干靠近墙壁",
+          "target_angles": {
+            "left_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_elbow",
+              "rule": "肘关节弯曲约90°",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "肘部角度不足",
+          "feedback": "肘关节仅弯曲{value}°，请靠近墙壁",
+          "joint": "elbow",
+          "threshold": 120
+        },
+        {
+          "name": "身体未成直线",
+          "feedback": "身体未成直线，请收紧核心",
+          "joint": "trunk_tilt",
+          "threshold": 15
+        }
+      ],
+      "video_url": "/media/videos/wall_pushup_standard.mp4"
+    },
+    "上斜俯卧撑": {
+      "name": "上斜俯卧撑",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "category": "上肢推",
+      "description": "双手撑于桌面或台阶，身体成直线，屈肘下降后推起",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：身体成直线，核心收紧",
+          "target_angles": {
+            "left_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "trunk_tilt": {
+              "min": 60,
+              "max": 80,
+              "optimal": 70
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_elbow",
+              "rule": "肘关节弯曲约90°",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "塌腰",
+          "feedback": "腰部下塌{value}°，请收紧核心",
+          "joint": "trunk_tilt",
+          "threshold": 15
+        },
+        {
+          "name": "深度不足",
+          "feedback": "下降深度不足，肘关节仅{value}°",
+          "joint": "elbow",
+          "threshold": 110
+        }
+      ],
+      "video_url": "/media/videos/incline_pushup_standard.mp4"
+    },
+    "扶椅深蹲": {
+      "name": "扶椅深蹲",
+      "family": "squat",
+      "family_name": "深蹲",
+      "category": "下肢蹲",
+      "description": "手扶椅背或桌面，缓慢下蹲至大腿与地面平行后站起",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：下蹲至大腿平行地面，膝盖不超脚尖",
+          "target_angles": {
+            "left_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝关节弯曲约90°",
+              "threshold": 15,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "膝盖超脚尖",
+          "feedback": "膝盖前移{value}°，请向后坐",
+          "joint": "knee",
+          "threshold": 100
+        },
+        {
+          "name": "深度不足",
+          "feedback": "下蹲仅{value}°，请蹲至大腿平行",
+          "joint": "knee",
+          "threshold": 115
+        }
+      ],
+      "video_url": "/media/videos/chair_assisted_squat_standard.mp4"
+    },
+    "俯卧Y字举": {
+      "name": "俯卧Y字举",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "category": "上肢拉",
+      "description": "俯卧，双臂前伸呈Y形，肩胛发力抬起手臂，缓慢下放",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：俯卧姿势，手臂上举至Y形（trunk_tilt≈90°）",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            },
+            "left_shoulder": {
+              "min": 130,
+              "max": 170,
+              "optimal": 155
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂充分上举",
+              "threshold": 130,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "上举不足",
+          "feedback": "手臂仅上举{value}°，请充分抬起",
+          "joint": "shoulder",
+          "threshold": 130
+        },
+        {
+          "name": "腰椎过伸",
+          "feedback": "腰椎过度伸展，请保持核心收紧",
+          "joint": "hip",
+          "threshold": 10
+        }
+      ],
+      "video_url": "/media/videos/proneY_raise_standard.mp4"
+    },
+    "俯卧T字举": {
+      "name": "俯卧T字举",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "category": "上肢拉",
+      "description": "俯卧，双臂侧平举呈T形，肩胛内收抬起手臂，缓慢下放",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：俯卧姿势，手臂侧平举至T形（trunk_tilt≈90°）",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            },
+            "left_shoulder": {
+              "min": 50,
+              "max": 90,
+              "optimal": 75
+            },
+            "right_shoulder": {
+              "min": 50,
+              "max": 90,
+              "optimal": 75
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂侧举约75°",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "手臂下垂",
+          "feedback": "手臂仅{value}°，请举至水平",
+          "joint": "shoulder",
+          "threshold": 50
+        },
+        {
+          "name": "借力摆动",
+          "feedback": "身体摆动借力，请稳定躯干",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        }
+      ],
+      "video_url": "/media/videos/proneT_raise_standard.mp4"
+    },
+    "膝盖平板支撑": {
+      "name": "膝盖平板支撑",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "category": "核心抗伸展",
+      "description": "膝盖着地的简化平板支撑，前臂撑地，身体从肩到膝成一直线",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：肩-髋-膝成一直线，核心收紧",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 70,
+              "max": 100,
+              "optimal": 85
+            },
+            "left_hip": {
+              "min": 95,
+              "max": 125,
+              "optimal": 110
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "身体保持直线",
+              "threshold": 5,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "left_hip",
+              "rule": "不塌腰不撅臀",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "塌腰",
+          "feedback": "腰部下塌{value}°，请收紧核心",
+          "joint": "trunk_tilt",
+          "threshold": 5
+        },
+        {
+          "name": "臀部过高",
+          "feedback": "臀部抬起{value}°，请降低至身体成直线",
+          "joint": "hip",
+          "threshold": 170
+        }
+      ],
+      "video_url": "/media/videos/knee_plank_standard.mp4"
+    },
+    "站姿体侧屈": {
+      "name": "站姿体侧屈",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "category": "拉伸",
+      "description": "站姿，一侧手臂过头向对侧弯曲，感受侧腰拉伸",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面标准：躯干向一侧侧屈，骨盆保持稳定",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 15,
+              "max": 35,
+              "optimal": 25
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干侧屈20-30°",
+              "threshold": 15,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "骨盆侧移",
+          "feedback": "骨盆侧移，请保持骨盆稳定",
+          "joint": "hip",
+          "threshold": 10
+        },
+        {
+          "name": "侧屈不足",
+          "feedback": "侧屈仅{value}°，可适当加大幅度",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        }
+      ],
+      "video_url": "/media/videos/side_reaches_standard.mp4"
+    },
+    "双腿闭眼站立": {
+      "name": "双腿闭眼站立",
+      "family": "balance",
+      "family_name": "平衡",
+      "category": "平衡",
+      "description": "双脚并拢闭眼站立，保持身体稳定不晃动，训练本体感觉",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面标准：躯干稳定不晃动，重心居中",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 0,
+              "max": 5,
+              "optimal": 0
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干保持直立不晃动",
+              "threshold": 5,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "身体晃动",
+          "feedback": "躯干晃动{value}°，请收紧核心保持稳定",
+          "joint": "trunk_tilt",
+          "threshold": 8
+        },
+        {
+          "name": "睁眼",
+          "feedback": "请闭眼训练以增加难度",
+          "joint": "eye",
+          "threshold": 0
+        }
+      ],
+      "video_url": "/media/videos/stand_eyesclosed_standard.mp4"
+    },
+    "踝关节环绕": {
+      "name": "踝关节环绕",
+      "family": "warmup",
+      "family_name": "热身",
+      "category": "热身",
+      "description": "坐姿或站姿，脚尖点地，踝关节缓慢画圈环绕",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准：踝关节做全范围环绕运动",
+          "target_angles": {
+            "left_knee": {
+              "min": 70,
+              "max": 110,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝关节角度变化反映踝活动",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "range"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "活动范围小",
+          "feedback": "活动范围不足，请做全范围环绕",
+          "joint": "knee",
+          "threshold": 15
+        }
+      ],
+      "video_url": "/media/videos/ankle_circles_standard.mp4"
+    },
+    "髋关节环绕": {
+      "name": "髋关节环绕",
+      "family": "warmup",
+      "family_name": "热身",
+      "category": "热身",
+      "description": "站姿，双手叉腰，髋关节缓慢画圈环绕",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面标准：髋关节全范围环绕，髋角从~25°（俯身画圈）到~180°（直立），躯干稳定不借力",
+          "target_angles": {
+            "left_hip": {
+              "min": 20,
+              "max": 180,
+              "optimal": 150
+            },
+            "right_hip": {
+              "min": 20,
+              "max": 180,
+              "optimal": 150
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_hip",
+              "rule": "髋关节全范围环绕活动（幅度~160°）",
+              "threshold": 80,
+              "unit": "°",
+              "direction": "range"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "躯干借力",
+          "feedback": "躯干晃动借力，请稳定上半身",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "活动范围小",
+          "feedback": "活动范围不足，请做全范围环绕",
+          "joint": "hip",
+          "threshold": 20
+        }
+      ],
+      "video_url": "/media/videos/hip_circles_standard.mp4"
+    },
+    "窄距俯卧撑": {
+      "name": "窄距俯卧撑",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "category": "上肢推",
+      "description": "双手窄距（与肩同宽或更窄），身体成直线，屈肘下降后推起",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "left_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_elbow",
+              "rule": "肘关节弯曲约90度",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "肘部外展",
+          "feedback": "肘部外展过大，请靠近身体{value}°",
+          "joint": "elbow",
+          "threshold": 45
+        },
+        {
+          "name": "深度不足",
+          "feedback": "下降深度不足{value}°",
+          "joint": "elbow",
+          "threshold": 110
+        }
+      ],
+      "video_url": "/media/videos/closegrip_pushup_standard.mp4"
+    },
+    "单腿俯卧撑": {
+      "name": "单腿俯卧撑",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "category": "上肢推",
+      "description": "一腿抬起，单腿支撑完成俯卧撑，增加核心抗旋转需求",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "left_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_elbow",
+              "rule": "肘关节弯曲约90度",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "身体旋转",
+          "feedback": "身体旋转借力，请保持稳定{value}°",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "深度不足",
+          "feedback": "下降深度不足{value}°",
+          "joint": "elbow",
+          "threshold": 110
+        }
+      ],
+      "video_url": "/media/videos/single_leg_pushup_standard.mp4"
+    },
+    "膝盖俯卧撑": {
+      "name": "膝盖俯卧撑",
+      "family": "pushup",
+      "family_name": "俯卧撑",
+      "category": "上肢推",
+      "description": "膝盖着地的简化俯卧撑，身体从肩到膝成直线",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "left_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_elbow": {
+              "min": 70,
+              "max": 100,
+              "optimal": 90
+            },
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_elbow",
+              "rule": "肘关节弯曲约90度",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "塌腰",
+          "feedback": "腰部下塌，请收紧核心{value}°",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "深度不足",
+          "feedback": "下降深度不足{value}°",
+          "joint": "elbow",
+          "threshold": 110
+        }
+      ],
+      "video_url": "/media/videos/knee_pushup_standard.mp4"
+    },
+    "窄距深蹲": {
+      "name": "窄距深蹲",
+      "family": "squat",
+      "family_name": "深蹲",
+      "category": "下肢蹲",
+      "description": "双脚窄距站立，下蹲至大腿平行地面后站起",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "left_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝关节弯曲约90度",
+              "threshold": 15,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "膝盖超脚尖",
+          "feedback": "膝盖前移过多{value}°",
+          "joint": "knee",
+          "threshold": 100
+        },
+        {
+          "name": "深度不足",
+          "feedback": "下蹲深度不足{value}°",
+          "joint": "knee",
+          "threshold": 115
+        }
+      ],
+      "video_url": "/media/videos/close_stance_squat_standard.mp4"
+    },
+    "箱式深蹲": {
+      "name": "箱式深蹲",
+      "family": "squat",
+      "family_name": "深蹲",
+      "category": "下肢蹲",
+      "description": "身后放一箱子或椅子，下蹲至臀部轻触后站起，控制离心阶段",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "left_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "right_knee": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝关节弯曲约90度",
+              "threshold": 15,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "坐得太重",
+          "feedback": "请轻触箱子而非坐下{value}°",
+          "joint": "knee",
+          "threshold": 85
+        },
+        {
+          "name": "膝盖超脚尖",
+          "feedback": "膝盖前移过多{value}°",
+          "joint": "knee",
+          "threshold": 100
+        }
+      ],
+      "video_url": "/media/videos/box_squat_standard.mp4"
+    },
+    "侧平板旋转": {
+      "name": "侧平板旋转",
+      "family": "core_anti_lateral_flexion",
+      "family_name": "核心抗侧屈",
+      "category": "核心抗侧屈",
+      "description": "侧平板姿势，上方手臂从肋侧旋转至指向天花板再回位",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面标准",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 80,
+              "max": 100,
+              "optimal": 90
+            },
+            "left_shoulder": {
+              "min": 40,
+              "max": 100,
+              "optimal": 80
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "肩关节旋转活动",
+              "threshold": 30,
+              "unit": "°",
+              "direction": "range"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "髋部下沉",
+          "feedback": "髋部下垂{value}°",
+          "joint": "hip",
+          "threshold": 165
+        },
+        {
+          "name": "旋转不足",
+          "feedback": "旋转幅度不足{value}°",
+          "joint": "shoulder",
+          "threshold": 50
+        }
+      ],
+      "video_url": "/media/videos/side_plank_with_rotation_standard.mp4"
+    },
+    "俯卧W字举": {
+      "name": "俯卧W字举",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "category": "上肢拉",
+      "description": "俯卧，双臂屈肘呈W形，肩胛内收抬起手臂后下放",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            },
+            "left_shoulder": {
+              "min": 40,
+              "max": 80,
+              "optimal": 60
+            },
+            "right_shoulder": {
+              "min": 40,
+              "max": 80,
+              "optimal": 60
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "肩胛内收充分",
+              "threshold": 60,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "上举不足",
+          "feedback": "手臂抬起不足{value}°",
+          "joint": "shoulder",
+          "threshold": 40
+        },
+        {
+          "name": "腰椎过伸",
+          "feedback": "腰椎过伸{value}°",
+          "joint": "hip",
+          "threshold": 10
+        }
+      ],
+      "video_url": "/media/videos/proneW_raise_standard.mp4"
+    },
+    "地板天使": {
+      "name": "地板天使",
+      "family": "upper_pull",
+      "family_name": "上肢拉",
+      "category": "上肢拉",
+      "description": "仰卧屈膝，双臂贴地做天使翅膀的开合运动",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            },
+            "left_shoulder": {
+              "min": 40,
+              "max": 100,
+              "optimal": 80
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂全范围活动",
+              "threshold": 50,
+              "unit": "°",
+              "direction": "range"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "肋骨外翻",
+          "feedback": "肋骨外翻，请收紧核心{value}°",
+          "joint": "hip",
+          "threshold": 10
+        },
+        {
+          "name": "活动范围小",
+          "feedback": "活动范围不足{value}°",
+          "joint": "shoulder",
+          "threshold": 50
+        }
+      ],
+      "video_url": "/media/videos/floor_angels_standard.mp4"
+    },
+    "直腿下放（仰卧）": {
+      "name": "直腿下放（仰卧）",
+      "family": "core_anti_extension",
+      "family_name": "核心抗伸展",
+      "category": "核心抗伸展",
+      "description": "仰卧双腿伸直上举，缓慢下放至接近地面后抬起，腰椎贴地",
+      "video_url": "/media/videos/supine_straight_leg_lowering_standard.mp4",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 85,
+              "max": 95,
+              "optimal": 90
+            },
+            "left_hip": {
+              "min": 60,
+              "max": 120,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_hip",
+              "rule": "双腿下放控制",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "腰椎离地",
+          "feedback": "腰椎弓起离开地面{value}°",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "下放过快",
+          "feedback": "请慢速控制下放{value}°",
+          "joint": "hip",
+          "threshold": 50
+        }
+      ]
+    },
+    "肩桥": {
+      "name": "肩桥",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "category": "下肢拉",
+      "description": "仰卧屈膝，双肩着地将臀部推至最高（肩部支撑的臀桥变体）",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 40,
+              "max": 70,
+              "optimal": 55
+            },
+            "left_hip": {
+              "min": 170,
+              "max": 180,
+              "optimal": 175
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_hip",
+              "rule": "髋部充分伸展",
+              "threshold": 170,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "臀部下沉",
+          "feedback": "臀部未充分抬起{value}°",
+          "joint": "hip",
+          "threshold": 165
+        },
+        {
+          "name": "颈部受力",
+          "feedback": "请用肩部而非颈部支撑{value}°",
+          "joint": "neck_tilt",
+          "threshold": 15
+        }
+      ],
+      "video_url": "/media/videos/shoulder_bridge_standard.mp4"
+    },
+    "单腿站立": {
+      "name": "单腿站立",
+      "family": "balance",
+      "family_name": "平衡",
+      "category": "平衡",
+      "description": "单腿站立，保持身体稳定不晃动",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面标准",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 0,
+              "max": 5,
+              "optimal": 0
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干保持直立不晃动",
+              "threshold": 5,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "身体晃动",
+          "feedback": "躯干晃动过多{value}°",
+          "joint": "trunk_tilt",
+          "threshold": 8
+        },
+        {
+          "name": "支撑腿锁死",
+          "feedback": "支撑腿请微屈{value}°",
+          "joint": "knee",
+          "threshold": 175
+        }
+      ],
+      "video_url": "/media/videos/single_leg_stand_standard.mp4"
+    },
+    "闭眼单腿站立": {
+      "name": "闭眼单腿站立",
+      "family": "balance",
+      "family_name": "平衡",
+      "category": "平衡",
+      "description": "单腿站立并闭眼，训练本体感觉和平衡能力",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面标准",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 0,
+              "max": 8,
+              "optimal": 0
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "闭眼保持直立",
+              "threshold": 8,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "身体大幅晃动",
+          "feedback": "躯干晃动过多{value}°",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        },
+        {
+          "name": "睁眼",
+          "feedback": "请闭眼训练{value}°",
+          "joint": "eye",
+          "threshold": 0
+        }
+      ],
+      "video_url": "/media/videos/stand_eyesclosed_standard.mp4"
+    },
+    "最伟大拉伸": {
+      "name": "最伟大拉伸",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "category": "拉伸",
+      "description": "弓步+旋转+伸展的复合动态拉伸，同时打开髋、胸椎、腹股沟",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面标准",
+          "target_angles": {
+            "left_knee": {
+              "min": 70,
+              "max": 110,
+              "optimal": 90
+            },
+            "trunk_tilt": {
+              "min": 10,
+              "max": 40,
+              "optimal": 25
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "弓步膝关节约90度",
+              "threshold": 20,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "膝盖超脚尖",
+          "feedback": "前膝超出脚尖{value}°",
+          "joint": "knee",
+          "threshold": 100
+        },
+        {
+          "name": "弓步过小",
+          "feedback": "弓步步幅过小{value}°",
+          "joint": "hip",
+          "threshold": 10
+        }
+      ],
+      "video_url": "/media/videos/worlds_greatest_stretch_standard.mp4"
+    },
+    "硬拉": {
+      "name": "硬拉",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "category": "下肢拉",
+      "description": "双脚与髋同宽，保持背部挺直，髋部后推发力拉起",
+      "views": [
+        "正面",
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面检查双膝对齐、脊柱中立",
+          "target_angles": {
+            "left_knee": {
+              "min": 140,
+              "max": 180,
+              "optimal": 160
+            },
+            "right_knee": {
+              "min": 140,
+              "max": 180,
+              "optimal": 160
+            },
+            "left_hip": {
+              "min": 50,
+              "max": 110,
+              "optimal": 80
+            },
+            "right_hip": {
+              "min": 50,
+              "max": 110,
+              "optimal": 80
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝盖不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            },
+            {
+              "joint": "right_knee",
+              "rule": "膝盖不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        },
+        "侧面": {
+          "description": "侧面检查背部挺直和髋铰链动作",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 30,
+              "max": 90,
+              "optimal": 60
+            },
+            "left_hip": {
+              "min": 40,
+              "max": 100,
+              "optimal": 70
+            },
+            "right_hip": {
+              "min": 40,
+              "max": 100,
+              "optimal": 70
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "背部不弓起",
+              "threshold": 90,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "背部弓起",
+          "feedback": "背部弓起{value}°，请保持背部挺直",
+          "joint": "trunk_tilt",
+          "threshold": 90
+        }
+      ],
+      "video_url": "/media/videos/deadlift_standard.mp4"
+    },
+    "罗马尼亚硬拉": {
+      "name": "罗马尼亚硬拉",
+      "family": "hip_hinge",
+      "family_name": "髋铰链",
+      "category": "下肢拉",
+      "description": "双腿直立微屈膝，髋部后推，杠铃沿腿前侧下放",
+      "views": [
+        "正面",
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面检查双膝对齐",
+          "target_angles": {
+            "left_knee": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            },
+            "right_knee": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            },
+            "left_hip": {
+              "min": 60,
+              "max": 110,
+              "optimal": 85
+            },
+            "right_hip": {
+              "min": 60,
+              "max": 110,
+              "optimal": 85
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "膝盖不内扣",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "deviation"
+            }
+          ]
+        },
+        "侧面": {
+          "description": "侧面检查髋部后推幅度",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 40,
+              "max": 90,
+              "optimal": 70
+            },
+            "left_hip": {
+              "min": 50,
+              "max": 100,
+              "optimal": 75
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "背部挺直不屈曲",
+              "threshold": 90,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "膝盖过度弯曲",
+          "feedback": "膝盖弯曲过多{value}°，请保持微屈",
+          "joint": "knee",
+          "threshold": 150
+        }
+      ],
+      "video_url": "/media/videos/romanian_deadlift_standard.mp4"
+    },
+    "前后脚掌重心转换": {
+      "name": "前后脚掌重心转换",
+      "family": "balance",
+      "family_name": "平衡",
+      "category": "平衡",
+      "description": "站立位，缓慢将重心从脚跟转移到脚尖再返回",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面检查躯干稳定性和重心偏移",
+          "target_angles": {
+            "trunk_tilt": {
+              "min": 0,
+              "max": 10,
+              "optimal": 3
+            },
+            "left_knee": {
+              "min": 170,
+              "max": 180,
+              "optimal": 180
+            },
+            "right_knee": {
+              "min": 170,
+              "max": 180,
+              "optimal": 180
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干保持直立",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "躯干过度前倾",
+          "feedback": "躯干前倾{value}°，请保持直立",
+          "joint": "trunk_tilt",
+          "threshold": 10
+        }
+      ],
+      "video_url": "/media/videos/heeltotoe_rocks_standard.mp4"
+    },
+    "髋部打开": {
+      "name": "髋部打开",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "category": "拉伸",
+      "description": "坐姿，双腿屈膝向外打开（蝴蝶式），双手放膝上轻压",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面检查髋部外展幅度",
+          "target_angles": {
+            "left_hip": {
+              "min": 30,
+              "max": 90,
+              "optimal": 60
+            },
+            "right_hip": {
+              "min": 30,
+              "max": 90,
+              "optimal": 60
+            },
+            "left_knee": {
+              "min": 30,
+              "max": 100,
+              "optimal": 60
+            },
+            "right_knee": {
+              "min": 30,
+              "max": 100,
+              "optimal": 60
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_hip",
+              "rule": "髋部打开幅度充足",
+              "threshold": 30,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [],
+      "video_url": "/media/videos/hip_openers_standard.mp4"
+    },
+    "开合跳": {
+      "name": "开合跳",
+      "family": "jumping_jack",
+      "family_name": "开合跳",
+      "category": "热身",
+      "description": "双脚并拢站立，跳起分腿举手，落地并腿放手，保持节奏重复",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面检查四肢协调",
+          "target_angles": {
+            "left_hip": {
+              "min": 10,
+              "max": 60,
+              "optimal": 30
+            },
+            "right_hip": {
+              "min": 10,
+              "max": 60,
+              "optimal": 30
+            },
+            "left_shoulder": {
+              "min": 10,
+              "max": 90,
+              "optimal": 45
+            },
+            "right_shoulder": {
+              "min": 10,
+              "max": 90,
+              "optimal": 45
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂充分展开",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "手臂未充分展开",
+          "feedback": "手臂展开不足，请举至头顶",
+          "joint": "shoulder",
+          "threshold": 30
+        }
+      ],
+      "video_url": "/media/videos/jumpjack_standard.mp4"
+    },
+    "深弓步": {
+      "name": "深弓步",
+      "family": "squat",
+      "family_name": "深蹲",
+      "category": "下肢蹲",
+      "description": "向前迈一大步，前腿膝盖弯曲大于90度，后腿膝盖接近地面",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面检查前膝角度和躯干直立",
+          "target_angles": {
+            "left_knee": {
+              "min": 80,
+              "max": 120,
+              "optimal": 100
+            },
+            "right_knee": {
+              "min": 80,
+              "max": 120,
+              "optimal": 100
+            },
+            "left_hip": {
+              "min": 70,
+              "max": 120,
+              "optimal": 95
+            },
+            "trunk_tilt": {
+              "min": 0,
+              "max": 30,
+              "optimal": 10
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_knee",
+              "rule": "前膝不超脚尖",
+              "threshold": 120,
+              "unit": "°",
+              "direction": "max"
+            },
+            {
+              "joint": "trunk_tilt",
+              "rule": "躯干保持直立",
+              "threshold": 30,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "躯干过度前倾",
+          "feedback": "躯干前倾{value}°，请保持直立",
+          "joint": "trunk_tilt",
+          "threshold": 30
+        }
+      ],
+      "video_url": "/media/videos/deep_lunge_standard.mp4"
+    },
+    "小狗伸展式": {
+      "name": "小狗伸展式",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "category": "拉伸",
+      "description": "四足跪姿，双手向前延伸，胸部下沉向地面",
+      "views": [
+        "侧面"
+      ],
+      "standard_keypoints": {
+        "侧面": {
+          "description": "侧面检查肩部伸展幅度",
+          "target_angles": {
+            "left_shoulder": {
+              "min": 120,
+              "max": 180,
+              "optimal": 160
+            },
+            "right_shoulder": {
+              "min": 120,
+              "max": 180,
+              "optimal": 160
+            },
+            "trunk_tilt": {
+              "min": 10,
+              "max": 60,
+              "optimal": 30
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "肩部充分伸展",
+              "threshold": 120,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "臀部未保持位置",
+          "feedback": "臀部前移过多，请保持在膝盖上方",
+          "joint": "hip",
+          "threshold": 10
+        }
+      ],
+      "video_url": "/media/videos/extend_puppy_standard.mp4"
+    },
+    "胸部打开": {
+      "name": "胸部打开",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "category": "拉伸",
+      "description": "站立位，双手在背后交握，手臂向后上方抬起",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面检查手臂后展幅度",
+          "target_angles": {
+            "left_shoulder": {
+              "min": 10,
+              "max": 60,
+              "optimal": 30
+            },
+            "right_shoulder": {
+              "min": 10,
+              "max": 60,
+              "optimal": 30
+            },
+            "left_elbow": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            },
+            "right_elbow": {
+              "min": 150,
+              "max": 180,
+              "optimal": 170
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂充分后展",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "耸肩",
+          "feedback": "侦测到耸肩，请肩膀下沉",
+          "joint": "shoulder",
+          "threshold": 5
+        }
+      ],
+      "video_url": "/media/videos/chest_open_standard.mp4"
+    },
+    "侧卧胸椎旋转": {
+      "name": "侧卧胸椎旋转",
+      "family": "warmup",
+      "family_name": "热身",
+      "category": "拉伸",
+      "description": "侧卧屈膝，双手前伸，上方手臂向对侧打开旋转",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面检查手臂打开幅度和旋转范围",
+          "target_angles": {
+            "left_shoulder": {
+              "min": 10,
+              "max": 120,
+              "optimal": 90
+            },
+            "right_shoulder": {
+              "min": 10,
+              "max": 120,
+              "optimal": 90
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂旋转幅度充足",
+              "threshold": 10,
+              "unit": "°",
+              "direction": "min"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "骨盆跟随旋转",
+          "feedback": "骨盆跟随旋转过多，请保持骨盆稳定",
+          "joint": "hip",
+          "threshold": 10
+        }
+      ],
+      "video_url": "/media/videos/sidelying_thoracic_rotation_standard.mp4"
+    },
+    "肩部拉伸": {
+      "name": "肩部拉伸",
+      "family": "stretch",
+      "family_name": "拉伸",
+      "category": "拉伸",
+      "description": "一侧手臂横过胸前，另一手辅助拉向身体",
+      "views": [
+        "正面"
+      ],
+      "standard_keypoints": {
+        "正面": {
+          "description": "正面检查肩部拉伸幅度",
+          "target_angles": {
+            "left_shoulder": {
+              "min": 10,
+              "max": 60,
+              "optimal": 30
+            },
+            "right_shoulder": {
+              "min": 10,
+              "max": 60,
+              "optimal": 30
+            },
+            "left_elbow": {
+              "min": 120,
+              "max": 180,
+              "optimal": 150
+            },
+            "right_elbow": {
+              "min": 120,
+              "max": 180,
+              "optimal": 150
+            }
+          },
+          "key_checks": [
+            {
+              "joint": "left_shoulder",
+              "rule": "手臂靠近身体",
+              "threshold": 60,
+              "unit": "°",
+              "direction": "max"
+            }
+          ]
+        }
+      },
+      "common_errors": [
+        {
+          "name": "肩膀耸起",
+          "feedback": "拉伸侧肩膀耸起，请放松下沉",
+          "joint": "shoulder",
+          "threshold": 5
+        }
+      ],
+      "video_url": "/media/videos/shoulder_stretch_standard.mp4"
+    }
+  }
+}
